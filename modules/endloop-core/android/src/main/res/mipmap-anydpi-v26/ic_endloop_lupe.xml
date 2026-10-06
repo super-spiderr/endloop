@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Screen 17: home-screen icon with Lupe's face (switched from Settings / onboarding). -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+  <background android:drawable="@color/endloop_icon_bg" />
+  <foreground android:drawable="@drawable/ic_endloop_lupe_fg" />
+  <monochrome android:drawable="@drawable/ic_endloop_mono" />
+</adaptive-icon>

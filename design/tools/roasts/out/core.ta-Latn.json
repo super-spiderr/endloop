@@ -1,0 +1,1550 @@
+{
+  "pack": "core",
+  "lang": "ta-Latn",
+  "version": 1,
+  "placeholders": [
+    "app",
+    "clock",
+    "left",
+    "limit",
+    "opens",
+    "over",
+    "streak",
+    "time",
+    "week_total",
+    "won_back",
+    "worst_app",
+    "worst_time"
+  ],
+  "appKeys": {
+    "instagram": [
+      "com.instagram.android"
+    ],
+    "youtube": [
+      "com.google.android.youtube"
+    ],
+    "snapchat": [
+      "com.snapchat.android"
+    ],
+    "x": [
+      "com.twitter.android"
+    ],
+    "reddit": [
+      "com.reddit.frontpage"
+    ],
+    "whatsapp": [
+      "com.whatsapp"
+    ]
+  },
+  "notes": "intensity null = any level; apps null = any app; kinds null = any kind of app (feed, video, chat, browser, games, shopping, work); roaster null = both. snooze_sentence_* must be typed by the user; compare ignoring case and extra spaces. comparison lines use minMinutes; win_streak uses minStreak.",
+  "roasts": [
+    {
+      "id": "ta_lh_p01",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "Boss, {time} aachu {app} app-la. Konjam break edunga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_p02",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "Innaiku {app} quota mudinjiduchu. Naalaiku paakalam.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_p03",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "Feed engayum oda poradhu illa. Neenga konjam rest edunga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_p04",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "{time} podhum boss. Eyesku konjam rest kudunga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_p05",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "Ippo close panna kooda, streak-la neenga win pannalam.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_p06",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "Limit reach aairuchu. Phone-a keela vechittu oru tea kudinga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_p07",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "Reels naalaikum irukum. Indha saayangalam thirumba varadhu.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_p08",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "Seri, podhum. Screen time illadha edhavadhu pannunga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_h01",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "\"Innum oru reel dhaan\" nu {opens} thadava sollitteenga. Ippo naan solren: idhu dhaan last reel.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_h02",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "{time} full-ah matha vanga vacation paatheenga. Unga life airplane mode-la irukku.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_h03",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "{opens} thadava open panneenga. Idhu habit illa boss, love story.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_h04",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "Unga limit {limit}. Ippo {time}. Kanakku unga side-la illa.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_h05",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "{time} scroll panneenga, aana moonu video kooda nyabagam illa.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_h06",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "Time pass-ku open panneenga. Time mothama pass aagiduchu.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_h07",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "Unga phone unga friends-a vida ungala adhigama paakudhu.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_h08",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "{over} limit-a thaandiyachu. Unga thumb yosikkave illa.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_h09",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "Algorithm-ku unga weakness theriyum. Enakkum theriyum. Adhu idhu dhaan.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_h10",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "{time}-la oru full padam paathu, interval-la popcorn-um saaptirukalam. Neenga reels paatheenga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_s01",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "{opens} thadava open pannirukeenga. {app}-ku rent kudukka aarambinga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_s02",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "Vera level scrolling. Aana life-la level onnum illa.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video",
+        "browser",
+        "shopping"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_s03",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "{time} {app}-la. Unga thumb-ku unga-vida adhiga exercise.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_s04",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "\"Just checking\" illa boss. Neenga anga kudi poiteenga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_s05",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "Unga thumb innaiku marathon odiduchu. Neenga ukkandhu vedikkai paatheenga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_s06",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "Feed-ku end-e illa. Neenga dhaan end-a irukanum.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_s07",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "{over} limit thaandiyachu. Self-control-um neengalum breakup-la irukeenga pola.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_s08",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "Nalla content innum varum-nu wait panreengala? Adhu oru mani neram munnadiye poiduchu.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video",
+        "browser",
+        "shopping"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_s09",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "{time} {app}-la. Idhellam oru polappa?",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_s10",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "Mudiyala boss. Neenga podhum-nu sollala-na, naan solren. Podhum.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_u01",
+      "category": "limit_hit",
+      "intensity": "unhinged",
+      "text": "Unga thumb-ku oru statue vechidalam pola.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_u02",
+      "category": "limit_hit",
+      "intensity": "unhinged",
+      "text": "Unga phone ungala \"roommate\"-nu kooppida aarambichuduchu.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_u03",
+      "category": "limit_hit",
+      "intensity": "unhinged",
+      "text": "Indha speed-la ponga, archaeologists ungala scroll panra posture-laye kandupidipaanga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video",
+        "browser",
+        "shopping"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_u04",
+      "category": "limit_hit",
+      "intensity": "unhinged",
+      "text": "Breaking news: {app}-ku bottom-e illa-nu kandupidicha manushan, innum thedittu irukaar.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video",
+        "browser",
+        "shopping"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_u05",
+      "category": "limit_hit",
+      "intensity": "unhinged",
+      "text": "Naan kovapadala. Close panra varaikum ungala muraichu paathutte iruppen.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_u06",
+      "category": "limit_hit",
+      "intensity": "unhinged",
+      "text": "Unga phone 20% battery-la warning kudukudhu. Neenga 0% attention-la kooda scroll pannureenga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video",
+        "browser",
+        "shopping"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_u07",
+      "category": "limit_hit",
+      "intensity": "unhinged",
+      "text": "Innum scroll panna 1979 oda ads-e vandhudum.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_u08",
+      "category": "limit_hit",
+      "intensity": "unhinged",
+      "text": "Unga screen-ku unga thumbprint manappaadam aairuchu. Rendu perum konjam break edunga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_l01",
+      "category": "limit_hit",
+      "intensity": null,
+      "text": "{opens} thadava open panneenga. Naan ellathaiyum count panniten. Enakkum velai illa, ungalukkum velai illa.",
+      "apps": null,
+      "roaster": "loop",
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_l02",
+      "category": "limit_hit",
+      "intensity": null,
+      "text": "Ivlo dedication vera edhula irundhaalum naan impress aagiruppen.",
+      "apps": null,
+      "roaster": "loop",
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_l03",
+      "category": "limit_hit",
+      "intensity": null,
+      "text": "Enakku shock-e illa. Expected dhaan.",
+      "apps": null,
+      "roaster": "lupe",
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lh_l04",
+      "category": "limit_hit",
+      "intensity": null,
+      "text": "Seri, \"just five minutes\" dhaan-nu sollunga. Kekaren.",
+      "apps": null,
+      "roaster": "lupe",
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_hu_p01",
+      "category": "heads_up",
+      "intensity": "polite",
+      "text": "{left} dhaan irukku {app}-la. Mella wrap up pannunga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_hu_p02",
+      "category": "heads_up",
+      "intensity": "polite",
+      "text": "Mukkaal quota mudinjiduchu. Konjam slow pannunga boss.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_hu_h01",
+      "category": "heads_up",
+      "intensity": "honest",
+      "text": "{left} irukku. Oru nalla decision edukka adhu podhum.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_hu_h02",
+      "category": "heads_up",
+      "intensity": "honest",
+      "text": "{time} aairuchu, {left} baaki. Unga thumb warm-up aagudhu. Naanum dhaan.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_hu_s01",
+      "category": "heads_up",
+      "intensity": "savage",
+      "text": "{left} baaki. Naan stretching aarambichitten.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_hu_s02",
+      "category": "heads_up",
+      "intensity": "savage",
+      "text": "{left} irukku. Enjoy pannunga. Naan notes eduthuttu irukken.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_hu_u01",
+      "category": "heads_up",
+      "intensity": "unhinged",
+      "text": "{left} baaki. Reels-ku unga bayam theriyum.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lc_p01",
+      "category": "last_call",
+      "intensity": "polite",
+      "text": "{left} dhaan. Idha mudichittu close pannidunga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lc_p02",
+      "category": "last_call",
+      "intensity": "polite",
+      "text": "Ippo close panna adhu unga idea. Apram-na adhu en idea.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lc_h01",
+      "category": "last_call",
+      "intensity": "honest",
+      "text": "{left} baaki. Adhukku apram en turn.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lc_h02",
+      "category": "last_call",
+      "intensity": "honest",
+      "text": "{left}. Oru video-ku dhaan time irukku. Yosichu choose pannunga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lc_s01",
+      "category": "last_call",
+      "intensity": "savage",
+      "text": "{left}. Ippo close panna yaarukkum damage illa.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lc_s02",
+      "category": "last_call",
+      "intensity": "savage",
+      "text": "{left} baaki. Roast ready aairuchu. Adhu unga-ah pathi dhaan.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_lc_u01",
+      "category": "last_call",
+      "intensity": "unhinged",
+      "text": "{left} baaki. Naan popcorn ready pannitten. Show aarambikka pogudhu.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_sa_p01",
+      "category": "snooze_ask",
+      "intensity": "polite",
+      "text": "Innum konjam time venuma? Seri, aana oru chinna velai irukku.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_sa_h01",
+      "category": "snooze_ask",
+      "intensity": "honest",
+      "text": "Oh? Convince pannunga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_sa_h02",
+      "category": "snooze_ask",
+      "intensity": "honest",
+      "text": "Anju nimisham-a? Adha {opens} open-ku munnadiye sonneenga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_sa_s01",
+      "category": "snooze_ask",
+      "intensity": "savage",
+      "text": "Ennoda negotiate panreengala? Dhairiyam dhaan. Confession-a type pannunga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_sa_s02",
+      "category": "snooze_ask",
+      "intensity": "savage",
+      "text": "Feed ungala miss pannadhu. Aana seri, prove pannunga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_sa_u01",
+      "category": "snooze_ask",
+      "intensity": "unhinged",
+      "text": "Snooze venuma? Oru chinna embarrassing line type pannunga. Terms and conditions apply.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_st_p01",
+      "category": "snooze_sentence_1",
+      "intensity": "polite",
+      "text": "Innum anju nimisham dhaan, promise.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_st_p02",
+      "category": "snooze_sentence_1",
+      "intensity": "polite",
+      "text": "Idhu mudinjadhum close pannidren.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_st_h01",
+      "category": "snooze_sentence_1",
+      "intensity": "honest",
+      "text": "Naan reels-ku adimai, en kanavu-ku illa.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_st_h02",
+      "category": "snooze_sentence_1",
+      "intensity": "honest",
+      "text": "En thumb dhaan ippo en boss.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_st_s01",
+      "category": "snooze_sentence_1",
+      "intensity": "savage",
+      "text": "Oru app kitta argument-la thothuttu irukken.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_st_s02",
+      "category": "snooze_sentence_1",
+      "intensity": "savage",
+      "text": "Naan enna thedren-nu enakke theriyala.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_st_u01",
+      "category": "snooze_sentence_1",
+      "intensity": "unhinged",
+      "text": "En saayangalam muzhusum scroll-ku samarpanam.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video",
+        "browser",
+        "shopping"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_st_a01",
+      "category": "snooze_sentence_1",
+      "intensity": "honest",
+      "text": "Innum oru video en life-a maathidum.",
+      "apps": [
+        "youtube"
+      ],
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_st2_01",
+      "category": "snooze_sentence_2",
+      "intensity": null,
+      "text": "Reels-a stop panna mudiyala.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_st2_02",
+      "category": "snooze_sentence_2",
+      "intensity": null,
+      "text": "Oru snooze use pannitten, innum onnume kathukala.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_st2_03",
+      "category": "snooze_sentence_2",
+      "intensity": null,
+      "text": "Close panradhukku badhila indha muzhu line-ayum type panniten.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_as_01",
+      "category": "after_snooze",
+      "intensity": null,
+      "text": "Anju nimisham mudinjiduchu. Type pannadhu kooda ungala shame pannala? Semma.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_as_02",
+      "category": "after_snooze",
+      "intensity": null,
+      "text": "Snooze over. Adhe feed, konjam kammiyana saayangalam.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_as_03",
+      "category": "after_snooze",
+      "intensity": null,
+      "text": "Back-ah? Roast ungalukkaga dhaan wait pannitu irundhuchu.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_su_01",
+      "category": "snoozes_used_up",
+      "intensity": null,
+      "text": "Illa. Mudinjiduchu. Podhum.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_cm_01",
+      "category": "snooze_backout",
+      "intensity": null,
+      "text": "Paarunga. Ungalukkaga neengale choose panneenga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_cm_02",
+      "category": "snooze_backout",
+      "intensity": null,
+      "text": "Fight illama close panneenga. Konjam proud-ah irukku.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_ln_01",
+      "category": "late_night",
+      "intensity": null,
+      "text": "Feed naalaikum irukum. Unga thookam thirumba varadhu.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_ln_02",
+      "category": "late_night",
+      "intensity": null,
+      "text": "{clock}. Indha neraththula yaarum nalla content post panradhilla.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_ln_03",
+      "category": "late_night",
+      "intensity": null,
+      "text": "Room-la brightest thing unga screen dhaan. Adha maathunga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_ln_04",
+      "category": "late_night",
+      "intensity": null,
+      "text": "{clock} aairuchu, innum scroll-a? Unga pillow complaint kuduthirukku.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video",
+        "browser",
+        "shopping"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_ln_05",
+      "category": "late_night",
+      "intensity": null,
+      "text": "Ippo thoongunga. Naalaiku scroll pannaalum fresh-ah pannalam.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video",
+        "browser",
+        "shopping"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_w_01",
+      "category": "win_first_roast",
+      "intensity": null,
+      "text": "First roast-laye close panneenga. Naan sentence-a mudikka kooda illa.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_w_02",
+      "category": "win_streak",
+      "intensity": null,
+      "text": "{streak} naal continuous-ah. Yaaruya nee?",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "minStreak": 3,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_w_03",
+      "category": "win_perfect_day",
+      "intensity": null,
+      "text": "Nethu ella limit-um kulla. Naan… proud-ah? Weird-ah irukku.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_w_04",
+      "category": "win_streak_7",
+      "intensity": null,
+      "text": "Ezhu naal. Seri, sirikkiren. Weird aakkadheenga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_w_05",
+      "category": "win_lowered_limit",
+      "intensity": null,
+      "text": "Limit-a korachitteenga. Semma.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_wr_g01",
+      "category": "weekly_good",
+      "intensity": null,
+      "text": "Seri, nalla pannitteenga. Adhu thalaikku yeradha maathiri paathukkonga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_wr_g02",
+      "category": "weekly_good",
+      "intensity": null,
+      "text": "{won_back} indha vaaram thirumba kidaichadhu. Adha nalla vishayathukku use pannirupeenganu nambaren.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_wr_b01",
+      "category": "weekly_bad",
+      "intensity": null,
+      "text": "Ennai install pannadhukku munnadi-ya vida adhigama scroll panneenga. Mosamana record.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_wr_b02",
+      "category": "weekly_bad",
+      "intensity": null,
+      "text": "{worst_time} {worst_app}-la. Sambalam illadha part-time velai.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_wr_f01",
+      "category": "weekly_first",
+      "intensity": null,
+      "text": "First week mudinjiduchu. Baseline set aairuchu. Ini dhaan aattam.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_hm_01",
+      "category": "home_day1",
+      "intensity": null,
+      "text": "Day one. Naan notes eduthuttu irukken.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_hm_02",
+      "category": "home_under",
+      "intensity": null,
+      "text": "Ippo varaikum ok. Kedukkaadheenga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_hm_03",
+      "category": "home_close",
+      "intensity": null,
+      "text": "Careful. {app}-la {left} dhaan irukku. Naan paathuttu irukken.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_hm_04",
+      "category": "home_over",
+      "intensity": null,
+      "text": "Idhai vida mosamaana days paathirukken. Romba illa, aana paathirukken.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_hm_05",
+      "category": "home_over",
+      "intensity": null,
+      "text": "{app} ungala already pudichiduchu. Innaiku adhu mattum podhum.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_cp_01",
+      "category": "comparison",
+      "intensity": null,
+      "text": "Oru full padam paathirukalam.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "minMinutes": 120,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_cp_02",
+      "category": "comparison",
+      "intensity": null,
+      "text": "Oru full IPL match, strategic timeout-oda.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "minMinutes": 180,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_cp_03",
+      "category": "comparison",
+      "intensity": null,
+      "text": "Chennai to Bangalore train journey-ye mudinjirukum.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "minMinutes": 300,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_ch01",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "{time} chat panniyaachu. Pesura vishayam naalaikum irukkum.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "chat"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_ch02",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "{opens} thadava open panneenga. Yaarum ivlo message anuppala. Neenga dhaan check pannittu irukeenga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "chat"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_ch03",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "Group chat-ku live commentary thevai illa boss. Phone-a vainga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "chat"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_ch04",
+      "category": "limit_hit",
+      "intensity": "unhinged",
+      "text": "Unga \"typing…\" {time}-a type pannittu irukku.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "chat"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_ch05",
+      "category": "heads_up",
+      "intensity": "polite",
+      "text": "{left} dhaan irukku. Last reply-a anuppitu kelambunga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "chat"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_ch06",
+      "category": "last_call",
+      "intensity": "honest",
+      "text": "{left}. Oru reply podhum. Full thread venaam.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "chat"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_ch07",
+      "category": "late_night",
+      "intensity": null,
+      "text": "{clock}. Neenga message panra aalum ippo thoonganum.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "chat"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_br01",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "{time} {app}-la. Konjam tabs close pannunga. Idhula irundhu aarambinga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "browser"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_br02",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "Oru vishayam search panna vandheenga. Adhu {time} munnadi.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "browser"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_br03",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "Innaiku plans-a vida adhigama tabs open-la irukku.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "browser"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_br04",
+      "category": "heads_up",
+      "intensity": "polite",
+      "text": "{left} irukku. Thedi vandhadha kandupidichittu close pannunga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "browser"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_br05",
+      "category": "last_call",
+      "intensity": "honest",
+      "text": "{left}. Bookmark pannunga. Kelambunga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "browser"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_br06",
+      "category": "late_night",
+      "intensity": null,
+      "text": "{clock}. Kaalaila maranthu pora vishayatha ippo search panreenga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "browser"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_gm01",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "Innaiku game over. Real life-kum oru save point irukku.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "games"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_gm02",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "\"Innum oru round\"-nu {time} aachu. Round dhaan jeyichuchu.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "games"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_gm03",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "{time} grind panneenga. Real life level mattum ezhumbala.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "games"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_gm04",
+      "category": "heads_up",
+      "intensity": "polite",
+      "text": "{left} irukku. Indha round-a mudichu save pannunga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "games"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_gm05",
+      "category": "last_call",
+      "intensity": "savage",
+      "text": "{left}. Last round. Final boss naan dhaan.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "games"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_gm06",
+      "category": "late_night",
+      "intensity": null,
+      "text": "{clock}. Innum oru match-na sunrise-e paathuduveenga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "games"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_sh01",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "{time} browsing aachu. Cart naalaikum wait pannum.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "shopping"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_sh02",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "{time} {app}-la. Vaangradha vida paakradhu dhaan adhigam.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "shopping"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_sh03",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "Add to cart oru hobby illa boss. Close pannunga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "shopping"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_sh04",
+      "category": "heads_up",
+      "intensity": "honest",
+      "text": "{left} irukku. Decide pannunga, illa close pannunga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "shopping"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_sh05",
+      "category": "last_call",
+      "intensity": "savage",
+      "text": "{left}. Checkout pannunga, illa kelambunga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "shopping"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_sh06",
+      "category": "late_night",
+      "intensity": null,
+      "text": "{clock}. Indha neraththula cart-la podra edhuvum nalla idea illa.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "shopping"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_wk01",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "{time} {app}-la. Inbox naalaikum full-ah dhaan irukkum. Adhu dhaan inbox.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "work"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_wk02",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "{app}-a refresh panna yaarum seekiram reply panna maattaanga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "work"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_wk03",
+      "category": "heads_up",
+      "intensity": "polite",
+      "text": "{left} irukku. Important-a irukkradhukku reply panni close pannunga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "work"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_wk04",
+      "category": "late_night",
+      "intensity": null,
+      "text": "{clock}. Work message ellam kaalaila paathukalam. Ungalukkum dhaan.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "work"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_vd01",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "Autoplay oru reason illa. Close pannunga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "video"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_vd02",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "\"Innum oru episode\"-nu {time} aachu. Credits dhaan unga exit.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "video"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_vd03",
+      "category": "heads_up",
+      "intensity": "polite",
+      "text": "{left} irukku. Indha episode-a mudinga, next-a illa.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "video"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_vd04",
+      "category": "last_call",
+      "intensity": "honest",
+      "text": "{left}. Innoru episode-ku time illa. Aarambikkaadheenga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "video"
+      ],
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_un01",
+      "category": "late_night",
+      "intensity": null,
+      "text": "{clock} aachu. Phone-a charge-la pottu neenga thoonga ponga.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    },
+    {
+      "id": "ta_k_un02",
+      "category": "late_night",
+      "intensity": null,
+      "text": "Naalaiku-unga kaalai ippove tired-ah irukku. Unga thappu dhaan.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "ta-Latn"
+    }
+  ]
+}

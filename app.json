@@ -1,0 +1,73 @@
+{
+  "expo": {
+    "name": "Endloop",
+    "slug": "endloop",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "endloop",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#E5132B",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.superspider.endloop"
+    },
+    "android": {
+      "package": "com.superspider.endloop",
+      "adaptiveIcon": {
+        "backgroundColor": "#E5132B",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "permissions": [
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.PACKAGE_USAGE_STATS",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_SPECIAL_USE",
+        "android.permission.RECEIVE_BOOT_COMPLETED"
+      ],
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#E5132B",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200
+        }
+      ],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/ClashDisplay-Bold.otf",
+            "./assets/fonts/Satoshi-Regular.otf",
+            "./assets/fonts/Satoshi-Medium.otf",
+            "./assets/fonts/Satoshi-Bold.otf"
+          ]
+        }
+      ],
+      "expo-localization",
+      "./plugins/with-app-icons"
+    ],
+    "experiments": {
+      "typedRoutes": false,
+      "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "8bcf42fc-d4c5-430d-be68-8ce86fda81be"
+      }
+    },
+    "owner": "superspider-team"
+  }
+}

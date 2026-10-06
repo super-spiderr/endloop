@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Only the roast share cards are shared, from the cache folder. -->
+<paths>
+  <cache-path name="roasts" path="roasts/" />
+</paths>

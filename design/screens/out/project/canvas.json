@@ -1,0 +1,908 @@
+{
+ "v": 3,
+ "attachments": {},
+ "boards": {
+  "S01-Welcome-A-Peek.dc.html": {
+   "h": 844,
+   "title": "0.3s \u00b7 Loop peeks in",
+   "w": 390,
+   "x": 0,
+   "y": 0
+  },
+  "S01-Welcome-B-Typing.dc.html": {
+   "h": 844,
+   "title": "1.5s \u00b7 Headline types out",
+   "w": 390,
+   "x": 470,
+   "y": 0
+  },
+  "S01-Welcome.dc.html": {
+   "h": 844,
+   "title": "3.4s \u00b7 Final state",
+   "w": 390,
+   "x": 940,
+   "y": 0
+  },
+  "S02-UsageAccess.dc.html": {
+   "x": 0,
+   "y": 1224,
+   "w": 390,
+   "h": 844,
+   "title": "Ask"
+  },
+  "S02-UsageAccess-B-NotFound.dc.html": {
+   "x": 470,
+   "y": 1224,
+   "w": 390,
+   "h": 844,
+   "title": "Back without granting"
+  },
+  "S02-UsageAccess-C-Granted.dc.html": {
+   "x": 940,
+   "y": 1224,
+   "w": 390,
+   "h": 844,
+   "title": "Granted \u00b7 auto-advances"
+  },
+  "S03-PickApps.dc.html": {
+   "x": 0,
+   "y": 2448,
+   "w": 390,
+   "h": 844,
+   "title": "Damage + top 3 pre-picked"
+  },
+  "S03-PickApps-B-Premium.dc.html": {
+   "x": 470,
+   "y": 2448,
+   "w": 390,
+   "h": 844,
+   "title": "4th app \u00b7 Premium sheet"
+  },
+  "S03-PickApps-C-NoAccess.dc.html": {
+   "x": 940,
+   "y": 2448,
+   "w": 390,
+   "h": 844,
+   "title": "Usage Access denied"
+  },
+  "S04-Intensity.dc.html": {
+   "x": 0,
+   "y": 3672,
+   "w": 390,
+   "h": 844,
+   "title": "Loop \u00b7 Honest (default) \u00b7 2 chillies"
+  },
+  "S04-Intensity-B-Polite.dc.html": {
+   "x": 470,
+   "y": 3672,
+   "w": 390,
+   "h": 844,
+   "title": "Loop \u00b7 Polite \u00b7 1 chilli"
+  },
+  "S04-Intensity-C-Savage.dc.html": {
+   "x": 940,
+   "y": 3672,
+   "w": 390,
+   "h": 844,
+   "title": "Loop \u00b7 Savage \u00b7 3 chillies, screen goes red"
+  },
+  "S04-Intensity-D-Unhinged.dc.html": {
+   "x": 1410,
+   "y": 3672,
+   "w": 390,
+   "h": 844,
+   "title": "Unhinged tapped \u00b7 Premium sheet"
+  },
+  "S04-Intensity-E-LupePolite.dc.html": {
+   "x": 0,
+   "y": 4636,
+   "w": 390,
+   "h": 844,
+   "title": "Lupe \u00b7 Polite"
+  },
+  "S04-Intensity-F-LupeHonest.dc.html": {
+   "x": 470,
+   "y": 4636,
+   "w": 390,
+   "h": 844,
+   "title": "Lupe \u00b7 Honest"
+  },
+  "S04-Intensity-G-LupeSavage.dc.html": {
+   "x": 940,
+   "y": 4636,
+   "w": 390,
+   "h": 844,
+   "title": "Lupe \u00b7 Savage"
+  },
+  "S05-Limits.dc.html": {
+   "x": 0,
+   "y": 5860,
+   "w": 390,
+   "h": 844,
+   "title": "Suggested defaults (30% below average)"
+  },
+  "S05-Limits-B-Low.dc.html": {
+   "x": 470,
+   "y": 5860,
+   "w": 390,
+   "h": 844,
+   "title": "Dragged very low"
+  },
+  "S05-Limits-C-High.dc.html": {
+   "x": 940,
+   "y": 5860,
+   "w": 390,
+   "h": 844,
+   "title": "Set above the habit"
+  },
+  "S04-Intensity-H-Tanglish.dc.html": {
+   "x": 1880,
+   "y": 3672,
+   "w": 390,
+   "h": 844,
+   "title": "Loop \u00b7 Honest \u00b7 Tanglish"
+  },
+  "S06-Permissions.dc.html": {
+   "x": 0,
+   "y": 7084,
+   "w": 390,
+   "h": 844,
+   "title": "Start \u00b7 notifications first"
+  },
+  "S06-Permissions-B-Overlay.dc.html": {
+   "x": 470,
+   "y": 7084,
+   "w": 390,
+   "h": 844,
+   "title": "1 done \u00b7 display over apps lit"
+  },
+  "S06-Permissions-C-Skipped.dc.html": {
+   "x": 940,
+   "y": 7084,
+   "w": 390,
+   "h": 844,
+   "title": "Overlay skipped \u00b7 battery with phone steps"
+  },
+  "S06-Permissions-D-Ready.dc.html": {
+   "x": 1410,
+   "y": 7084,
+   "w": 390,
+   "h": 844,
+   "title": "All done \u00b7 ready"
+  },
+  "S07-Home-A-FirstVisit.dc.html": {
+   "x": 0,
+   "y": 8308,
+   "w": 390,
+   "h": 844,
+   "title": "First visit \u00b7 setup done"
+  },
+  "S07-Home.dc.html": {
+   "x": 470,
+   "y": 8308,
+   "w": 390,
+   "h": 844,
+   "title": "Every day \u00b7 one app close"
+  },
+  "S07-Home-C-Over.dc.html": {
+   "x": 940,
+   "y": 8308,
+   "w": 390,
+   "h": 844,
+   "title": "Over the limit"
+  },
+  "S07-Home-D-PermissionLost.dc.html": {
+   "x": 1410,
+   "y": 8308,
+   "w": 390,
+   "h": 844,
+   "title": "Permission lost"
+  },
+  "S08-Notif-A-HeadsUp.dc.html": {
+   "x": 0,
+   "y": 9532,
+   "w": 390,
+   "h": 844,
+   "title": "Heads up \u00b7 75% \u00b7 drops in over the app"
+  },
+  "S08-Notif-B-Shade.dc.html": {
+   "x": 470,
+   "y": 9532,
+   "w": 390,
+   "h": 844,
+   "title": "Heads up expanded \u00b7 quiet watcher below"
+  },
+  "S08-Notif-C-LastCall.dc.html": {
+   "x": 940,
+   "y": 9532,
+   "w": 390,
+   "h": 844,
+   "title": "Last call \u00b7 90%"
+  },
+  "S08-Notif-D-LateNight.dc.html": {
+   "x": 1410,
+   "y": 9532,
+   "w": 390,
+   "h": 844,
+   "title": "Late night \u00b7 lock screen"
+  },
+  "S08-Notif-E-Weekly.dc.html": {
+   "x": 1880,
+   "y": 9532,
+   "w": 390,
+   "h": 844,
+   "title": "Weekly roast \u00b7 Sunday"
+  },
+  "S08-Notif-F-Tanglish.dc.html": {
+   "x": 2350,
+   "y": 9532,
+   "w": 390,
+   "h": 844,
+   "title": "Tanglish \u00b7 plus one-time watcher explainer"
+  },
+  "S09-Roast-A-Entrance.dc.html": {
+   "x": 0,
+   "y": 10756,
+   "w": 390,
+   "h": 844,
+   "title": "0.3s \u00b7 slides up, Loop eye-rolls"
+  },
+  "S09-Roast.dc.html": {
+   "x": 470,
+   "y": 10756,
+   "w": 390,
+   "h": 844,
+   "title": "Final \u00b7 Honest \u00b7 Loop"
+  },
+  "S09-Roast-C-Reopened.dc.html": {
+   "x": 940,
+   "y": 10756,
+   "w": 390,
+   "h": 844,
+   "title": "Reopened 40s later \u00b7 escalates"
+  },
+  "S09-Roast-D-NoSnoozes.dc.html": {
+   "x": 1410,
+   "y": 10756,
+   "w": 390,
+   "h": 844,
+   "title": "Snoozes used up"
+  },
+  "S09-Roast-E-ShareCard.dc.html": {
+   "x": 1880,
+   "y": 10756,
+   "w": 390,
+   "h": 844,
+   "title": "Share this roast \u00b7 story card"
+  },
+  "S09-Roast-F-LupeTanglish.dc.html": {
+   "x": 2350,
+   "y": 10756,
+   "w": 390,
+   "h": 844,
+   "title": "Lupe \u00b7 Savage \u00b7 Tanglish"
+  },
+  "S10-Snooze-A-Why.dc.html": {
+   "x": 0,
+   "y": 11980,
+   "w": 390,
+   "h": 844,
+   "title": "1 \u00b7 Convince me \u00b7 pick a reason"
+  },
+  "S10-Snooze-B-Type.dc.html": {
+   "x": 470,
+   "y": 11980,
+   "w": 390,
+   "h": 844,
+   "title": "2 \u00b7 Type the confession \u00b7 typo shown"
+  },
+  "S10-Snooze-C-Wait.dc.html": {
+   "x": 940,
+   "y": 11980,
+   "w": 390,
+   "h": 844,
+   "title": "3 \u00b7 10 s wait \u00b7 a fact while you wait"
+  },
+  "S10-Snooze-D-Ready.dc.html": {
+   "x": 1410,
+   "y": 11980,
+   "w": 390,
+   "h": 844,
+   "title": "Ready \u00b7 Give me 5 minutes"
+  },
+  "S10-Snooze-E-BackedOut.dc.html": {
+   "x": 1880,
+   "y": 11980,
+   "w": 390,
+   "h": 844,
+   "title": "Never mind \u00b7 counts as a win"
+  },
+  "S10-Snooze-F-Second.dc.html": {
+   "x": 2350,
+   "y": 11980,
+   "w": 390,
+   "h": 844,
+   "title": "Second snooze \u00b7 longer, 20 s"
+  },
+  "S09-Roast-G-Fact.dc.html": {
+   "x": 2820,
+   "y": 10756,
+   "w": 390,
+   "h": 844,
+   "title": "With a fact card \u00b7 Honest tone"
+  },
+  "S10-Facts-Tones.dc.html": {
+   "x": 2820,
+   "y": 11980,
+   "w": 390,
+   "h": 844,
+   "title": "Facts \u00b7 one fact, three tones"
+  },
+  "S11-AppDetail.dc.html": {
+   "x": 0,
+   "y": 13204,
+   "w": 390,
+   "h": 1720,
+   "title": "Full page \u00b7 over the limit (scrolls)"
+  },
+  "S11-AppDetail-B-Lower.dc.html": {
+   "x": 470,
+   "y": 13204,
+   "w": 390,
+   "h": 844,
+   "title": "Edit limit \u00b7 lower = now"
+  },
+  "S11-AppDetail-C-Raise.dc.html": {
+   "x": 940,
+   "y": 13204,
+   "w": 390,
+   "h": 844,
+   "title": "Edit limit \u00b7 raise = tomorrow"
+  },
+  "S11-AppDetail-D-Stop.dc.html": {
+   "x": 1410,
+   "y": 13204,
+   "w": 390,
+   "h": 844,
+   "title": "Stop tracking \u00b7 from tomorrow"
+  },
+  "S11-AppDetail-E-Good.dc.html": {
+   "x": 1880,
+   "y": 13204,
+   "w": 390,
+   "h": 844,
+   "title": "A good week \u00b7 under the limit"
+  },
+  "S12-Stats.dc.html": {
+   "x": 0,
+   "y": 15304,
+   "w": 390,
+   "h": 1640,
+   "title": "Week \u00b7 winning (full page, scrolls)"
+  },
+  "S12-Stats-B-Month.dc.html": {
+   "x": 470,
+   "y": 15304,
+   "w": 390,
+   "h": 844,
+   "title": "Month tapped \u00b7 Premium (free user)"
+  },
+  "S12-Stats-C-Worse.dc.html": {
+   "x": 940,
+   "y": 15304,
+   "w": 390,
+   "h": 844,
+   "title": "A worse week \u00b7 time lost"
+  },
+  "S12-Stats-D-Baseline.dc.html": {
+   "x": 1410,
+   "y": 15304,
+   "w": 390,
+   "h": 844,
+   "title": "First week \u00b7 baseline building"
+  },
+  "S13-Weekly-A-Total.dc.html": {
+   "x": 0,
+   "y": 17324,
+   "w": 390,
+   "h": 844,
+   "title": "1 \u00b7 This week you scrolled\u2026 (counts up)"
+  },
+  "S13-Weekly-B-Worst.dc.html": {
+   "x": 470,
+   "y": 17324,
+   "w": 390,
+   "h": 844,
+   "title": "2 \u00b7 Worst offender \u00b7 Loop shakes head"
+  },
+  "S13-Weekly-C-Wins.dc.html": {
+   "x": 940,
+   "y": 17324,
+   "w": 390,
+   "h": 844,
+   "title": "3 \u00b7 But also\u2026 ends positive"
+  },
+  "S13-Weekly-D-Share.dc.html": {
+   "x": 1410,
+   "y": 17324,
+   "w": 390,
+   "h": 844,
+   "title": "Share \u00b7 Stories or save"
+  },
+  "S13-Weekly-E-Card.dc.html": {
+   "x": 1880,
+   "y": 17324,
+   "w": 390,
+   "h": 693,
+   "title": "The card \u00b7 good week (1080\u00d71920)"
+  },
+  "S13-Weekly-F-BadHidden.dc.html": {
+   "x": 2350,
+   "y": 17324,
+   "w": 390,
+   "h": 844,
+   "title": "Bad week \u00b7 app names hidden"
+  },
+  "S13-Weekly-G-First.dc.html": {
+   "x": 2820,
+   "y": 17324,
+   "w": 390,
+   "h": 693,
+   "title": "The card \u00b7 first week"
+  },
+  "S14-Settings.dc.html": {
+   "x": 0,
+   "y": 18548,
+   "w": 390,
+   "h": 2200,
+   "title": "All settings (full page, scrolls)"
+  },
+  "S14-Settings-B-Pause.dc.html": {
+   "x": 470,
+   "y": 18548,
+   "w": 390,
+   "h": 844,
+   "title": "Pause for today \u00b7 confirm"
+  },
+  "S14-Settings-C-Paused.dc.html": {
+   "x": 940,
+   "y": 18548,
+   "w": 390,
+   "h": 844,
+   "title": "Paused \u00b7 back at midnight"
+  },
+  "S14-Settings-D-Delete.dc.html": {
+   "x": 1410,
+   "y": 18548,
+   "w": 390,
+   "h": 844,
+   "title": "Delete all my data \u00b7 confirm"
+  },
+  "S14-Settings-E-Privacy.dc.html": {
+   "x": 1880,
+   "y": 18548,
+   "w": 390,
+   "h": 844,
+   "title": "What Endloop can see"
+  },
+  "S15-Paywall.dc.html": {
+   "x": 0,
+   "y": 21128,
+   "w": 390,
+   "h": 1180,
+   "title": "4th app \u00b7 yearly + trial (default)"
+  },
+  "S15-Paywall-B-Unhinged.dc.html": {
+   "x": 470,
+   "y": 21128,
+   "w": 390,
+   "h": 1180,
+   "title": "From Unhinged \u00b7 dark"
+  },
+  "S15-Paywall-C-Lifetime.dc.html": {
+   "x": 940,
+   "y": 21128,
+   "w": 390,
+   "h": 1180,
+   "title": "Month view \u00b7 lifetime picked"
+  },
+  "S15-Paywall-D-Welcome.dc.html": {
+   "x": 1410,
+   "y": 21128,
+   "w": 390,
+   "h": 844,
+   "title": "After purchase \u00b7 welcome"
+  },
+  "S16-Edge-A-DayOne.dc.html": {
+   "x": 0,
+   "y": 22688,
+   "w": 390,
+   "h": 844,
+   "title": "Day 1 \u00b7 no data yet"
+  },
+  "S16-Edge-B-NoApps.dc.html": {
+   "x": 470,
+   "y": 22688,
+   "w": 390,
+   "h": 844,
+   "title": "No apps tracked"
+  },
+  "S16-Edge-C-Killed.dc.html": {
+   "x": 940,
+   "y": 22688,
+   "w": 390,
+   "h": 844,
+   "title": "Phone killed Endloop \u00b7 battery steps"
+  },
+  "S16-Edge-D-Paused.dc.html": {
+   "x": 1410,
+   "y": 22688,
+   "w": 390,
+   "h": 844,
+   "title": "Paused for today \u00b7 grey Home"
+  },
+  "S16-Edge-E-AllOver.dc.html": {
+   "x": 1880,
+   "y": 22688,
+   "w": 390,
+   "h": 844,
+   "title": "Every limit hit"
+  },
+  "S16-Edge-F-Perfect.dc.html": {
+   "x": 2350,
+   "y": 22688,
+   "w": 390,
+   "h": 844,
+   "title": "Perfect day \u00b7 next morning"
+  },
+  "S16-Edge-G-Uninstalled.dc.html": {
+   "x": 2820,
+   "y": 22688,
+   "w": 390,
+   "h": 844,
+   "title": "Tracked app uninstalled"
+  },
+  "S16-Edge-H-PremiumEnded.dc.html": {
+   "x": 3290,
+   "y": 22688,
+   "w": 390,
+   "h": 844,
+   "title": "Premium ended \u00b7 keep 3"
+  },
+  "S17-Icon-A-Set.dc.html": {
+   "x": 0,
+   "y": 23912,
+   "w": 390,
+   "h": 844,
+   "title": "Icon set \u00b7 squircle, circle, themed"
+  },
+  "S17-Icon-B-HomeLoop.dc.html": {
+   "x": 470,
+   "y": 23912,
+   "w": 390,
+   "h": 844,
+   "title": "Home screen \u00b7 Loop"
+  },
+  "S17-Icon-C-HomeLupe.dc.html": {
+   "x": 940,
+   "y": 23912,
+   "w": 390,
+   "h": 844,
+   "title": "Home screen \u00b7 Lupe"
+  },
+  "S17-Icon-D-AskLoop.dc.html": {
+   "x": 1410,
+   "y": 23912,
+   "w": 390,
+   "h": 844,
+   "title": "Onboarding ask \u00b7 Loop"
+  },
+  "S17-Icon-E-AskLupe.dc.html": {
+   "x": 1880,
+   "y": 23912,
+   "w": 390,
+   "h": 844,
+   "title": "Onboarding ask \u00b7 Lupe"
+  },
+  "S17-Icon-F-Settings.dc.html": {
+   "x": 2350,
+   "y": 23912,
+   "w": 390,
+   "h": 844,
+   "title": "Settings \u00b7 roaster changed, swap icon?"
+  },
+  "S10b-Short-A-Why.dc.html": {
+   "x": 3690,
+   "y": 11980,
+   "w": 390,
+   "h": 844,
+   "title": "1st snooze \u00b7 1 of 2 \u00b7 pick a reason"
+  },
+  "S10b-Short-B-Wait.dc.html": {
+   "x": 4160,
+   "y": 11980,
+   "w": 390,
+   "h": 844,
+   "title": "1st snooze \u00b7 2 of 2 \u00b7 10 s, no typing"
+  },
+  "S10b-Short-C-Ready.dc.html": {
+   "x": 4630,
+   "y": 11980,
+   "w": 390,
+   "h": 844,
+   "title": "Ready \u00b7 Give me 5 minutes"
+  },
+  "S10b-Short-D-SecondType.dc.html": {
+   "x": 5100,
+   "y": 11980,
+   "w": 390,
+   "h": 844,
+   "title": "2nd snooze \u00b7 now you type (short)"
+  },
+  "S10b-Short-E-SecondWait.dc.html": {
+   "x": 5570,
+   "y": 11980,
+   "w": 390,
+   "h": 844,
+   "title": "2nd snooze \u00b7 20 s wait"
+  },
+  "S10b-Short-F-BackedOut.dc.html": {
+   "x": 6040,
+   "y": 11980,
+   "w": 390,
+   "h": 844,
+   "title": "Never mind \u00b7 slow clap, a win"
+  }
+ },
+ "createdOnFiles": {
+  "at": "2026-09-24T08:47:49Z",
+  "v": 1
+ },
+ "designSystems": [],
+ "launch": {
+  "view": "canvas"
+ },
+ "notes": {
+  "s01": {
+   "kind": "title1",
+   "maxW": 1330,
+   "text": "Screen 1 \u00b7 Welcome",
+   "w": 240,
+   "x": 0,
+   "y": -260
+  },
+  "s02": {
+   "kind": "title1",
+   "x": 0,
+   "y": 964,
+   "text": "Screen 2 \u00b7 Usage Access",
+   "maxW": 1330,
+   "w": 240
+  },
+  "s03": {
+   "kind": "title1",
+   "x": 0,
+   "y": 2188,
+   "text": "Screen 3 \u00b7 The damage / pick apps",
+   "maxW": 1330,
+   "w": 240
+  },
+  "s04": {
+   "kind": "title1",
+   "x": 0,
+   "y": 3412,
+   "text": "Screen 4 \u00b7 Roast intensity",
+   "maxW": 2270,
+   "w": 240
+  },
+  "s05": {
+   "kind": "title1",
+   "x": 0,
+   "y": 5600,
+   "text": "Screen 5 \u00b7 Set limits",
+   "maxW": 1330,
+   "w": 240
+  },
+  "s06": {
+   "kind": "title1",
+   "x": 0,
+   "y": 6824,
+   "text": "Screen 6 \u00b7 Final permissions",
+   "maxW": 1800,
+   "w": 240
+  },
+  "s07": {
+   "kind": "title1",
+   "x": 0,
+   "y": 8048,
+   "text": "Screen 7 \u00b7 Home",
+   "maxW": 1800,
+   "w": 240
+  },
+  "s08": {
+   "kind": "title1",
+   "x": 0,
+   "y": 9272,
+   "text": "Screen 8 \u00b7 Notifications",
+   "maxW": 2740,
+   "w": 240
+  },
+  "s09": {
+   "kind": "title1",
+   "x": 0,
+   "y": 10496,
+   "text": "Screen 9 \u00b7 Roast screen",
+   "maxW": 3210,
+   "w": 240
+  },
+  "s10": {
+   "kind": "title1",
+   "x": 0,
+   "y": 11720,
+   "text": "Screen 10 \u00b7 Snooze friction",
+   "maxW": 3210,
+   "w": 240
+  },
+  "s11": {
+   "kind": "title1",
+   "x": 0,
+   "y": 12944,
+   "text": "Screen 11 \u00b7 App detail",
+   "maxW": 2270,
+   "w": 240
+  },
+  "s12": {
+   "kind": "title1",
+   "x": 0,
+   "y": 15044,
+   "text": "Screen 12 \u00b7 Stats",
+   "maxW": 1800,
+   "w": 240
+  },
+  "s13": {
+   "kind": "title1",
+   "x": 0,
+   "y": 17064,
+   "text": "Screen 13 \u00b7 Weekly roast report",
+   "maxW": 3210,
+   "w": 240
+  },
+  "s14": {
+   "kind": "title1",
+   "x": 0,
+   "y": 18288,
+   "text": "Screen 14 \u00b7 Settings",
+   "maxW": 2270,
+   "w": 240
+  },
+  "s15": {
+   "kind": "title1",
+   "x": 0,
+   "y": 20868,
+   "text": "Screen 15 \u00b7 Premium paywall",
+   "maxW": 1800,
+   "w": 240
+  },
+  "s16": {
+   "kind": "title1",
+   "x": 0,
+   "y": 22428,
+   "text": "Screen 16 \u00b7 Empty states and edge cases",
+   "maxW": 3680,
+   "w": 240
+  },
+  "s17": {
+   "kind": "title1",
+   "x": 0,
+   "y": 23652,
+   "text": "Screen 17 \u00b7 App icon matches your roaster",
+   "maxW": 2740,
+   "w": 240
+  },
+  "s10b": {
+   "kind": "title1",
+   "x": 3690,
+   "y": 11720,
+   "text": "Screen 10 \u00b7 Shorter snooze (proposal)",
+   "maxW": 2740,
+   "w": 240
+  }
+ },
+ "order": [
+  "S01-Welcome-A-Peek.dc.html",
+  "S01-Welcome-B-Typing.dc.html",
+  "S01-Welcome.dc.html",
+  "S02-UsageAccess.dc.html",
+  "S02-UsageAccess-B-NotFound.dc.html",
+  "S02-UsageAccess-C-Granted.dc.html",
+  "S03-PickApps.dc.html",
+  "S03-PickApps-B-Premium.dc.html",
+  "S03-PickApps-C-NoAccess.dc.html",
+  "S04-Intensity.dc.html",
+  "S04-Intensity-B-Polite.dc.html",
+  "S04-Intensity-C-Savage.dc.html",
+  "S04-Intensity-D-Unhinged.dc.html",
+  "S04-Intensity-E-LupePolite.dc.html",
+  "S04-Intensity-F-LupeHonest.dc.html",
+  "S04-Intensity-G-LupeSavage.dc.html",
+  "S05-Limits.dc.html",
+  "S05-Limits-B-Low.dc.html",
+  "S05-Limits-C-High.dc.html",
+  "S04-Intensity-H-Tanglish.dc.html",
+  "S06-Permissions.dc.html",
+  "S06-Permissions-B-Overlay.dc.html",
+  "S06-Permissions-C-Skipped.dc.html",
+  "S06-Permissions-D-Ready.dc.html",
+  "S07-Home-A-FirstVisit.dc.html",
+  "S07-Home.dc.html",
+  "S07-Home-C-Over.dc.html",
+  "S07-Home-D-PermissionLost.dc.html",
+  "S08-Notif-A-HeadsUp.dc.html",
+  "S08-Notif-B-Shade.dc.html",
+  "S08-Notif-C-LastCall.dc.html",
+  "S08-Notif-D-LateNight.dc.html",
+  "S08-Notif-E-Weekly.dc.html",
+  "S08-Notif-F-Tanglish.dc.html",
+  "S09-Roast-A-Entrance.dc.html",
+  "S09-Roast.dc.html",
+  "S09-Roast-C-Reopened.dc.html",
+  "S09-Roast-D-NoSnoozes.dc.html",
+  "S09-Roast-E-ShareCard.dc.html",
+  "S09-Roast-F-LupeTanglish.dc.html",
+  "S10-Snooze-A-Why.dc.html",
+  "S10-Snooze-B-Type.dc.html",
+  "S10-Snooze-C-Wait.dc.html",
+  "S10-Snooze-D-Ready.dc.html",
+  "S10-Snooze-E-BackedOut.dc.html",
+  "S10-Snooze-F-Second.dc.html",
+  "S09-Roast-G-Fact.dc.html",
+  "S10-Facts-Tones.dc.html",
+  "S11-AppDetail.dc.html",
+  "S11-AppDetail-B-Lower.dc.html",
+  "S11-AppDetail-C-Raise.dc.html",
+  "S11-AppDetail-D-Stop.dc.html",
+  "S11-AppDetail-E-Good.dc.html",
+  "S12-Stats.dc.html",
+  "S12-Stats-B-Month.dc.html",
+  "S12-Stats-C-Worse.dc.html",
+  "S12-Stats-D-Baseline.dc.html",
+  "S13-Weekly-A-Total.dc.html",
+  "S13-Weekly-B-Worst.dc.html",
+  "S13-Weekly-C-Wins.dc.html",
+  "S13-Weekly-D-Share.dc.html",
+  "S13-Weekly-E-Card.dc.html",
+  "S13-Weekly-F-BadHidden.dc.html",
+  "S13-Weekly-G-First.dc.html",
+  "S14-Settings.dc.html",
+  "S14-Settings-B-Pause.dc.html",
+  "S14-Settings-C-Paused.dc.html",
+  "S14-Settings-D-Delete.dc.html",
+  "S14-Settings-E-Privacy.dc.html",
+  "S15-Paywall.dc.html",
+  "S15-Paywall-B-Unhinged.dc.html",
+  "S15-Paywall-C-Lifetime.dc.html",
+  "S15-Paywall-D-Welcome.dc.html",
+  "S16-Edge-A-DayOne.dc.html",
+  "S16-Edge-B-NoApps.dc.html",
+  "S16-Edge-C-Killed.dc.html",
+  "S16-Edge-D-Paused.dc.html",
+  "S16-Edge-E-AllOver.dc.html",
+  "S16-Edge-F-Perfect.dc.html",
+  "S16-Edge-G-Uninstalled.dc.html",
+  "S16-Edge-H-PremiumEnded.dc.html",
+  "S17-Icon-A-Set.dc.html",
+  "S17-Icon-B-HomeLoop.dc.html",
+  "S17-Icon-C-HomeLupe.dc.html",
+  "S17-Icon-D-AskLoop.dc.html",
+  "S17-Icon-E-AskLupe.dc.html",
+  "S17-Icon-F-Settings.dc.html",
+  "S10b-Short-A-Why.dc.html",
+  "S10b-Short-B-Wait.dc.html",
+  "S10b-Short-C-Ready.dc.html",
+  "S10b-Short-D-SecondType.dc.html",
+  "S10b-Short-E-SecondWait.dc.html",
+  "S10b-Short-F-BackedOut.dc.html"
+ ],
+ "pages": [],
+ "title": "Endloop Screens"
+}

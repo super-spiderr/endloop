@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "packs": [
+    {
+      "file": "core.en.json",
+      "lang": "en",
+      "count": 221
+    },
+    {
+      "file": "core.ta-Latn.json",
+      "lang": "ta-Latn",
+      "count": 135
+    }
+  ]
+}

@@ -1,0 +1,2517 @@
+{
+  "pack": "core",
+  "lang": "en",
+  "version": 1,
+  "placeholders": [
+    "app",
+    "clock",
+    "left",
+    "limit",
+    "opens",
+    "over",
+    "streak",
+    "time",
+    "week_total",
+    "won_back",
+    "worst_app",
+    "worst_time"
+  ],
+  "appKeys": {
+    "instagram": [
+      "com.instagram.android"
+    ],
+    "youtube": [
+      "com.google.android.youtube"
+    ],
+    "snapchat": [
+      "com.snapchat.android"
+    ],
+    "x": [
+      "com.twitter.android"
+    ],
+    "reddit": [
+      "com.reddit.frontpage"
+    ],
+    "whatsapp": [
+      "com.whatsapp"
+    ]
+  },
+  "notes": "intensity null = any level; apps null = any app; kinds null = any kind of app (feed, video, chat, browser, games, shopping, work); roaster null = both. snooze_sentence_* must be typed by the user; compare ignoring case and extra spaces. comparison lines use minMinutes; win_streak uses minStreak.",
+  "roasts": [
+    {
+      "id": "en_lh_p01",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "That's your {app} time for today. The feed will survive without you.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_p02",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "{time} today. Your eyes would like a word.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_p03",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "{time} on {app} today. Let's call it a day, yeah?",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_p04",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "Limit reached. Your eyes have earned a break.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_p05",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "{app} will still be here tomorrow. Promise.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_p06",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "Time's up. Go look at something that doesn't refresh.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_p07",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "The reels will still be there tomorrow. This evening won't.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_p08",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "Enough scrolling for today. Your thumb has clocked out.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video",
+        "browser",
+        "shopping"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_p09",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "Close it now and today counts as a win.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_p10",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "{time} is plenty. The rest of your day is waiting.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_h01",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "{time} of other people's vacations. Your own life is on airplane mode.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_h02",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "You didn't lose track of time. You handed it over.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_h03",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "{opens} opens today. That's not a habit, that's a relationship.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_h04",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "{time} on {app}, and you couldn't name three things you saw.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video",
+        "browser",
+        "shopping"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_h05",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "Your limit was {limit}. You're at {time}. Math is not on your side.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_h06",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "You've watched strangers live for {time}. Want to try it yourself?",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_h07",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "{opens} opens. Your phone sees you more than your friends do.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_h08",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "{time} of content. None of it was about you.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_h09",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "{time} gone. That was a movie, a nap or a walk. You picked scrolling.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video",
+        "browser",
+        "shopping"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_h10",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "{over} over your limit. Your thumb didn't even hesitate.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_s01",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "{opens} opens today. At this point {app} should be paying you rent.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_s02",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "{time} on {app}. Your thumb gets more exercise than you do.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_s03",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "Another {time} donated to a billion-dollar company. Generous.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_s04",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "You're not \"just checking.\" You're moving in.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_s05",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "The feed has no ending. You were supposed to be the ending.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_s06",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "Your thumb ran a marathon today. The rest of you watched.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_s07",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "{over} over the limit. You and self-control are clearly on a break.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_s08",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "You've watched so much today your brain has started buffering.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_s09",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "Your hand opened {app} {opens} times today. Your brain agreed to none of them.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_s10",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "Still looking for something good in there? It left an hour ago.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video",
+        "browser",
+        "shopping"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_u01",
+      "category": "limit_hit",
+      "intensity": "unhinged",
+      "text": "Your phone has started calling you \"roommate.\"",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_u02",
+      "category": "limit_hit",
+      "intensity": "unhinged",
+      "text": "At this rate, archaeologists will find you mid-scroll.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video",
+        "browser",
+        "shopping"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_u03",
+      "category": "limit_hit",
+      "intensity": "unhinged",
+      "text": "Breaking news: local human discovers {app} has no bottom. Keeps looking anyway.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video",
+        "browser",
+        "shopping"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_u04",
+      "category": "limit_hit",
+      "intensity": "unhinged",
+      "text": "I'm not mad. I'm just going to stare at you until you close it.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_u05",
+      "category": "limit_hit",
+      "intensity": "unhinged",
+      "text": "Your screen has your thumbprint memorised. You two should really see other people.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_u06",
+      "category": "limit_hit",
+      "intensity": "unhinged",
+      "text": "{opens} opens. At this point {app} opens itself out of habit. Like you.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_u07",
+      "category": "limit_hit",
+      "intensity": "unhinged",
+      "text": "Your battery has a longer attention span than you do today.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_u08",
+      "category": "limit_hit",
+      "intensity": "unhinged",
+      "text": "Keep scrolling and you'll reach the ads from 2019.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_a01",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "Another reel won't fix it. Neither did the last forty.",
+      "apps": [
+        "instagram"
+      ],
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_a02",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "{time} of other people's best moments. Here's one of yours: closing this.",
+      "apps": [
+        "instagram"
+      ],
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_a03",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "\"Just one more video\" has now been said {opens} times.",
+      "apps": [
+        "youtube"
+      ],
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_a04",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "Shorts are short. Your session isn't.",
+      "apps": [
+        "youtube"
+      ],
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_a05",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "Your streak is alive. Your evening isn't.",
+      "apps": [
+        "snapchat"
+      ],
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_a06",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "{time} of strangers arguing. Who won? Nobody.",
+      "apps": [
+        "x"
+      ],
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_a07",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "{time} on Reddit. You're now an expert in things you'll never need.",
+      "apps": [
+        "reddit"
+      ],
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_a08",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "{opens} opens today. Nobody texts that much. You just keep checking.",
+      "apps": [
+        "whatsapp"
+      ],
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_l01",
+      "category": "limit_hit",
+      "intensity": null,
+      "text": "I counted all {opens} of your opens today. We both need a hobby.",
+      "apps": null,
+      "roaster": "loop",
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_l02",
+      "category": "limit_hit",
+      "intensity": null,
+      "text": "I'd be impressed by the dedication if it were to literally anything else.",
+      "apps": null,
+      "roaster": "loop",
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_l03",
+      "category": "limit_hit",
+      "intensity": null,
+      "text": "My eyelids are this heavy and I'm a cartoon. Imagine yours.",
+      "apps": null,
+      "roaster": "loop",
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_l04",
+      "category": "limit_hit",
+      "intensity": null,
+      "text": "I'm not even surprised. I'm just here.",
+      "apps": null,
+      "roaster": "lupe",
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_l05",
+      "category": "limit_hit",
+      "intensity": null,
+      "text": "I expected this. I'm still disappointed.",
+      "apps": null,
+      "roaster": "lupe",
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lh_l06",
+      "category": "limit_hit",
+      "intensity": null,
+      "text": "Go on, tell me it was \"just five minutes.\"",
+      "apps": null,
+      "roaster": "lupe",
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_hu_p01",
+      "category": "heads_up",
+      "intensity": "polite",
+      "text": "{left} left on {app}. Plenty of time to finish up and head out.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_hu_p02",
+      "category": "heads_up",
+      "intensity": "polite",
+      "text": "Three quarters of your {app} time is gone. Pace yourself.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_hu_p03",
+      "category": "heads_up",
+      "intensity": "polite",
+      "text": "{left} to go. Maybe skip the next rabbit hole.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video",
+        "browser",
+        "shopping"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_hu_p04",
+      "category": "heads_up",
+      "intensity": "polite",
+      "text": "{left} left. Good moment to wrap up the video you're on.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_hu_h01",
+      "category": "heads_up",
+      "intensity": "honest",
+      "text": "{left} left. That's a lot of reels, or one good decision.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_hu_h02",
+      "category": "heads_up",
+      "intensity": "honest",
+      "text": "{time} down, {left} to go. Your thumb is warming up. So am I.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_hu_h03",
+      "category": "heads_up",
+      "intensity": "honest",
+      "text": "{left} left. The algorithm is saving its best stuff for right now. Suspicious.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_hu_h04",
+      "category": "heads_up",
+      "intensity": "honest",
+      "text": "{opens} opens so far today. I'm keeping count in case you aren't.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_hu_s01",
+      "category": "heads_up",
+      "intensity": "savage",
+      "text": "{left} left. I've started stretching.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_hu_s02",
+      "category": "heads_up",
+      "intensity": "savage",
+      "text": "{left} to go. I'm already picking out your roast.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_hu_s03",
+      "category": "heads_up",
+      "intensity": "savage",
+      "text": "Three quarters gone. Your self-control is on 25% battery.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_hu_s04",
+      "category": "heads_up",
+      "intensity": "savage",
+      "text": "{left} left. Enjoy it. I'm taking notes.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_hu_u01",
+      "category": "heads_up",
+      "intensity": "unhinged",
+      "text": "{left} left. I've told your thumb to start packing.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_hu_u02",
+      "category": "heads_up",
+      "intensity": "unhinged",
+      "text": "Countdown started. I'm warming up my eye roll.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_hu_u03",
+      "category": "heads_up",
+      "intensity": "unhinged",
+      "text": "{left} left. The reels can sense fear.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_lc_p01",
+      "category": "last_call",
+      "intensity": "polite",
+      "text": "{left} left on {app}. Finish this one and call it.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lc_p02",
+      "category": "last_call",
+      "intensity": "polite",
+      "text": "Last few minutes. Good time to put the phone down on your own terms.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lc_p03",
+      "category": "last_call",
+      "intensity": "polite",
+      "text": "{left} to go. Close it now and it's your idea, not mine.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lc_p04",
+      "category": "last_call",
+      "intensity": "polite",
+      "text": "Almost at your limit. The feed will keep.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_lc_h01",
+      "category": "last_call",
+      "intensity": "honest",
+      "text": "{left} left. After that, it's my turn to talk.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lc_h02",
+      "category": "last_call",
+      "intensity": "honest",
+      "text": "{left}. That's one video. Choose wisely.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_lc_h03",
+      "category": "last_call",
+      "intensity": "honest",
+      "text": "You're {left} away from meeting me properly.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lc_h04",
+      "category": "last_call",
+      "intensity": "honest",
+      "text": "{left} left, {opens} opens today. You can see where this is going.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lc_s01",
+      "category": "last_call",
+      "intensity": "savage",
+      "text": "{left}. Close it now and nobody gets hurt.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lc_s02",
+      "category": "last_call",
+      "intensity": "savage",
+      "text": "{left} left. My roast is loaded and it's about you.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lc_s03",
+      "category": "last_call",
+      "intensity": "savage",
+      "text": "Last call. After this, the roast writes itself.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lc_s04",
+      "category": "last_call",
+      "intensity": "savage",
+      "text": "{left} left. I'd start saying goodbye to the feed.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_lc_u01",
+      "category": "last_call",
+      "intensity": "unhinged",
+      "text": "{left} left. I've cleared my whole schedule for this.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lc_u02",
+      "category": "last_call",
+      "intensity": "unhinged",
+      "text": "{left}. I'm cracking my knuckles. I don't have knuckles. That's how ready I am.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_lc_u03",
+      "category": "last_call",
+      "intensity": "unhinged",
+      "text": "Final warning. The next face you see in this app will be mine.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_sa_p01",
+      "category": "snooze_ask",
+      "intensity": "polite",
+      "text": "Need a bit more time? Okay, but you'll have to earn it.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_sa_p02",
+      "category": "snooze_ask",
+      "intensity": "polite",
+      "text": "Five more minutes. Let's make it official.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_sa_p03",
+      "category": "snooze_ask",
+      "intensity": "polite",
+      "text": "Sure. One small task first.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_sa_h01",
+      "category": "snooze_ask",
+      "intensity": "honest",
+      "text": "Oh? Convince me.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_sa_h02",
+      "category": "snooze_ask",
+      "intensity": "honest",
+      "text": "Five more minutes. You said that {opens} opens ago.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_sa_h03",
+      "category": "snooze_ask",
+      "intensity": "honest",
+      "text": "Fine. Type this and we'll pretend it was your idea.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_sa_s01",
+      "category": "snooze_ask",
+      "intensity": "savage",
+      "text": "Negotiating with me? Bold. Type your confession.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_sa_s02",
+      "category": "snooze_ask",
+      "intensity": "savage",
+      "text": "Five more minutes of what, exactly? Go on, type it.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_sa_s03",
+      "category": "snooze_ask",
+      "intensity": "savage",
+      "text": "The feed won't miss you. But fine, prove you mean it.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_sa_u01",
+      "category": "snooze_ask",
+      "intensity": "unhinged",
+      "text": "I've prepared a small ritual for you.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_sa_u02",
+      "category": "snooze_ask",
+      "intensity": "unhinged",
+      "text": "Every snooze costs one sentence of dignity. Pay up.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_st_p01",
+      "category": "snooze_sentence_1",
+      "intensity": "polite",
+      "text": "Just five more minutes, I promise.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_st_p02",
+      "category": "snooze_sentence_1",
+      "intensity": "polite",
+      "text": "I will close it right after this.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_st_p03",
+      "category": "snooze_sentence_1",
+      "intensity": "polite",
+      "text": "This is my last scroll today.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video",
+        "browser",
+        "shopping"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_st_h01",
+      "category": "snooze_sentence_1",
+      "intensity": "honest",
+      "text": "I am choosing reels over my dreams.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_st_h02",
+      "category": "snooze_sentence_1",
+      "intensity": "honest",
+      "text": "My thumb makes my decisions now.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_st_h03",
+      "category": "snooze_sentence_1",
+      "intensity": "honest",
+      "text": "I know this video will not help me.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_st_s01",
+      "category": "snooze_sentence_1",
+      "intensity": "savage",
+      "text": "I am losing an argument to an app.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_st_s02",
+      "category": "snooze_sentence_1",
+      "intensity": "savage",
+      "text": "The algorithm knows me better than I do.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_st_s03",
+      "category": "snooze_sentence_1",
+      "intensity": "savage",
+      "text": "I have no idea what I am looking for.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_st_u01",
+      "category": "snooze_sentence_1",
+      "intensity": "unhinged",
+      "text": "I pledge my entire evening to the scroll.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video",
+        "browser",
+        "shopping"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_st_u02",
+      "category": "snooze_sentence_1",
+      "intensity": "unhinged",
+      "text": "Please sir, may I have more reels.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_st_a01",
+      "category": "snooze_sentence_1",
+      "intensity": "honest",
+      "text": "One more video will definitely fix my life.",
+      "apps": [
+        "youtube"
+      ],
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_st_a02",
+      "category": "snooze_sentence_1",
+      "intensity": "honest",
+      "text": "I need to see one more stranger's holiday.",
+      "apps": [
+        "instagram"
+      ],
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_st2_01",
+      "category": "snooze_sentence_2",
+      "intensity": null,
+      "text": "I, a fully grown adult, cannot stop watching strangers dance.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_st2_02",
+      "category": "snooze_sentence_2",
+      "intensity": null,
+      "text": "I already used one snooze and I have learned absolutely nothing.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_st2_03",
+      "category": "snooze_sentence_2",
+      "intensity": null,
+      "text": "My thumb has more free will than I do today.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_st2_04",
+      "category": "snooze_sentence_2",
+      "intensity": null,
+      "text": "I promise this is really the last time, just like the last time.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_st2_05",
+      "category": "snooze_sentence_2",
+      "intensity": null,
+      "text": "I am asking a cartoon for permission to keep going.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_st2_06",
+      "category": "snooze_sentence_2",
+      "intensity": null,
+      "text": "I typed this whole sentence instead of closing the app.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_as_01",
+      "category": "after_snooze",
+      "intensity": null,
+      "text": "Five minutes are up. The typing didn't shame you? Impressive, honestly.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_as_02",
+      "category": "after_snooze",
+      "intensity": null,
+      "text": "That was your snooze. I hope the extra reels were life-changing.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_as_03",
+      "category": "after_snooze",
+      "intensity": null,
+      "text": "Snooze over. You're right back where you started, minus five minutes.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_as_04",
+      "category": "after_snooze",
+      "intensity": null,
+      "text": "You typed a confession for five more minutes. Bold trade.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_as_05",
+      "category": "after_snooze",
+      "intensity": null,
+      "text": "Five minutes later: same feed, less evening.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_as_06",
+      "category": "after_snooze",
+      "intensity": null,
+      "text": "Welcome back. I kept your seat warm. It's the roast seat.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_su_01",
+      "category": "snoozes_used_up",
+      "intensity": null,
+      "text": "No. We're done here.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_su_02",
+      "category": "snoozes_used_up",
+      "intensity": null,
+      "text": "Snoozes: zero. Excuses: also zero. Close it.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_su_03",
+      "category": "snoozes_used_up",
+      "intensity": null,
+      "text": "You've used both. The only button left is the good one.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_su_04",
+      "category": "snoozes_used_up",
+      "intensity": null,
+      "text": "I'd give you more time, but you'd just spend it here.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_cm_01",
+      "category": "snooze_backout",
+      "intensity": null,
+      "text": "Look at you. Choosing yourself.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_cm_02",
+      "category": "snooze_backout",
+      "intensity": null,
+      "text": "Good call. That sentence was going to haunt you.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_cm_03",
+      "category": "snooze_backout",
+      "intensity": null,
+      "text": "Closed without a fight. I'm almost proud.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_cm_04",
+      "category": "snooze_backout",
+      "intensity": null,
+      "text": "That counts as a win. I'm writing it down.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_ln_01",
+      "category": "late_night",
+      "intensity": null,
+      "text": "The feed will still be there tomorrow. Your sleep won't.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_ln_02",
+      "category": "late_night",
+      "intensity": null,
+      "text": "{clock}. Nothing good has ever been posted at this hour.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_ln_03",
+      "category": "late_night",
+      "intensity": null,
+      "text": "Your screen is the brightest thing in the room. Fix that.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_ln_04",
+      "category": "late_night",
+      "intensity": null,
+      "text": "Every extra hour on your phone is linked to a later bedtime. Just saying.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "fact": true,
+      "lang": "en"
+    },
+    {
+      "id": "en_ln_05",
+      "category": "late_night",
+      "intensity": null,
+      "text": "Tomorrow-you is already tired, and it's your fault.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_ln_06",
+      "category": "late_night",
+      "intensity": null,
+      "text": "{clock} and still scrolling. Your pillow has filed a complaint.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video",
+        "browser",
+        "shopping"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_ln_07",
+      "category": "late_night",
+      "intensity": null,
+      "text": "This is the hour where \"one more reel\" becomes a lifestyle.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_ln_08",
+      "category": "late_night",
+      "intensity": null,
+      "text": "Sleep now and tomorrow's scrolling will at least be well rested.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video",
+        "browser",
+        "shopping"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_w_01",
+      "category": "win_first_roast",
+      "intensity": null,
+      "text": "Closed on the first roast. I didn't even get to finish my sentence.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_w_02",
+      "category": "win_first_roast",
+      "intensity": null,
+      "text": "You closed it. I'm not proud. I'm just not disappointed.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_w_03",
+      "category": "win_streak",
+      "intensity": null,
+      "text": "{streak} days in a row of closing on the first roast. Who are you?",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "minStreak": 3,
+      "lang": "en"
+    },
+    {
+      "id": "en_w_04",
+      "category": "win_streak",
+      "intensity": null,
+      "text": "{streak}-day streak. I'm running out of things to say. Good.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "minStreak": 3,
+      "lang": "en"
+    },
+    {
+      "id": "en_w_05",
+      "category": "win_perfect_day",
+      "intensity": null,
+      "text": "Yesterday: all under limits. I'm… proud? Weird feeling.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_w_06",
+      "category": "win_perfect_day",
+      "intensity": null,
+      "text": "A whole day under every limit. I've never been this bored. Well done.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_w_07",
+      "category": "win_lowered_limit",
+      "intensity": null,
+      "text": "Look at you.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_w_08",
+      "category": "win_streak_7",
+      "intensity": null,
+      "text": "Seven days. Fine. I'm smiling. Don't make it weird.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_w_09",
+      "category": "win_streak",
+      "intensity": null,
+      "text": "Day {streak}. Your thumb is starting to forget the way.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "minStreak": 5,
+      "lang": "en"
+    },
+    {
+      "id": "en_wr_g01",
+      "category": "weekly_good",
+      "intensity": null,
+      "text": "Fine. You did well. Don't let it go to your head.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_wr_g02",
+      "category": "weekly_good",
+      "intensity": null,
+      "text": "{won_back} won back this week. I hope you did something great with it.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_wr_g03",
+      "category": "weekly_good",
+      "intensity": null,
+      "text": "Less scrolling than last week. I'm suspicious, but impressed.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_wr_b01",
+      "category": "weekly_bad",
+      "intensity": null,
+      "text": "You scrolled more than before you installed me. Impressive, in the worst way.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_wr_b02",
+      "category": "weekly_bad",
+      "intensity": null,
+      "text": "{worst_time} on {worst_app}. That's a part-time job with no salary.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_wr_b03",
+      "category": "weekly_bad",
+      "intensity": null,
+      "text": "{week_total} this week. Your thumb needs a holiday. So do you.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_wr_f01",
+      "category": "weekly_first",
+      "intensity": null,
+      "text": "Week 1. The baseline is set. Now we see what you're made of.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_wr_f02",
+      "category": "weekly_first",
+      "intensity": null,
+      "text": "First week done. I have notes. Many notes.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_wr_m01",
+      "category": "weekly_mixed",
+      "intensity": null,
+      "text": "Some days you won, some days {worst_app} won. Rematch next week.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_hm_01",
+      "category": "home_day1",
+      "intensity": null,
+      "text": "Day one. I'm taking notes.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_hm_02",
+      "category": "home_under",
+      "intensity": null,
+      "text": "So far, so good. Don't ruin it.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_hm_03",
+      "category": "home_under",
+      "intensity": null,
+      "text": "Quiet day. I like quiet days.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_hm_04",
+      "category": "home_under",
+      "intensity": null,
+      "text": "Under every limit. I'm almost worried.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_hm_05",
+      "category": "home_close",
+      "intensity": null,
+      "text": "Careful. {left} left on {app}. I'm watching.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_hm_06",
+      "category": "home_close",
+      "intensity": null,
+      "text": "{app} is almost done for today. I've started stretching.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_hm_07",
+      "category": "home_close",
+      "intensity": null,
+      "text": "One more long scroll on {app} and we're talking.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "feed",
+        "video",
+        "browser",
+        "shopping"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_hm_08",
+      "category": "home_over",
+      "intensity": null,
+      "text": "I've seen worse. Not much worse, though.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_hm_09",
+      "category": "home_over",
+      "intensity": null,
+      "text": "{app} already got you today. Let's keep it to one.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_hm_10",
+      "category": "home_over",
+      "intensity": null,
+      "text": "Roasted on {app} already, and the day isn't over.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    },
+    {
+      "id": "en_cp_01",
+      "category": "comparison",
+      "intensity": null,
+      "text": "That's an episode of something you actually like.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "minMinutes": 30,
+      "lang": "en"
+    },
+    {
+      "id": "en_cp_02",
+      "category": "comparison",
+      "intensity": null,
+      "text": "That's a long walk you didn't take.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "minMinutes": 45,
+      "lang": "en"
+    },
+    {
+      "id": "en_cp_03",
+      "category": "comparison",
+      "intensity": null,
+      "text": "That's a full gym session. Just saying.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "minMinutes": 60,
+      "lang": "en"
+    },
+    {
+      "id": "en_cp_04",
+      "category": "comparison",
+      "intensity": null,
+      "text": "That's a whole lunch with friends, minus the friends.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "minMinutes": 90,
+      "lang": "en"
+    },
+    {
+      "id": "en_cp_05",
+      "category": "comparison",
+      "intensity": null,
+      "text": "That's a whole movie you didn't watch.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "minMinutes": 120,
+      "lang": "en"
+    },
+    {
+      "id": "en_cp_06",
+      "category": "comparison",
+      "intensity": null,
+      "text": "That's a full IPL match, strategic timeouts included.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "minMinutes": 180,
+      "lang": "en"
+    },
+    {
+      "id": "en_cp_07",
+      "category": "comparison",
+      "intensity": null,
+      "text": "That's a Chennai to Bangalore train ride.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "minMinutes": 300,
+      "lang": "en"
+    },
+    {
+      "id": "en_cp_08",
+      "category": "comparison",
+      "intensity": null,
+      "text": "That's a full night's sleep, spent awake.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "minMinutes": 480,
+      "lang": "en"
+    },
+    {
+      "id": "en_k_ch01",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "{time} of chatting today. The conversation will keep till tomorrow.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "chat"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_ch02",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "Everyone you were talking to will still be there tomorrow. Promise.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "chat"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_ch03",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "You're not waiting for a reply. You're waiting for a reason.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "chat"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_ch04",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "{opens} opens today. Nobody texts that much. You just keep checking.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "chat"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_ch05",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "Group chats don't need a live commentator. Put it down.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "chat"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_ch06",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "Left on read by your own self-control.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "chat"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_ch07",
+      "category": "limit_hit",
+      "intensity": "unhinged",
+      "text": "Your \"typing…\" has been typing for {time}.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "chat"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_ch08",
+      "category": "heads_up",
+      "intensity": "polite",
+      "text": "{left} left on {app}. Good time to send the last reply.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "chat"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_ch09",
+      "category": "heads_up",
+      "intensity": "honest",
+      "text": "{left} left. Wrap up the chat before the chat wraps you up.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "chat"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_ch10",
+      "category": "heads_up",
+      "intensity": "savage",
+      "text": "{left} left. Say \"ttyl\" and mean it this time.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "chat"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_ch11",
+      "category": "last_call",
+      "intensity": "polite",
+      "text": "{left} left. Send that last message and log off.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "chat"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_ch12",
+      "category": "last_call",
+      "intensity": "honest",
+      "text": "{left}. One reply. Not a whole thread.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "chat"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_ch13",
+      "category": "last_call",
+      "intensity": "savage",
+      "text": "{left} left. Type \"bye\" like you mean it.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "chat"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_ch14",
+      "category": "late_night",
+      "intensity": null,
+      "text": "{clock}. Whoever you're texting should be asleep too.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "chat"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_ch15",
+      "category": "late_night",
+      "intensity": null,
+      "text": "Nothing typed after midnight needs sending right now. Go to sleep.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "chat"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_br01",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "{time} in {app}. Close a few tabs. Start with this one.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "browser"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_br02",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "{time} of \"just looking something up\". What was it again?",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "browser"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_br03",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "You opened {app} to search one thing. That was {time} ago.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "browser"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_br04",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "You have more tabs open than plans for today.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "browser"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_br05",
+      "category": "limit_hit",
+      "intensity": "unhinged",
+      "text": "Somewhere in tab 47 is the thing you came for. Leave it there.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "browser"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_br06",
+      "category": "heads_up",
+      "intensity": "polite",
+      "text": "{left} left in {app}. Find what you came for and close it.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "browser"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_br07",
+      "category": "heads_up",
+      "intensity": "honest",
+      "text": "{left} left. You searched one thing. This is page nine.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "browser"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_br08",
+      "category": "last_call",
+      "intensity": "honest",
+      "text": "{left}. Bookmark it. Leave.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "browser"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_br09",
+      "category": "last_call",
+      "intensity": "savage",
+      "text": "{left} left. That rabbit hole has a floor. It's me.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "browser"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_br10",
+      "category": "late_night",
+      "intensity": null,
+      "text": "{clock}, and you're searching things you'll forget by morning.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "browser"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_gm01",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "Game over for today. Real life has a save point too.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "games"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_gm02",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "{time} of \"one more round\". The rounds won.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "games"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_gm03",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "You've grinded {time}. Your real-life level hasn't moved.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "games"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_gm04",
+      "category": "limit_hit",
+      "intensity": "unhinged",
+      "text": "Achievement unlocked: {time} gone. Reward: nothing.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "games"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_gm05",
+      "category": "heads_up",
+      "intensity": "polite",
+      "text": "{left} left. Finish this round and save.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "games"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_gm06",
+      "category": "heads_up",
+      "intensity": "honest",
+      "text": "{left} left. That's one more round. Exactly one.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "games"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_gm07",
+      "category": "last_call",
+      "intensity": "savage",
+      "text": "{left}. Last round. I'm the final boss.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "games"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_gm08",
+      "category": "late_night",
+      "intensity": null,
+      "text": "{clock}. One more match turns into a sunrise.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "games"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_sh01",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "{time} of browsing. Your cart can wait till tomorrow.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "shopping"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_sh02",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "{time} on {app}. You've window-shopped longer than most people shop.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "shopping"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_sh03",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "Adding to cart is not a hobby. Close it.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "shopping"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_sh04",
+      "category": "limit_hit",
+      "intensity": "unhinged",
+      "text": "Your wishlist has a wishlist.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "shopping"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_sh05",
+      "category": "heads_up",
+      "intensity": "honest",
+      "text": "{left} left. Decide, or close it. Both are fine.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "shopping"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_sh06",
+      "category": "last_call",
+      "intensity": "savage",
+      "text": "{left}. Check out, or check out.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "shopping"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_sh07",
+      "category": "late_night",
+      "intensity": null,
+      "text": "{clock}. Nothing you add to cart at this hour is a good idea.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "shopping"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_wk01",
+      "category": "limit_hit",
+      "intensity": "polite",
+      "text": "{time} in {app} today. The inbox will still be full tomorrow. That's how inboxes work.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "work"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_wk02",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "Refreshing {app} doesn't make anyone reply faster.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "work"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_wk03",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "{opens} checks of {app}. Your work isn't in there. It's on your desk.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "work"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_wk04",
+      "category": "heads_up",
+      "intensity": "polite",
+      "text": "{left} left on {app}. Reply to the important one and close it.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "work"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_wk05",
+      "category": "last_call",
+      "intensity": "honest",
+      "text": "{left}. Send it or save it as a draft. Then go.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "work"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_wk06",
+      "category": "late_night",
+      "intensity": null,
+      "text": "{clock}. Work can wait until people are awake. Including you.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "work"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_vd01",
+      "category": "limit_hit",
+      "intensity": "honest",
+      "text": "Autoplay is not a reason. Close it.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_vd02",
+      "category": "limit_hit",
+      "intensity": "savage",
+      "text": "{time} of \"one more episode\". The credits were your exit.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_vd03",
+      "category": "heads_up",
+      "intensity": "polite",
+      "text": "{left} left. Finish this episode, not the next one.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_vd04",
+      "category": "last_call",
+      "intensity": "honest",
+      "text": "{left}. Not enough for another episode. Don't start one.",
+      "apps": null,
+      "roaster": null,
+      "kinds": [
+        "video"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "en_k_un01",
+      "category": "late_night",
+      "intensity": null,
+      "text": "{clock}. Put the phone on charge and yourself to bed.",
+      "apps": null,
+      "roaster": null,
+      "kinds": null,
+      "lang": "en"
+    }
+  ]
+}
