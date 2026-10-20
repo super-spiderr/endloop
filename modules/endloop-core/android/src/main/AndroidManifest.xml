@@ -34,6 +34,15 @@
         android:value="Screen-time limiter: watches which app is open to warn the user and show a full-screen reminder when their own daily limit is reached." />
     </service>
 
+    <!-- Invisible step from the roast to the home screen, so the app underneath doesn't drop into picture-in-picture. -->
+    <activity
+      android:name="expo.modules.endloopcore.ExitActivity"
+      android:exported="false"
+      android:excludeFromRecents="true"
+      android:noHistory="true"
+      android:taskAffinity=""
+      android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
     <!-- Shares the "I got roasted" card image (Screen 9). Own subclass so it never clashes with other FileProviders. -->
     <provider
       android:name="expo.modules.endloopcore.ShareProvider"

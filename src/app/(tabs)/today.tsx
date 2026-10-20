@@ -12,6 +12,7 @@ import { PremiumSheet } from '@/components/premium-sheet';
 import { AppTile, Avatar, Button, Character, Pill, T } from '@/components/ui';
 import { usage, type TodayUsage } from '@/data/usage';
 import { fill, pickRoast } from '@/roasts';
+import { dismissNews, useRoastNews } from '@/roasts/news';
 import { comparison, fmt } from '@/lib/time';
 import { batterySteps, openBatterySettings, openUsageAccessSettings } from '@/lib/permissions';
 import { watcherLooksDead } from '@/lib/watcher';
@@ -23,13 +24,14 @@ import { colors, fonts, gradients, radius, stateStyle, usageState } from '@/them
 const VARS = ['app', 'time', 'limit'] as const;
 
 export default function Today() {
-  const { roaster, roastLang, intensity, tracked, hasUsageAccess, howItWorksDismissed, streakDays, startedAt, pausedOn, perfectSeen, set } = useSettings();
+  const { roaster, roastLang, intensity, name, tracked, hasUsageAccess, howItWorksDismissed, streakDays, startedAt, pausedOn, perfectSeen, set } = useSettings();
   const [today, setToday] = useState<TodayUsage>({});
   const [demo, setDemo] = useState(false);
   const [premium, setPremium] = useState(false);
   const [killed, setKilled] = useState(false);
   const [gone, setGone] = useState<string | null>(null);
   const [perfectYesterday, setPerfectYesterday] = useState(false);
+  const news = useRoastNews(roastLang);
 
   // Refresh on open and every time the app comes back to the front.
   useEffect(() => {
@@ -85,13 +87,13 @@ export default function Today() {
     if (over.length && over.length === rows.length)
       return { label: 'Fuming', pose: 'fuming' as Pose, tint: colors.blush, color: colors.red, line: 'Roasted on every app. Go outside. Seriously.' };
     if (over.length)
-      return { label: 'Disgusted', pose: 'disgusted' as Pose, tint: colors.blush, color: colors.red, line: fill(pickRoast({ category: 'home_over', lang: roastLang, intensity, roaster, seed, vars: VARS, packageName: over[0].packageName, appLabel: over[0].label }) ?? "I'm not angry. I'm disappointed.", vars(over[0])) };
+      return { label: 'Disgusted', pose: 'disgusted' as Pose, tint: colors.blush, color: colors.red, line: fill(pickRoast({ category: 'home_over', lang: roastLang, intensity, roaster, name, seed, vars: VARS, packageName: over[0].packageName, appLabel: over[0].label }) ?? "I'm not angry. I'm disappointed.", vars(over[0])) };
     if (close.length) {
       const pct = Math.round((close[0].used / close[0].limitMin) * 100);
-      return { label: 'Suspicious', pose: 'eyesOnYou' as Pose, tint: colors.headsTint, color: colors.heads, line: fill(pickRoast({ category: 'home_close', lang: roastLang, intensity, roaster, seed, vars: VARS, packageName: close[0].packageName, appLabel: close[0].label }) ?? `${close[0].label}'s at ${pct}%. I see you.`, vars(close[0])) };
+      return { label: 'Suspicious', pose: 'eyesOnYou' as Pose, tint: colors.headsTint, color: colors.heads, line: fill(pickRoast({ category: 'home_close', lang: roastLang, intensity, roaster, name, seed, vars: VARS, packageName: close[0].packageName, appLabel: close[0].label }) ?? `${close[0].label}'s at ${pct}%. I see you.`, vars(close[0])) };
     }
     if (dayOne && total === 0) return { label: 'Day one', pose: 'notes' as Pose, tint: colors.headsTint, color: colors.heads, line: "I'm taking notes. Check back tonight." };
-    return { label: 'Chill', pose: 'chill' as Pose, tint: colors.chillTint, color: colors.chill, line: fill(pickRoast({ category: 'home_under', lang: roastLang, intensity, roaster, seed, vars: VARS }) ?? 'Under every limit. Who are you?', vars(rows[0])) };
+    return { label: 'Chill', pose: 'chill' as Pose, tint: colors.chillTint, color: colors.chill, line: fill(pickRoast({ category: 'home_under', lang: roastLang, intensity, roaster, name, seed, vars: VARS }) ?? 'Under every limit. Who are you?', vars(rows[0])) };
   })();
 
   const streakAtRisk = over.length > 0;
@@ -153,6 +155,19 @@ export default function Today() {
             <Avatar source={pose(roaster, 'impressed')} size={36} />
             <T v="bodyBold" style={{ flex: 1, fontSize: 14, color: colors.white }}>{gone}&apos;s gone. Bold move. Slot freed.</T>
             <Pressable accessibilityLabel="Dismiss" onPress={() => setGone(null)} hitSlop={8}>
+              <CloseIcon color={colors.white} />
+            </Pressable>
+          </View>
+        ) : null}
+
+        {news ? (
+          <View accessibilityRole="alert" style={st.news}>
+            <Avatar source={pose(roaster, 'party')} size={40} bg={colors.white} />
+            <View style={{ flex: 1, gap: 2 }}>
+              <T v="label" style={{ fontSize: 11, color: colors.white, opacity: 0.85 }}>Fresh roasts</T>
+              <T v="bodyBold" style={{ fontSize: 15, lineHeight: 20, color: colors.white }}>{news}</T>
+            </View>
+            <Pressable accessibilityLabel="Dismiss" onPress={dismissNews} hitSlop={8}>
               <CloseIcon color={colors.white} />
             </Pressable>
           </View>
@@ -331,6 +346,7 @@ const st = StyleSheet.create({
   track: { height: 8, borderRadius: 4, backgroundColor: colors.surface },
   upsell: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 48, paddingHorizontal: 16, borderRadius: 14, backgroundColor: colors.surface },
   toast: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, backgroundColor: colors.ink },
+  news: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, backgroundColor: colors.red },
   killed: { gap: 10, padding: 16, borderRadius: 18, backgroundColor: colors.ink },
   killedBtn: { height: 44, borderRadius: 12, backgroundColor: colors.white, alignItems: 'center', justifyContent: 'center' },
   perfect: { gap: 12, padding: 18, borderRadius: 22 },

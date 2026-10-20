@@ -60,10 +60,11 @@ object Notifier {
     return PendingIntent.getActivity(context, 2, i, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
   }
 
-  /** "Put it down": straight to the home screen. */
+  /** "Put it down": to the home screen through ExitActivity, so a playing video doesn't drop into picture-in-picture. */
   private fun goHome(context: Context): PendingIntent {
-    val home = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    return PendingIntent.getActivity(context, 1, home, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+    val exit = Intent(context, ExitActivity::class.java)
+      .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+    return PendingIntent.getActivity(context, 1, exit, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
   }
 
   /** The white broken loop (res/drawable/endloop_notification.xml). */

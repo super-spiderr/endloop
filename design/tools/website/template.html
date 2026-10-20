@@ -1,0 +1,1263 @@
+<title>Endloop</title>
+<meta name="description" content="Endloop is the screen-time app that roasts you when you hit your limit. Per-app limits, a heads-up at 75%, a last call at 90%, a full-screen roast at 100% and a weekly roast to share.">
+<meta name="theme-color" content="#E5132B">
+<meta property="og:title" content="Endloop: your screen time, roasted">
+<meta property="og:description" content="Set a daily limit. Go past it and your roaster, Loop or Lupe, takes over your screen with a roast.">
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&amp;f[]=satoshi@400,500,700,900&amp;display=swap">
+<style>
+/* Endloop site v2. The app's own world: white pages, blush cards, Roast Red saved for the roast.
+   Motion follows the product: things fill up, drop in, slide over and get roasted. */
+:root{
+  --bg:#FFFFFF; --surface:#FFF4F5; --blush:#FFE3E6; --line:#F1D9DC;
+  --ink:#141414; --muted:#5F5F5F; --red:#E5132B; --red-press:#B80F22;
+  --chill:#16895F; --chill-tint:#E3F3EC; --heads:#B86E00; --heads-tint:#FFF3E0;
+  --night1:#6B5BFF; --night2:#1B1464;
+  --on-red:#FFFFFF; --card:#FFFFFF; --shadow:0 24px 60px -28px rgba(122,7,20,.35);
+  --roasted:linear-gradient(180deg,#F0263D 0%,#C20F24 55%,#7A0714 100%);
+  --display:'Clash Display','Satoshi',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --body:'Satoshi',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --radius:24px; --ease:cubic-bezier(.2,.9,.25,1); --spring:cubic-bezier(.34,1.56,.64,1);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#140A0B; --surface:#1E1214; --blush:#2C1619; --line:#3A2427;
+  --ink:#F6EDEE; --muted:#B9A9AB; --red:#FF2E45; --red-press:#E5132B;
+  --chill:#3CC48E; --chill-tint:#14271F; --heads:#F0A43A; --heads-tint:#2A1F10;
+  --card:#1A0F11; --shadow:0 24px 60px -24px rgba(0,0,0,.7); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#140A0B; --surface:#1E1214; --blush:#2C1619; --line:#3A2427;
+  --ink:#F6EDEE; --muted:#B9A9AB; --red:#FF2E45; --red-press:#E5132B;
+  --chill:#3CC48E; --chill-tint:#14271F; --heads:#F0A43A; --heads-tint:#2A1F10;
+  --card:#1A0F11; --shadow:0 24px 60px -24px rgba(0,0,0,.7); color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{background:var(--bg);color:var(--ink);font:500 17px/1.55 var(--body);margin:0;overflow-x:clip;transition:background-color .4s,color .4s}
+img{max-width:100%;display:block}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px}
+a{color:var(--red);font-weight:700}
+a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{outline:3px solid var(--red);outline-offset:3px;border-radius:10px}
+h1,h2,h3{font-family:var(--display);font-weight:600;letter-spacing:-.015em;text-wrap:balance;margin:0}
+h1{font-size:clamp(46px,8.4vw,104px);line-height:.92;font-weight:600}
+h2{font-size:clamp(34px,5.4vw,64px);line-height:1}
+h3{font-size:22px;line-height:1.15}
+p{margin:0}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font:700 13px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+.eyebrow::before{content:"";width:22px;height:2px;background:currentColor;border-radius:2px}
+.lead{font-size:clamp(18px,2.1vw,21px);color:var(--muted);max-width:40ch}
+.muted{color:var(--muted)}
+section{padding-block:clamp(72px,11vw,140px);position:relative}
+.sec-head{display:grid;gap:16px;max-width:760px;margin-bottom:clamp(36px,5vw,56px)}
+.red{color:var(--red)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- header ---------- */
+.top{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 84%,transparent);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid transparent;transition:border-color .3s}
+.top.scrolled{border-bottom-color:var(--line)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:66px}
+.brand{display:flex;color:var(--ink)}
+.wordmark{display:block;height:28px;width:auto;color:var(--ink);overflow:visible}
+.wordmark .loop{stroke:var(--red)}
+.top nav{display:flex;gap:26px;align-items:center}
+.top nav a{color:var(--ink);font-weight:500;text-decoration:none;font-size:15px;position:relative}
+.top nav a::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:2px;background:var(--red);transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
+.top nav a:hover::after{transform:none}
+.tools{display:flex;gap:10px;align-items:center}
+.icon-btn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);display:grid;place-items:center;cursor:pointer;transition:border-color .2s,transform .2s}
+.icon-btn:hover{border-color:var(--red)}
+.icon-btn svg{width:18px;height:18px}
+.icon-btn .moon{display:none}
+:root[data-theme="dark"] .icon-btn .moon{display:block}:root[data-theme="dark"] .icon-btn .sun{display:none}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .icon-btn .moon{display:block}:root:not([data-theme="light"]) .icon-btn .sun{display:none}}
+.pill-soon{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 14px;border-radius:12px;background:var(--red);color:#fff;font:700 14px/1 var(--body);text-decoration:none}
+.pill-soon:hover{background:var(--red-press)}
+/* the page has a limit too: the scroll meter fills like an app limit */
+.meter{position:absolute;left:0;bottom:-1px;height:3px;width:100%;transform-origin:left;transform:scaleX(var(--p,0));background:var(--chill);transition:background-color .3s}
+.meter.heads{background:var(--heads)}.meter.last{background:var(--red)}
+@media (max-width:860px){.top nav{display:none}}
+@media (max-width:400px){.pill-soon span{display:none}}
+
+/* ---------- buttons ---------- */
+.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:10px;height:58px;padding:0 26px;border-radius:18px;font:700 17px/1 var(--body);text-decoration:none;border:0;cursor:pointer;transition:transform .25s var(--ease),background-color .2s,box-shadow .25s;overflow:hidden}
+.btn:active{transform:scale(.97)}
+.btn-red{background:var(--red);color:var(--on-red);box-shadow:0 14px 30px -14px rgba(229,19,43,.7)}
+.btn-red:hover{background:var(--red-press);transform:translateY(-2px)}
+.btn-ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn-ghost:hover{border-color:var(--ink);transform:translateY(-2px)}
+.btn .arrow{transition:transform .25s var(--ease)}
+.btn:hover .arrow{transform:translateX(4px)}
+
+/* ---------- hero ---------- */
+.hero{padding-block:clamp(28px,5vw,64px) clamp(64px,9vw,120px);overflow:clip}
+.hero .wrap{display:grid;grid-template-columns:1.08fr .92fr;gap:40px;align-items:center}
+.hero-copy{display:grid;gap:26px;justify-items:start;min-width:0;position:relative;z-index:2}
+.soon{display:inline-flex;align-items:center;gap:9px;font:700 13px/1 var(--body);padding:9px 14px;border-radius:999px;background:var(--blush);color:var(--red)}
+.soon i{width:8px;height:8px;border-radius:50%;background:var(--red);display:block;box-shadow:0 0 0 0 rgba(229,19,43,.5)}
+.h1 .ln{display:block;overflow:hidden;padding-bottom:.06em;margin-bottom:-.06em}
+.h1 .ln>span{display:inline-block}
+.roasted{position:relative;color:var(--red);display:inline-block}
+.scribble{position:absolute;left:-2%;right:-4%;bottom:-.12em;width:106%;height:.32em;overflow:visible}
+.scribble path{fill:none;stroke:var(--red);stroke-width:7;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:0}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.trust{display:flex;gap:10px;flex-wrap:wrap}
+.trust span{display:inline-flex;gap:8px;align-items:center;font-size:14px;color:var(--muted);padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:var(--bg)}
+.trust b{color:var(--ink)}
+.trust svg{width:15px;height:15px;color:var(--chill)}
+.blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:.55;pointer-events:none;z-index:0}
+.blob.a{width:520px;height:520px;background:var(--blush);right:-120px;top:-80px}
+.blob.b{width:340px;height:340px;background:color-mix(in srgb,var(--red) 22%,transparent);right:18%;bottom:-120px}
+@media (max-width:920px){.hero .wrap{grid-template-columns:1fr;gap:56px}.lead{max-width:none}}
+
+/* hero stage */
+.stage{position:relative;display:grid;justify-items:center;gap:22px;z-index:1;padding-inline:clamp(0px,4vw,48px)}
+.float{position:absolute;z-index:3;display:flex;gap:10px;align-items:center;padding:10px 14px 10px 10px;border-radius:16px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);font-size:13.5px;line-height:1.25;max-width:220px}
+.float b{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.float .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none;font:700 14px/1 var(--display)}
+.f1{left:-6px;top:16%}.f1 .ic{background:var(--heads-tint);color:var(--heads)}.f1 b{color:var(--heads)}
+.f2{right:-10px;top:42%}.f2 .ic{background:var(--blush);color:var(--red)}.f2 b{color:var(--red)}
+.f3{left:2%;bottom:20%}.f3 .ic{background:var(--chill-tint);color:var(--chill)}.f3 b{color:var(--chill)}
+@media (max-width:560px){.float{display:none}}
+
+/* watcher card under the phone */
+.watch{width:min(340px,100%);background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;display:grid;gap:8px;box-shadow:var(--shadow)}
+.watch-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:14px}
+.watch-top b{font:600 16px/1 var(--display)}
+.watch-top span{color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{height:10px;border-radius:99px;background:var(--surface);border:1px solid var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:var(--w,0%);border-radius:99px;background:var(--chill);transition:width 1.4s linear,background-color .3s}
+.bar.heads i{background:var(--heads)}.bar.last i,.bar.over i{background:var(--red)}
+.watch-note{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.watch-note em{font-style:normal;font-weight:700}
+.picker{display:grid;gap:10px;justify-items:center}
+.seg{display:flex;gap:3px;padding:4px;border-radius:14px;background:var(--surface);border:1px solid var(--line);flex-wrap:wrap;justify-content:center;position:relative}
+.seg button{border:0;background:transparent;color:var(--muted);font:700 14px/1 var(--body);height:36px;padding:0 13px;border-radius:10px;cursor:pointer;transition:color .2s,background-color .2s,box-shadow .2s}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--bg);color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.seg .lock{font-size:10.5px;margin-left:5px;color:var(--red);letter-spacing:.04em;text-transform:uppercase}
+.replay{border:0;background:none;color:var(--red);font:700 13px/1 var(--body);cursor:pointer;padding:6px;display:none}
+.replay.show{display:inline-flex;gap:6px;align-items:center}
+
+/* ---------- phone ---------- */
+.phone{position:relative;width:min(318px,80vw);aspect-ratio:9/19.3;border-radius:48px;padding:9px;background:#0E0E0E;box-shadow:0 50px 90px -40px rgba(122,7,20,.55),0 0 0 1.5px #2a2a2a inset;flex:none}
+.phone::after{content:"";position:absolute;top:19px;left:50%;width:27%;height:22px;margin-left:-13.5%;border-radius:20px;background:#0E0E0E;z-index:20}
+.screen{position:relative;height:100%;border-radius:40px;overflow:hidden;container-type:size;background:#fff;color:#141414;isolation:isolate}
+.sb{position:absolute;top:0;left:0;right:0;height:11cqw;display:flex;justify-content:space-between;align-items:center;padding:0 7cqw;font:700 3.9cqw/1 var(--body);z-index:15;color:#141414;transition:color .3s;pointer-events:none}
+.sb .ics{display:flex;gap:1.4cqw;align-items:center}
+.sb .ics i{display:block;width:4.4cqw;height:2.6cqw;border-radius:1cqw;border:.5cqw solid currentColor}
+.sb .ics i:first-child{width:3cqw;border-radius:50% 50% 0 0;border-bottom:0}
+.screen.dark-sb .sb{color:#fff}
+/* fake feed: generic shapes, no real app UI */
+.feed{position:absolute;inset:0;background:#fff;overflow:hidden}
+.feed-top{position:absolute;top:0;left:0;right:0;height:22cqw;padding:12cqw 5cqw 0;background:linear-gradient(#fff 75%,rgba(255,255,255,0));z-index:2;display:flex;justify-content:space-between;align-items:center;font:700 5cqw/1 var(--display)}
+.feed-top i{display:flex;gap:2cqw}.feed-top i b{width:5cqw;height:5cqw;border-radius:1.4cqw;border:.6cqw solid #141414;display:block}
+.feed-track{padding-top:22cqw;display:grid;gap:4cqw}
+.post{display:grid;gap:2.4cqw}
+.post .ph{display:flex;gap:2.4cqw;align-items:center;padding:0 5cqw}
+.post .av{width:8cqw;height:8cqw;border-radius:50%;background:linear-gradient(135deg,#FFB38A,#F0263D)}
+.post .nm{height:2.6cqw;width:30cqw;border-radius:2cqw;background:#EEE}
+.post .md{height:96cqw;background:var(--g)}
+.post .ac{display:flex;gap:3cqw;padding:0 5cqw}.post .ac b{width:5.4cqw;height:5.4cqw;border-radius:50%;border:.6cqw solid #141414}
+.post .tx{height:2.6cqw;width:60cqw;margin:0 5cqw;border-radius:2cqw;background:#EEE}
+/* notification banners */
+.notif{position:absolute;left:3.5cqw;right:3.5cqw;top:12cqw;z-index:12;border-radius:6cqw;background:rgba(250,250,250,.97);box-shadow:0 3cqw 8cqw -2cqw rgba(0,0,0,.35);padding:3.6cqw;display:grid;grid-template-columns:1fr 17cqw;gap:3cqw;align-items:center;transform:translateY(-150%);opacity:0;transition:transform .55s var(--spring),opacity .3s}
+.notif.show{transform:none;opacity:1}
+.notif .meta{display:flex;align-items:center;gap:1.8cqw;font:700 2.9cqw/1 var(--body);color:#5F5F5F;margin-bottom:1.8cqw;letter-spacing:.02em}
+.notif .meta .ap{width:4.4cqw;height:4.4cqw;border-radius:1.2cqw;background:#E5132B;display:grid;place-items:center;color:#fff;font-size:3cqw}
+.notif .tt{font:700 3.6cqw/1.1 var(--body);letter-spacing:.06em;text-transform:uppercase;margin-bottom:1cqw}
+.notif .bd{font:500 3.7cqw/1.3 var(--body);color:#141414}
+.notif .th{width:17cqw;height:17cqw;border-radius:3.6cqw;overflow:hidden}
+.notif .th img{width:100%;height:100%;object-fit:cover;object-position:50% 12%;transform:scale(1.25)}
+.notif.heads .tt{color:#B86E00}.notif.heads .th{background:#FFF3E0}
+.notif.last .tt{color:#E5132B}.notif.last .th{background:#FFE3E6}
+/* roast overlay */
+.roast{position:absolute;inset:0;z-index:10;background:var(--roasted);color:#fff;display:flex;flex-direction:column;transform:translateY(102%);transition:transform .7s var(--ease)}
+.roast.show{transform:none}
+.roast-top{display:flex;justify-content:space-between;align-items:center;padding:13cqw 6cqw 0}
+.roast-top svg.wordmark{height:5.6cqw;color:#fff}.roast-top .wordmark .loop{stroke:#fff}
+.share{width:10cqw;height:10cqw;border-radius:50%;background:rgba(255,255,255,.16);display:grid;place-items:center}
+.share svg{width:4.6cqw;height:4.6cqw}
+.roast-body{flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:0 6cqw 6cqw;gap:3.2cqw}
+.face{width:66%;align-self:center;margin-bottom:-3cqw;-webkit-mask-image:linear-gradient(180deg,#000 74%,transparent);mask-image:linear-gradient(180deg,#000 74%,transparent)}
+.r-eyebrow{font:700 3.3cqw/1 var(--body);letter-spacing:.14em;text-transform:uppercase;opacity:.85}
+.r-line{font:600 7.4cqw/1.1 var(--display);min-height:3.3em;text-wrap:balance}
+.r-line .w{display:inline-block}
+.r-stat{font-size:3.7cqw;opacity:.85}
+.r-close{height:13.5cqw;border-radius:4.2cqw;background:#fff;color:#C20F24;font:700 4.6cqw/13.5cqw var(--body);text-align:center;transition:transform .15s}
+.r-close.press{transform:scale(.94);background:#FFE3E6}
+.r-snooze{text-align:center;font:700 3.9cqw/1 var(--body);opacity:.85;text-decoration:underline;text-underline-offset:.8cqw}
+/* win toast */
+.win{position:absolute;left:4cqw;right:4cqw;bottom:5cqw;z-index:11;border-radius:6cqw;background:#E3F3EC;color:#0F5E41;padding:4cqw 4cqw 0 4cqw;display:grid;grid-template-columns:1fr 24cqw;gap:2cqw;align-items:end;overflow:hidden;transform:translateY(140%);transition:transform .6s var(--spring)}
+.win.show{transform:none}
+.win b{display:block;font:700 3.2cqw/1 var(--body);letter-spacing:.1em;text-transform:uppercase;color:#16895F;margin-bottom:1.6cqw}
+.win p{font:600 4.4cqw/1.2 var(--display);color:#141414;padding-bottom:4cqw}
+.win img{width:24cqw}
+
+/* ---------- marquee ---------- */
+.band{background:var(--roasted);color:#fff;padding-block:30px;overflow:hidden;display:grid;gap:14px;position:relative}
+.band::before,.band::after{content:"";position:absolute;top:0;bottom:0;width:80px;z-index:2;pointer-events:none}
+.band::before{left:0;background:linear-gradient(90deg,#C20F24,transparent)}
+.band::after{right:0;background:linear-gradient(-90deg,#C20F24,transparent)}
+.row{display:flex;width:max-content;gap:0}
+.row ul{display:flex;gap:0;margin:0;padding:0;list-style:none;flex:none}
+.row li{font:600 clamp(22px,3vw,34px)/1.1 var(--display);white-space:nowrap;display:flex;align-items:center;padding-right:40px}
+.row li::after{content:"";width:12px;height:12px;border-radius:50%;background:#fff;opacity:.6;margin-left:40px}
+.row.r2 li{font:500 clamp(16px,2vw,21px)/1.2 var(--body);opacity:.82}
+.row.r2 li::after{width:8px;height:8px}
+.band:hover .row{animation-play-state:paused}
+
+/* ---------- story (a day with Endloop) ---------- */
+.story .wrap{display:grid;grid-template-columns:1fr minmax(0,460px);gap:56px;align-items:start}
+.chapters{display:grid;position:relative;padding-left:44px}
+.rail{position:absolute;left:12px;top:0;bottom:0;width:2px;background:var(--line);border-radius:2px}
+.rail i{position:absolute;left:0;top:0;width:100%;height:var(--rp,0%);background:var(--red);border-radius:2px;transition:height .25s linear}
+.chapter{min-height:72vh;display:flex;flex-direction:column;justify-content:center;gap:12px;position:relative;opacity:.35;transition:opacity .4s}
+.chapter.on{opacity:1}
+.chapter::before{content:"";position:absolute;left:-38px;top:50%;width:14px;height:14px;margin-top:-7px;border-radius:50%;background:var(--bg);border:2px solid var(--line);transition:all .3s var(--spring)}
+.chapter.on::before{background:var(--red);border-color:var(--red);transform:scale(1.25);box-shadow:0 0 0 6px color-mix(in srgb,var(--red) 18%,transparent)}
+.chapter:first-child{min-height:60vh}
+.time{font:700 13px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--red);font-variant-numeric:tabular-nums}
+.chapter h3{font-size:clamp(28px,3.4vw,40px);line-height:1.05}
+.chapter p{color:var(--muted);max-width:44ch}
+.story-stage{position:sticky;top:calc(50vh - min(34vh,300px));height:min(68vh,600px);display:grid;place-items:center}
+.story-stage .phone{height:100%;width:auto}
+.scene{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .45s,visibility 0s .45s,transform .55s var(--ease);transform:translateY(3%)}
+.scene.on{opacity:1;visibility:visible;transform:none;transition:opacity .45s,visibility 0s,transform .55s var(--ease)}
+.scene.slide{transform:translateY(100%);opacity:1;transition:transform .7s var(--ease),visibility 0s .7s}
+.scene.slide.on{transform:none;transition:transform .7s var(--ease),visibility 0s}
+.pad{position:absolute;inset:0;padding:14cqw 6cqw 6cqw;display:flex;flex-direction:column;gap:3.4cqw}
+.s-title{font:600 7.6cqw/1.05 var(--display)}
+.s-sub{font-size:3.7cqw;color:#5F5F5F}
+.applist{display:grid;gap:2.4cqw}
+.app{display:grid;grid-template-columns:10cqw 1fr auto;gap:3cqw;align-items:center;padding:3cqw;border-radius:4cqw;border:.4cqw solid #F1D9DC;background:#fff;font-size:3.9cqw}
+.app .ai{width:10cqw;height:10cqw;border-radius:3cqw;display:grid;place-items:center;color:#fff;font:700 4.4cqw/1 var(--display)}
+.app small{display:block;color:#5F5F5F;font-size:3.2cqw}
+.app .ck{width:6.4cqw;height:6.4cqw;border-radius:50%;border:.5cqw solid #F1D9DC;display:grid;place-items:center;color:#fff;font-size:3.6cqw;transition:all .3s var(--spring)}
+.app.sel{border-color:#E5132B;background:#FFF4F5}
+.app.sel .ck{background:#E5132B;border-color:#E5132B}
+.s-btn{margin-top:auto;height:13cqw;border-radius:4.2cqw;background:#E5132B;color:#fff;font:700 4.4cqw/13cqw var(--body);text-align:center}
+.peek{position:absolute;right:-6cqw;bottom:16cqw;width:44cqw;pointer-events:none}
+.today-big{font:600 13cqw/1 var(--display);letter-spacing:-.02em}
+.mood{display:grid;grid-template-columns:1fr 32cqw;align-items:end;border-radius:5cqw;background:#E3F3EC;overflow:hidden;padding:4cqw 0 0 4cqw}
+.mood p{font:600 4.8cqw/1.15 var(--display);padding-bottom:4cqw}
+.mood b{display:block;font:700 3cqw/1 var(--body);letter-spacing:.1em;text-transform:uppercase;color:#16895F;margin-bottom:1.6cqw}
+.lim{display:grid;gap:1.6cqw;font-size:3.6cqw}
+.lim .lr{display:flex;justify-content:space-between}
+.lim .lr span{color:#5F5F5F}
+.lbar{height:2.4cqw;border-radius:2cqw;background:#FFF4F5;overflow:hidden}
+.lbar i{display:block;height:100%;width:0;border-radius:2cqw;background:var(--c,#16895F);transition:width 1.4s var(--ease) .3s}
+.scene.on .lbar i{width:var(--w)}
+.earn-pad{background:#FFF4F5}
+.chips{display:flex;flex-wrap:wrap;gap:2cqw}
+.chip{padding:2.6cqw 3.4cqw;border-radius:99px;border:.45cqw solid #F1D9DC;background:#fff;font:700 3.6cqw/1 var(--body);transition:all .3s}
+.chip.pick{background:#141414;color:#fff;border-color:#141414}
+.type-box{border-radius:4cqw;border:.5cqw dashed #F1D9DC;background:#fff;padding:3.4cqw;font:600 4.6cqw/1.3 var(--display);min-height:17cqw}
+.type-box .target{display:block;font:500 3.3cqw/1.2 var(--body);color:#5F5F5F;margin-bottom:1.6cqw}
+.caret{display:inline-block;width:.5cqw;height:1em;background:#E5132B;vertical-align:-.12em;margin-left:.3cqw;animation:blink 1s steps(1) infinite}
+.weekly{background:#140A0B;color:#fff}
+.weekly .s-sub{color:#B9A9AB}
+.wk-card{border-radius:5cqw;background:var(--roasted);padding:5cqw;display:grid;gap:2cqw;position:relative;overflow:hidden}
+.wk-card .big{font:600 12cqw/1 var(--display)}
+.wk-card .lbl{font:700 3cqw/1 var(--body);letter-spacing:.12em;text-transform:uppercase;opacity:.8}
+.wk-card p{font:600 4.6cqw/1.2 var(--display);max-width:58%}
+.wk-card img{position:absolute;right:-4cqw;bottom:0;width:46%}
+.wk-row{display:flex;justify-content:space-between;font-size:3.7cqw;padding:2.4cqw 0;border-bottom:.3cqw solid #3A2427}
+.wk-row b{font-variant-numeric:tabular-nums}
+.ig-btn{margin-top:auto;height:13cqw;border-radius:4.2cqw;background:#fff;color:#141414;font:700 4.4cqw/13cqw var(--body);text-align:center}
+@media (max-width:920px){
+  .story .wrap{grid-template-columns:1fr;gap:0}
+  .story-stage{order:-1;top:66px;height:52vh;z-index:3;background:linear-gradient(var(--bg) 88%,color-mix(in srgb,var(--bg) 0%,transparent));padding-block:10px}
+  .chapters{padding-left:34px}
+  .rail{left:8px}
+  .chapter{min-height:62vh;justify-content:flex-start;padding-top:8vh}
+  .chapter::before{left:-32px;top:calc(8vh + 4px);margin-top:0}
+  .chapter:first-child{min-height:55vh}
+}
+
+/* ---------- earn it ---------- */
+.earn{background:var(--surface);border-block:1px solid var(--line);overflow:hidden}
+.earn-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;position:relative}
+.ecard{position:relative;background:var(--card);border:1.5px solid var(--line);border-radius:var(--radius);padding:24px;display:grid;gap:14px;align-content:start;min-height:330px;transition:border-color .4s,transform .4s var(--ease),box-shadow .4s}
+.ecard.on{border-color:var(--red);transform:translateY(-6px);box-shadow:var(--shadow)}
+.ecard .num{width:40px;height:40px;border-radius:50%;background:var(--blush);color:var(--red);display:grid;place-items:center;font:600 17px/1 var(--display);transition:all .4s}
+.ecard.on .num,.ecard.done .num{background:var(--red);color:#fff}
+.ecard .muted{font-size:15.5px}
+.e-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.e-chips span{padding:9px 13px;border-radius:999px;border:1.5px solid var(--line);font:700 14px/1 var(--body);transition:all .35s var(--spring);background:var(--bg)}
+.e-chips span.pick{background:var(--ink);color:var(--bg);border-color:var(--ink);transform:scale(1.06)}
+.e-quote{font:600 19px/1.2 var(--display)}
+.e-type{border:1.5px dashed var(--line);border-radius:14px;padding:14px;background:var(--bg);display:grid;gap:8px}
+.e-type small{color:var(--muted);font-size:13px}
+.e-type .typed{font:600 19px/1.3 var(--display);min-height:2.6em}
+.e-type .typed .bad{color:var(--red);text-decoration:underline wavy;text-underline-offset:4px}
+.e-type .ok{color:var(--chill);font-size:13px;font-weight:700;opacity:0;transition:opacity .3s}
+.e-type.done .ok{opacity:1}
+.ring-wrap{display:flex;gap:16px;align-items:center}
+.ring{width:96px;height:96px;flex:none;position:relative}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:8}
+.ring .tr{stroke:var(--blush)}
+.ring .pr{stroke:var(--red);stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:var(--o,0)}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font:600 30px/1 var(--display);font-variant-numeric:tabular-nums}
+.fact{font-size:15px;line-height:1.45;border-left:3px solid var(--red);padding-left:12px}
+.fact small{display:block;color:var(--muted);font-size:12.5px;margin-top:4px}
+.unlocked{display:inline-flex;align-items:center;gap:8px;font:700 14px/1 var(--body);color:var(--chill);background:var(--chill-tint);padding:9px 12px;border-radius:999px;opacity:0;transform:translateY(6px);transition:all .4s var(--spring);justify-self:start}
+.unlocked.show{opacity:1;transform:none}
+.earn-foot{display:flex;align-items:center;gap:18px;margin-top:34px;flex-wrap:wrap}
+.earn-foot img{width:96px;border-radius:50%;background:var(--blush)}
+.earn-foot p{font:600 22px/1.2 var(--display);max-width:30ch}
+@media (max-width:960px){.earn-grid{grid-template-columns:1fr}.ecard{min-height:0}}
+
+/* ---------- bento features ---------- */
+.bento{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:18px}
+.tile{position:relative;overflow:hidden;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:26px;display:flex;flex-direction:column;gap:10px;min-height:290px;transition:transform .4s var(--ease),box-shadow .4s,border-color .3s}
+.tile:hover{transform:translateY(-6px);box-shadow:var(--shadow);border-color:color-mix(in srgb,var(--red) 35%,var(--line))}
+.tile .tag{align-self:flex-start;font:700 11.5px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;padding:7px 10px;border-radius:999px;background:var(--blush);color:var(--red)}
+.tile p{color:var(--muted);font-size:15.5px;max-width:40ch}
+.tile .pose{position:absolute;right:-10px;bottom:-4px;width:170px;transition:transform .5s var(--spring);pointer-events:none}
+.tile:hover .pose{transform:translateY(-6px) rotate(-3deg)}
+.tile.with-pose{padding-right:150px}
+.s2{grid-column:span 2}.s3{grid-column:span 3}.s4{grid-column:span 4}
+.night{background:linear-gradient(160deg,var(--night1),var(--night2));color:#fff;border-color:transparent}
+.night .tag{background:rgba(255,255,255,.16);color:#fff}
+.night p{color:rgba(255,255,255,.82)}
+.night .moon{position:absolute;right:26px;top:24px;width:44px;height:44px;border-radius:50%;box-shadow:-10px 6px 0 0 #FFE9A8;transform:rotate(-20deg)}
+.night .q{font:600 19px/1.25 var(--display);margin-top:auto;max-width:24ch}
+.stars i{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;opacity:.7}
+.vis{margin-top:auto;display:grid;gap:10px}
+.lim-row{display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:center;padding:12px 14px;border-radius:14px;font-size:14.5px}
+.lim-row b{font:600 16px/1 var(--display)}
+.lim-row .st{font:700 12.5px/1 var(--body);padding:6px 9px;border-radius:999px}
+.lim-row.dn{background:var(--chill-tint)}.lim-row.dn .st{background:var(--chill);color:#fff}
+.lim-row.up{background:var(--heads-tint)}.lim-row.up .st{background:var(--heads);color:#fff}
+.lim-row .arrowv{color:var(--muted);font-size:13.5px}
+.stack{position:relative;height:150px;margin-top:auto}
+.stack .rc{position:absolute;left:0;right:0;bottom:0;border-radius:16px;padding:14px 16px;color:#fff;font:600 16px/1.2 var(--display);transition:transform .6s var(--ease);box-shadow:0 10px 24px -14px rgba(0,0,0,.5)}
+.stack .rc small{display:block;font:700 11px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;opacity:.8;margin-bottom:6px}
+.stack .c1{background:#F0263D;transform:translateY(-84px) scale(.9)}
+.stack .c2{background:#C20F24;transform:translateY(-42px) scale(.95)}
+.stack .c3{background:#7A0714}
+.tile:hover .stack .c1{transform:translateY(-100px) scale(.9) rotate(-2deg)}
+.tile:hover .stack .c2{transform:translateY(-50px) scale(.95) rotate(1.5deg)}
+.bars{display:flex;gap:8px;align-items:flex-end;height:110px;margin-top:auto}
+.bars span{flex:1;border-radius:8px 8px 4px 4px;background:var(--blush);height:var(--h);transform-origin:bottom;position:relative}
+.bars span.t{background:var(--red)}
+.bars span em{position:absolute;bottom:-20px;left:0;right:0;text-align:center;font:700 11px/1 var(--body);color:var(--muted);font-style:normal}
+.streak{display:inline-flex;gap:8px;align-items:center;font:600 15px/1 var(--display);color:var(--heads);background:var(--heads-tint);padding:8px 12px;border-radius:999px;align-self:flex-start}
+.icons{display:flex;gap:14px;align-items:center;margin-top:auto}
+.flip{width:84px;height:84px;position:relative;perspective:600px}
+.flip>div{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .8s var(--ease)}
+.flip img{position:absolute;inset:0;width:100%;height:100%;border-radius:22px;backface-visibility:hidden;box-shadow:0 10px 24px -12px rgba(0,0,0,.4)}
+.flip img.bk{transform:rotateY(180deg)}
+.flip.three>div{transform:none!important}.flip.three img{transform:none;backface-visibility:visible;opacity:0;transition:opacity .5s,transform .6s var(--spring)}.flip.three img.on{opacity:1;transform:rotate(0) scale(1)}.flip.three img:not(.on){transform:rotate(-12deg) scale(.8)}
+.flip.turn>div{transform:rotateY(180deg)}
+.icons .dummy{width:62px;height:62px;border-radius:18px;background:var(--surface);border:1px solid var(--line)}
+.lang-card .ln{font:600 22px/1.2 var(--display);margin-top:auto;min-height:3.6em;transition:opacity .35s,transform .35s}
+.lang-card .ln.out{opacity:0;transform:translateY(8px)}
+.lang-tabs{display:flex;gap:6px}
+.lang-tabs span{font:700 12.5px/1 var(--body);padding:7px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted);transition:all .3s}
+.lang-tabs span.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.safe{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
+.safe span{display:inline-flex;gap:7px;align-items:center;padding:9px 12px;border-radius:12px;background:var(--surface);border:1px solid var(--line);font:700 14px/1 var(--body)}
+.safe svg{width:15px;height:15px;color:var(--chill)}
+.toggle{display:flex;align-items:center;gap:12px;margin-top:auto;font:700 15px/1.2 var(--body)}
+.sw{width:54px;height:32px;border-radius:99px;background:var(--line);position:relative;flex:none;transition:background-color .3s}
+.sw::after{content:"";position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25);transition:transform .35s var(--spring)}
+.sw.on{background:var(--red)}.sw.on::after{transform:translateX(22px)}
+.fact-card{margin-top:auto;border-radius:16px;background:var(--surface);padding:14px 16px;font-size:15px;line-height:1.4;transition:opacity .35s}
+.fact-card small{display:block;color:var(--muted);font-size:12.5px;margin-top:6px}
+.share-mini{margin-top:auto;display:flex;gap:12px;align-items:flex-end}
+.story-card{width:96px;aspect-ratio:9/16;border-radius:14px;background:var(--roasted);padding:9px;color:#fff;font:600 10px/1.15 var(--display);display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;box-shadow:var(--shadow);transform:rotate(-5deg);transition:transform .5s var(--spring)}
+.tile:hover .story-card{transform:rotate(0) translateY(-6px)}
+.story-card img{width:100%;margin-bottom:-9px}
+.share-mini .targets{display:grid;gap:8px}
+.share-mini .targets span{font:700 13px/1 var(--body);padding:9px 12px;border-radius:12px;border:1px solid var(--line)}
+@media (max-width:1020px){.s2{grid-column:span 3}.s4{grid-column:span 6}}
+@media (max-width:680px){.bento{grid-template-columns:1fr}.s2,.s3,.s4{grid-column:auto}.tile{min-height:250px}.tile.with-pose{padding-right:26px;padding-bottom:150px}.tile .pose{width:150px}}
+
+/* ---------- heat ---------- */
+.heat .wrap{display:grid;grid-template-columns:.9fr 1.1fr;gap:56px;align-items:center}
+.heat-face{position:relative;aspect-ratio:1;max-width:460px;width:100%;justify-self:center;display:grid;place-items:end center}
+.heat-face .glow{position:absolute;inset:8%;border-radius:50%;background:radial-gradient(circle,var(--hc,#FFE3E6) 0%,transparent 68%);transition:background .6s}
+.heat-face .disc{position:absolute;inset:14% 14% 0;border-radius:50% 50% 0 0;background:var(--surface);border:1px solid var(--line);border-bottom:0}
+.heat-face img{position:relative;width:88%;transition:transform .5s var(--spring),opacity .25s}
+.heat-face img.swap{transform:scale(.92) translateY(10px);opacity:0}
+.heat-face .who-seg{position:absolute;left:50%;top:0;transform:translateX(-50%);z-index:2}
+/* roasters */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.rcard{position:relative;border-radius:28px;overflow:hidden;background:var(--surface);border:1px solid var(--line);padding:28px 28px 0;display:grid;grid-template-rows:auto 1fr;min-height:520px;transition:transform .5s var(--ease),box-shadow .5s}
+.rcard:hover{transform:translateY(-8px);box-shadow:var(--shadow)}
+.rcard.lupe-c{background:linear-gradient(170deg,var(--blush),var(--surface))}
+.rcard h3{font-size:clamp(34px,4vw,48px)}
+.rcard .rmeta{display:grid;gap:8px;position:relative;z-index:2;max-width:30ch}
+.rcard .rmeta p{color:var(--muted);font-size:15.5px}
+.rcard .rq{font:600 18px/1.25 var(--display);color:var(--ink)}
+.rcard .poses{position:relative;align-self:end;justify-self:center;width:min(380px,100%);aspect-ratio:1}
+.rcard .poses img{position:absolute;inset:0;width:100%;transition:opacity .45s,transform .6s var(--spring)}
+.rcard .poses img.b{opacity:0;transform:translateY(16px) scale(.96)}
+.rcard:hover .poses img.a,.rcard.alt .poses img.a{opacity:0;transform:translateY(16px) scale(.96)}
+.rcard:hover .poses img.b,.rcard.alt .poses img.b{opacity:1;transform:none}
+.rcard .badge-c{position:absolute;top:24px;right:24px;z-index:2;font:700 12px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;padding:8px 11px;border-radius:999px;background:var(--bg);border:1px solid var(--line)}
+.swap-strip{margin-top:20px;display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:center;padding:22px 26px;border-radius:24px;background:var(--card);border:1px solid var(--line)}
+.swap-strip h3{font-size:22px}
+.swap-strip p{color:var(--muted);font-size:15.5px;margin-top:4px}
+.swap-steps{display:flex;gap:10px;align-items:center;font:700 13px/1 var(--body);color:var(--muted);flex-wrap:wrap}
+.swap-steps span{padding:8px 11px;border-radius:10px;background:var(--surface);border:1px solid var(--line)}
+.swap-steps i{font-style:normal;color:var(--red)}
+.icon-trio{display:flex;gap:10px}
+.icon-trio img{width:58px;height:58px;border-radius:16px;opacity:.35;transform:scale(.9);transition:all .5s var(--spring);box-shadow:0 8px 18px -10px rgba(0,0,0,.4)}
+.icon-trio img.on{opacity:1;transform:scale(1.08)}
+@media (max-width:860px){.duo{grid-template-columns:1fr}.rcard{min-height:0}.swap-strip{grid-template-columns:1fr}}
+.peekers{transition:transform .3s ease-out;display:flex;align-items:flex-end;align-self:end;margin-bottom:calc(-1 * clamp(32px,6vw,72px));position:relative;z-index:1}
+.peekers img{width:min(250px,42vw);transition:transform .3s ease-out}
+.peekers img+img{margin-left:-70px}
+.heat-ctrl{display:grid;gap:22px;min-width:0}
+.meterbox{display:grid;gap:12px}
+.heat-labels{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.heat-labels button{border:0;background:none;padding:6px 0;text-align:left;font:600 clamp(15px,1.8vw,19px)/1 var(--display);color:var(--muted);cursor:pointer;transition:color .3s}
+.heat-labels button[aria-pressed="true"]{color:var(--ink)}
+.heat-labels button small{display:block;font:700 10.5px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--red);margin-top:5px}
+.range{position:relative;height:44px}
+.range input{position:absolute;inset:0;width:100%;margin:0;opacity:0;cursor:pointer;z-index:2}
+.track{position:absolute;left:0;right:0;top:50%;height:14px;margin-top:-7px;border-radius:99px;background:var(--surface);border:1px solid var(--line);overflow:hidden}
+.track i{position:absolute;inset:0;width:var(--hp,50%);background:linear-gradient(90deg,#16895F,#B86E00 40%,#E5132B 72%,#7A0714);background-size:calc(100% / var(--hf,.5)) 100%;border-radius:99px;transition:width .5s var(--ease)}
+.thumb{position:absolute;top:50%;left:var(--hp,50%);width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;background:#fff;border:3px solid var(--red);box-shadow:0 6px 16px -6px rgba(0,0,0,.4);transition:left .5s var(--ease);display:grid;place-items:center;font-size:14px;pointer-events:none}
+.range input:focus-visible~.thumb{outline:3px solid var(--red);outline-offset:3px}
+.heat-quote{font:600 clamp(26px,3.4vw,40px)/1.1 var(--display);min-height:3.4em;text-wrap:balance}
+.heat-quote .w{display:inline-block}
+.heat-note{font-size:14.5px;color:var(--muted)}
+@media (max-width:920px){.heat .wrap{grid-template-columns:1fr;gap:28px}.heat-face{max-width:340px}}
+
+/* ---------- privacy ---------- */
+.privacy{background:#140A0B;color:#F6EDEE;overflow:hidden}
+.privacy .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center}
+.privacy h2{color:#fff}
+.privacy .eyebrow{color:#FF2E45}
+.privacy .muted{color:#B9A9AB}
+.privacy a{color:#fff}
+.plist{margin:0;padding:0;list-style:none;display:grid;gap:12px;margin-top:8px}
+.plist li{display:flex;gap:14px;align-items:center;padding:14px 16px;border-radius:16px;background:#1E1214;border:1px solid #3A2427;font-weight:700}
+.plist i{width:30px;height:30px;border-radius:50%;background:#E5132B;display:grid;place-items:center;flex:none}
+.plist svg{width:15px;height:15px;color:#fff}
+.priv-vis{position:relative;display:grid;place-items:center;aspect-ratio:1;max-width:420px;width:100%;justify-self:center}
+.priv-vis img{position:relative;width:86%;z-index:1;-webkit-mask-image:linear-gradient(180deg,#000 80%,transparent);mask-image:linear-gradient(180deg,#000 80%,transparent)}
+.clock{position:absolute;inset:4%;border-radius:50%;border:2px solid #3A2427}
+.clock::before{content:"";position:absolute;inset:7%;border-radius:50%;border:1px dashed #3A2427}
+.hand{position:absolute;left:50%;top:50%;width:2px;height:46%;margin-left:-1px;background:linear-gradient(#FF2E45,transparent);transform-origin:50% 0;transform:rotate(180deg)}
+.priv-tag{position:absolute;z-index:2;background:#1E1214;border:1px solid #3A2427;border-radius:12px;padding:9px 12px;font:700 13px/1.2 var(--body);color:#F6EDEE}
+.priv-tag.t1{left:0;top:18%}.priv-tag.t2{right:0;top:34%}.priv-tag.t3{left:4%;bottom:20%}
+.priv-tag s{color:#B9A9AB}
+.priv-tag b{color:#3CC48E}
+@media (max-width:920px){.privacy .wrap{grid-template-columns:1fr}.priv-vis{max-width:340px;order:-1}}
+
+/* ---------- pricing ---------- */
+.plans{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;align-items:stretch}
+.plan{position:relative;border:1.5px solid var(--line);border-radius:var(--radius);padding:26px 22px;display:flex;flex-direction:column;gap:10px;background:var(--card);transition:transform .4s var(--ease),box-shadow .4s;overflow:hidden}
+.plan:hover{transform:translateY(-6px);box-shadow:var(--shadow)}
+.plan.best{border-color:var(--red);background:var(--surface)}
+.plan.best::after{content:"";position:absolute;top:0;bottom:0;width:60%;left:-80%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-18deg);pointer-events:none}
+.plan .badge{align-self:flex-start;background:var(--red);color:var(--on-red);font:700 12px/1 var(--body);padding:7px 10px;border-radius:999px}
+.plan .price{font:600 40px/1 var(--display);font-variant-numeric:tabular-nums;margin-top:6px}
+.plan .price small{font:500 15px/1 var(--body);color:var(--muted)}
+.plan p{color:var(--muted);font-size:15px}
+.plan h3{font-size:20px}
+.included{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:22px;padding:0;list-style:none}
+.included li{display:flex;gap:12px;align-items:flex-start;font-size:15px;padding:16px;border-radius:16px;background:var(--surface);border:1px solid var(--line)}
+.included li i{width:24px;height:24px;border-radius:50%;background:var(--red);color:#fff;font-style:normal;flex:none;display:grid;place-items:center}
+.included li i svg{width:13px;height:13px}
+.vip{display:flex;align-items:center;gap:16px;margin-bottom:28px}
+.vip img{width:110px;flex:none}
+@media (max-width:1020px){.plans,.included{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.plans,.included{grid-template-columns:1fr}}
+
+/* ---------- faq ---------- */
+.faq-wrap{display:grid;grid-template-columns:.8fr 1.2fr;gap:56px;align-items:start}
+.faq-wrap .sec-head{position:sticky;top:110px}
+.faq-wrap .sec-head img{width:200px;margin-top:10px}
+.faq{display:grid;gap:12px}
+details{border:1px solid var(--line);border-radius:18px;background:var(--card);transition:border-color .3s,background-color .3s}
+details[open]{border-color:color-mix(in srgb,var(--red) 40%,var(--line));background:var(--surface)}
+summary{font:600 19px/1.3 var(--display);cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 22px}
+summary::-webkit-details-marker{display:none}
+summary .pm{width:30px;height:30px;border-radius:50%;background:var(--blush);color:var(--red);flex:none;position:relative;transition:transform .35s var(--ease),background-color .3s}
+summary .pm::before,summary .pm::after{content:"";position:absolute;left:50%;top:50%;width:12px;height:2px;margin:-1px 0 0 -6px;background:currentColor;border-radius:2px}
+summary .pm::after{transform:rotate(90deg);transition:transform .35s var(--ease)}
+details[open] summary .pm{transform:rotate(180deg);background:var(--red);color:#fff}
+details[open] summary .pm::after{transform:rotate(0)}
+details p{color:var(--muted);padding:0 22px 20px;font-size:16px}
+@media (max-width:920px){.faq-wrap{grid-template-columns:1fr;gap:0}.faq-wrap .sec-head{position:static}.faq-wrap .sec-head img{display:none}}
+
+/* ---------- final ---------- */
+.final{position:relative;background:var(--roasted);color:#fff;border-radius:36px;padding:clamp(32px,6vw,72px);display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;overflow:hidden}
+.final h2{color:#fff;font-size:clamp(38px,6vw,76px)}
+.final p{opacity:.9;margin-top:14px;font-size:19px;max-width:38ch}
+.final .ctas{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.final .btn-w{background:#fff;color:#C20F24}
+.final .btn-w:hover{transform:translateY(-2px)}
+.final .btn-o{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.5)}
+.final .btn-o:hover{border-color:#fff}
+
+.final .rings{position:absolute;right:-120px;top:-120px;width:520px;height:520px;border-radius:50%;border:1.5px solid rgba(255,255,255,.14);pointer-events:none}
+.final .rings::before,.final .rings::after{content:"";position:absolute;inset:60px;border-radius:50%;border:1.5px solid rgba(255,255,255,.12)}
+.final .rings::after{inset:130px}
+@media (max-width:760px){.final{grid-template-columns:1fr}.peekers{justify-self:center}}
+footer{padding-block:48px 56px;color:var(--muted);font-size:14px}
+footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
+footer .brand .wordmark{height:22px}
+footer nav{display:flex;gap:20px}
+footer nav a{color:var(--muted);font-weight:500;text-decoration:none}
+footer nav a:hover{color:var(--red)}
+
+/* ---------- toast: the page has a limit too ---------- */
+.toast{position:fixed;left:16px;bottom:16px;z-index:60;display:flex;align-items:flex-end;gap:4px;max-width:min(360px,calc(100vw - 32px));background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:0 30px 60px -20px rgba(0,0,0,.35);padding:0 14px 0 0;overflow:hidden;transform:translateY(140%);transition:transform .6s var(--spring)}
+.toast.show{transform:none}
+.toast img{width:84px;flex:none;align-self:flex-end}
+.toast div{padding:14px 0;display:grid;gap:8px}
+.toast b{font:700 11.5px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--heads)}
+.toast p{font:600 16px/1.25 var(--display)}
+.toast button{justify-self:start;border:0;background:var(--ink);color:var(--bg);font:700 13px/1 var(--body);padding:9px 12px;border-radius:10px;cursor:pointer}
+
+/* ---------- motion (only when the visitor hasn't asked for less) ---------- */
+@keyframes blink{50%{opacity:0}}
+@keyframes rise{from{transform:translateY(105%)}to{transform:none}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+@keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes wordIn{from{opacity:0;transform:translateY(.45em) rotate(2deg);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(229,19,43,.5)}70%{box-shadow:0 0 0 10px rgba(229,19,43,0)}100%{box-shadow:0 0 0 0 rgba(229,19,43,0)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes marq{to{transform:translateX(-50%)}}
+@keyframes marqR{from{transform:translateX(-50%)}to{transform:none}}
+@keyframes feed{to{transform:translateY(-50%)}}
+@keyframes drift{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-30px,20px) scale(1.08)}}
+@keyframes popIn{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:none}}
+@keyframes grow{from{transform:scaleY(0)}to{transform:none}}
+@keyframes shine{0%{left:-80%}60%,100%{left:140%}}
+@keyframes sweep{to{transform:rotate(540deg)}}
+@keyframes twinkle{50%{opacity:.15}}
+@keyframes phoneIn{from{opacity:0;transform:translateY(60px) rotate(4deg)}to{opacity:1;transform:none}}
+
+html.motion .rv{opacity:0;transform:translateY(30px);transition:opacity .8s var(--ease),transform .8s var(--ease);transition-delay:calc(var(--d,0) * 90ms)}
+html.motion .rv.in{opacity:1;transform:none}
+html.motion .h1 .ln>span{animation:rise 1s var(--ease) both;animation-delay:calc(.15s + var(--i,0) * .12s)}
+html.motion .scribble path{animation:draw .9s var(--ease) 1.05s both}
+html.motion .hero-copy>.soon,html.motion .hero-copy>.lead,html.motion .hero-copy>.cta,html.motion .hero-copy>.trust{animation:fadeUp .9s var(--ease) both}
+html.motion .hero-copy>.soon{animation-delay:.05s}
+html.motion .hero-copy>.lead{animation-delay:.5s}
+html.motion .hero-copy>.cta{animation-delay:.62s}
+html.motion .hero-copy>.trust{animation-delay:.74s}
+html.motion .soon i{animation:pulse 2s infinite}
+html.motion .stage .phone{animation:phoneIn 1.1s var(--ease) .25s both}
+html.motion .float{animation:fadeUp .8s var(--ease) both,bob 6s ease-in-out infinite}
+html.motion .f1{animation-delay:1s,1.8s}html.motion .f2{animation-delay:1.2s,0s}html.motion .f3{animation-delay:1.4s,3s}
+html.motion .watch{animation:fadeUp .8s var(--ease) .9s both}
+html.motion .blob.a{animation:drift 14s ease-in-out infinite}
+html.motion .blob.b{animation:drift 18s ease-in-out infinite reverse}
+html.motion .wordmark .loop{stroke-dasharray:1;animation:draw 1.6s var(--ease) .2s both}
+html.motion .feed-track.run{animation:feed 26s linear infinite}
+html.motion .r-line .w,html.motion .heat-quote .w{animation:wordIn .55s var(--ease) both;animation-delay:calc(var(--i) * 65ms + var(--d0,0ms))}
+html.motion .row.r1{animation:marq 60s linear infinite}
+html.motion .row.r2{animation:marqR 70s linear infinite}
+html.motion .scene.on .app.sel .ck{animation:popIn .4s var(--spring) both;animation-delay:calc(.4s + var(--i) * .35s)}
+html.motion .scene.on .app.sel{animation:fadeUp .5s var(--ease) both;animation-delay:calc(.2s + var(--i) * .35s)}
+html.motion .scene.on .chip.pick{animation:popIn .4s var(--spring) .9s both}
+html.motion .scene.on .wk-card,html.motion .scene.on .mood{animation:fadeUp .7s var(--ease) .2s both}
+html.motion .scene.on .wk-row{animation:fadeUp .6s var(--ease) both;animation-delay:calc(.5s + var(--i) * .15s)}
+html.motion .bars.in span{animation:grow .9s var(--ease) both;animation-delay:calc(var(--i) * 80ms)}
+html.motion .plan.best.in::after{animation:shine 3.6s ease-in-out 1s infinite}
+html.motion .hand{animation:sweep 8s linear infinite}
+html.motion .stars i{animation:twinkle 3s ease-in-out infinite;animation-delay:var(--t)}
+@media (max-width:920px){html.motion .float{animation:none}}
+/* still mode: everything is visible and nothing moves */
+html.still .row{flex-wrap:wrap;width:auto;padding-inline:20px}
+html.still .row ul:nth-child(2){display:none}
+html.still .row ul{flex-wrap:wrap;row-gap:10px}
+html.still *{transition-duration:0s!important}
+</style>
+<!--BODY-->
+<header class="top" id="top-bar">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Endloop home">{{WORDMARK}}</a>
+    <nav aria-label="Main">
+      <a href="#day">How it works</a>
+      <a href="#earn">Snooze</a>
+      <a href="#features">Features</a>
+      <a href="#roasters">Roasters</a>
+      <a href="#premium">Premium</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="tools">
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch light or dark theme">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>
+      </button>
+      <a class="pill-soon" href="#premium">Free for 3 apps<span>&nbsp;→</span></a>
+    </div>
+  </div>
+  <i class="meter" id="meter" aria-hidden="true"></i>
+</header>
+
+<main id="top">
+<!-- ============ HERO ============ -->
+<section class="hero" aria-labelledby="hero-h">
+  <span class="blob a" aria-hidden="true"></span><span class="blob b" aria-hidden="true"></span>
+  <div class="wrap">
+    <div class="hero-copy">
+      <span class="soon"><i></i>Coming soon to Google Play · Android</span>
+      <h1 id="hero-h" class="h1">
+        <span class="ln"><span style="--i:0">Your screen</span></span>
+        <span class="ln"><span style="--i:1">time,</span></span>
+        <span class="ln"><span style="--i:2" class="roasted">roasted.<svg class="scribble" viewBox="0 0 300 30" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M4 20 C 60 6, 120 26, 180 14 S 270 8, 296 18"/></svg></span></span>
+      </h1>
+      <p class="lead">Endloop is the screen-time limiter that doesn't nag. Set a daily limit for the apps that eat your day. Go past it and your roaster takes over your screen with a roast you'll want to screenshot. Pick Loop or Lupe.</p>
+      <div class="cta">
+        <a class="btn btn-red" href="#day">See a day with Endloop <span class="arrow" aria-hidden="true">→</span></a>
+        <a class="btn btn-ghost" href="#heat">Pick your roast level</a>
+      </div>
+      <div class="trust">
+        <span>{{CHECK}}<b>No account</b> needed</span>
+        <span>{{CHECK}}<b>Stays on your phone</b></span>
+        <span>{{CHECK}}<b>English + Tanglish</b></span>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="float f1" aria-hidden="true"><span class="ic">75%</span><span><b>Heads up</b>15m left. Pace yourself.</span></div>
+      <div class="float f2" aria-hidden="true"><span class="ic">90%</span><span><b>Last call</b>After that, it's my turn to talk.</span></div>
+      <div class="float f3" aria-hidden="true"><span class="ic">✓</span><span><b>Closed it</b>Streak +1</span></div>
+
+      <div class="phone" id="heroPhone" role="img" aria-label="Demo: Endloop warns at 75% and 90%, then a full-screen roast covers the app at 100%.">
+        <div class="screen" id="heroScreen">
+          <div class="sb"><span>7:01</span><span class="ics"><i></i><i></i></span></div>
+          <div class="feed" aria-hidden="true">
+            <div class="feed-top">feed<i><b></b><b></b></i></div>
+            <div class="feed-track" id="feedTrack">{{FEED}}{{FEED}}</div>
+          </div>
+          <div class="notif heads" id="nHeads">
+            <div><div class="meta"><span class="ap">∞</span>Endloop · now</div><div class="tt">Heads up · 75%</div><div class="bd">15m left. That's a lot of reels, or one good decision.</div></div>
+            <div class="th"><img id="thHeads" src="{{IMG:peeking}}" alt=""></div>
+          </div>
+          <div class="notif last" id="nLast">
+            <div><div class="meta"><span class="ap">∞</span>Endloop · now</div><div class="tt">Last call · 90%</div><div class="bd">6m left. After that, it's my turn to talk.</div></div>
+            <div class="th"><img id="thLast" src="{{IMG:hourglass}}" alt=""></div>
+          </div>
+          <div class="roast" id="heroRoast">
+            <div class="roast-top">{{WORDMARK_PLAIN}}<span class="share">{{SHARE}}</span></div>
+            <div class="roast-body">
+              <img class="face" id="heroFace" src="{{IMG:honest}}" alt="">
+              <span class="r-eyebrow">Instagram · limit hit</span>
+              <p class="r-line" id="heroLine">You didn't lose track of time. You handed it over.</p>
+              <p class="r-stat">1h 32m today · 47 opens · limit 1h</p>
+              <div class="r-close" id="heroClose">Fine. Close it.</div>
+              <div class="r-snooze" id="heroSnooze">I need 5 more minutes</div>
+            </div>
+          </div>
+          <div class="win" id="heroWin">
+            <div><b>Closed on the first roast</b><p>I didn't even get to finish my sentence.</p></div>
+            <img id="winImg" src="{{IMG:impressed}}" alt="">
+          </div>
+        </div>
+      </div>
+
+      <div class="watch" aria-live="off">
+        <div class="watch-top"><b>Instagram today</b><span id="wTime">38m of 1h</span></div>
+        <div class="bar" id="wBar"><i style="--w:63%"></i></div>
+        <div class="watch-note"><span id="wNote">Endloop is counting</span><em id="wPct">63%</em></div>
+      </div>
+
+      <div class="picker">
+        <div class="seg" role="group" aria-label="Roast level">
+          <button type="button" data-level="polite" aria-pressed="false">Polite</button>
+          <button type="button" data-level="honest" aria-pressed="true">Honest</button>
+          <button type="button" data-level="savage" aria-pressed="false">Savage</button>
+          <button type="button" data-level="unhinged" aria-pressed="false">Unhinged<span class="lock">Pro</span></button>
+        </div>
+        <div class="seg" role="group" aria-label="Roast language">
+          <button type="button" data-lang="en" aria-pressed="true">English</button>
+          <button type="button" data-lang="ta" aria-pressed="false">Tanglish</button>
+        </div>
+        <div class="seg" role="group" aria-label="Roaster">
+          <button type="button" data-char="loop" aria-pressed="true">Loop</button>
+          <button type="button" data-char="lupe" aria-pressed="false">Lupe</button>
+        </div>
+        <button class="replay" id="replay" type="button">↻ Replay the demo</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MARQUEE ============ -->
+<div class="band" aria-label="Real roast lines from the app">
+  <div class="row r1">{{MARQ_EN}}{{MARQ_EN_DUP}}</div>
+  <div class="row r2">{{MARQ_TA}}{{MARQ_TA_DUP}}</div>
+</div>
+
+<!-- ============ A DAY WITH ENDLOOP ============ -->
+<section class="story" id="day" aria-labelledby="day-h">
+  <div class="wrap" style="margin-bottom:clamp(20px,4vw,40px)">
+    <div class="sec-head rv" style="margin-bottom:0">
+      <span class="eyebrow">How it works</span>
+      <h2 id="day-h">A day with Endloop.</h2>
+      <p class="lead" style="max-width:56ch">Warned twice. Roasted once. Scroll through a normal day and watch the phone.</p>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="chapters" id="chapters">
+      <span class="rail" aria-hidden="true"><i id="railFill"></i></span>
+      <article class="chapter" data-scene="pick"><span class="time">9:00 am · Setup</span><h3>Pick the apps that eat your day.</h3><p>Endloop shows how long you really spent on each app last week, then pre-picks your worst offenders. Three apps are free.</p></article>
+      <article class="chapter" data-scene="home"><span class="time">9:02 am · Limits</span><h3>Set a limit you can actually keep.</h3><p>Slide to a number. Loop suggests one about 30% below your habit and reacts to whatever you pick. Your home screen shows every limit at a glance.</p></article>
+      <article class="chapter" data-scene="heads"><span class="time">6:40 pm · 75%</span><h3>A heads-up at 75%.</h3><p>A rich notification with Loop's face. No lecture, just a nudge while stopping is still easy.</p></article>
+      <article class="chapter" data-scene="last"><span class="time">6:52 pm · 90%</span><h3>Last call at 90%.</h3><p>Close it now and it's your idea, not his.</p></article>
+      <article class="chapter" data-scene="roast"><span class="time">7:01 pm · 100%</span><h3>Then the roast.</h3><p>It slides over the app, full screen, with your real numbers. Close it, or ask for five more minutes.</p></article>
+      <article class="chapter" data-scene="earn"><span class="time">7:01 pm · Snooze</span><h3>Five more minutes? Earn it.</h3><p>Convince Loop, type a confession, wait ten seconds. Two snoozes per app per day, and the second one waits longer.</p></article>
+      <article class="chapter" data-scene="weekly"><span class="time">Sunday · 7 pm</span><h3>Your week, roasted.</h3><p>Your total, your worst app and your wins, as a card made for Instagram Stories. Share it or keep it to yourself.</p></article>
+    </div>
+
+    <div class="story-stage" aria-hidden="true">
+      <div class="phone">
+        <div class="screen" id="storyScreen">
+          <div class="sb"><span id="storyClock">9:00</span><span class="ics"><i></i><i></i></span></div>
+
+          <div class="scene on" data-s="pick"><div class="pad">
+            <p class="s-title">Who's eating your day?</p>
+            <p class="s-sub">Your last 7 days. We picked the worst three.</p>
+            <div class="applist">
+              <div class="app sel" style="--i:0"><span class="ai" style="background:linear-gradient(135deg,#FEDA75,#D62976,#4F5BD5)">I</span><span>Instagram<small>9h 12m last week</small></span><span class="ck">✓</span></div>
+              <div class="app sel" style="--i:1"><span class="ai" style="background:#FF0033">Y</span><span>YouTube<small>6h 40m last week</small></span><span class="ck">✓</span></div>
+              <div class="app sel" style="--i:2"><span class="ai" style="background:#141414">X</span><span>X<small>3h 05m last week</small></span><span class="ck">✓</span></div>
+              <div class="app"><span class="ai" style="background:#25D366">W</span><span>WhatsApp<small>2h 10m last week</small></span><span class="ck"></span></div>
+            </div>
+            <div class="s-btn">Set limits</div>
+          </div></div>
+
+          <div class="scene" data-s="home"><div class="pad">
+            <p class="s-sub" style="font-weight:700">Today</p>
+            <p class="today-big">1h 12m</p>
+            <div class="mood"><div><b>Chill</b><p>So far, so good. Don't ruin it.</p></div><img src="{{IMG:chill}}" alt=""></div>
+            <div class="lim">
+              <div class="lr"><b>Instagram</b><span>45m of 1h</span></div><div class="lbar"><i style="--w:75%;--c:#B86E00"></i></div>
+              <div class="lr"><b>YouTube</b><span>20m of 45m</span></div><div class="lbar"><i style="--w:44%"></i></div>
+              <div class="lr"><b>X</b><span>7m of 30m</span></div><div class="lbar"><i style="--w:23%"></i></div>
+            </div>
+          </div></div>
+
+          <div class="scene" data-s="heads">
+            <div class="feed"><div class="feed-top">feed<i><b></b><b></b></i></div><div class="feed-track run">{{FEED}}{{FEED}}</div></div>
+            <div class="notif heads show">
+              <div><div class="meta"><span class="ap">∞</span>Endloop · now</div><div class="tt">Heads up · 75%</div><div class="bd">15m left on Instagram. Pace yourself.</div></div>
+              <div class="th"><img src="{{IMG:peeking}}" alt=""></div>
+            </div>
+          </div>
+
+          <div class="scene" data-s="last">
+            <div class="feed"><div class="feed-top">feed<i><b></b><b></b></i></div><div class="feed-track run" style="animation-delay:-9s">{{FEED}}{{FEED}}</div></div>
+            <div class="notif last show">
+              <div><div class="meta"><span class="ap">∞</span>Endloop · now</div><div class="tt">Last call · 90%</div><div class="bd">6m. That's one video. Choose wisely.</div></div>
+              <div class="th"><img src="{{IMG:hourglass}}" alt=""></div>
+            </div>
+          </div>
+
+          <div class="scene slide" data-s="roast">
+            <div class="roast show" style="transition:none">
+              <div class="roast-top">{{WORDMARK_PLAIN}}<span class="share">{{SHARE}}</span></div>
+              <div class="roast-body">
+                <img class="face" src="{{IMG:eye-roll}}" alt="">
+                <span class="r-eyebrow">Instagram · limit hit</span>
+                <p class="r-line" id="storyLine">The feed has no ending. You were supposed to be the ending.</p>
+                <p class="r-stat">1h 01m today · 31 opens · limit 1h</p>
+                <div class="r-close">Fine. Close it.</div>
+                <div class="r-snooze">I need 5 more minutes</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="scene" data-s="earn"><div class="pad earn-pad">
+            <img src="{{IMG:convince}}" alt="" style="width:62%;align-self:center;margin-bottom:-2cqw">
+            <p class="s-title">Oh? Convince me.</p>
+            <div class="chips"><span class="chip">Work thing</span><span class="chip pick">Just one message</span><span class="chip">I'm bored</span><span class="chip">Need a break</span></div>
+            <div class="type-box"><span class="target">Type: My thumb makes my decisions now.</span><span id="storyTyped"></span><span class="caret"></span></div>
+          </div></div>
+
+          <div class="scene" data-s="weekly"><div class="pad weekly">
+            <p class="s-sub" style="font-weight:700">Your week, roasted</p>
+            <div class="wk-card"><span class="lbl">This week</span><span class="big">9h 14m</span><p>That's a part-time job with no salary.</p><img src="{{IMG:envelope}}" alt=""></div>
+            <div class="wk-row" style="--i:0"><span>Worst app</span><b>Instagram · 4h 02m</b></div>
+            <div class="wk-row" style="--i:1"><span>Closed on first roast</span><b>5 times</b></div>
+            <div class="wk-row" style="--i:2"><span>Won back vs last week</span><b>2h 41m</b></div>
+            <div class="ig-btn">Share to Stories</div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ EARN IT ============ -->
+<section class="earn" id="earn" aria-labelledby="earn-h">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="eyebrow">5 more minutes?</span>
+      <h2 id="earn-h">Snoozing is allowed. <span class="red">It's just not easy.</span></h2>
+      <p class="lead" style="max-width:56ch">Each snooze makes you stop and think for a moment. That moment is usually enough.</p>
+    </div>
+    <div class="earn-grid" id="earnGrid">
+      <article class="ecard rv" style="--d:0" data-step="0">
+        <span class="num">1</span><h3>Convince Loop</h3>
+        <p class="muted">Pick your excuse. He's heard them all.</p>
+        <p class="e-quote">"Oh? Convince me."</p>
+        <div class="e-chips" id="eChips"><span>Work thing</span><span>Just one message</span><span>I'm bored</span><span>Need a break</span><span>Waiting for someone</span></div>
+      </article>
+      <article class="ecard rv" style="--d:1" data-step="1">
+        <span class="num">2</span><h3>Type the confession</h3>
+        <p class="muted">Letter by letter. Paste is blocked. Typos don't count.</p>
+        <div class="e-type" id="eType"><small>Type exactly:</small><b style="font-weight:700">I am choosing reels over my dreams.</b><span class="typed"><span id="eTyped"></span><span class="caret"></span></span><span class="ok">✓ Matches. Fine.</span></div>
+      </article>
+      <article class="ecard rv" style="--d:2" data-step="2">
+        <span class="num">3</span><h3>Wait it out</h3>
+        <p class="muted">Ten seconds, with a real fact to read. The second snooze waits twenty.</p>
+        <div class="ring-wrap">
+          <div class="ring"><svg viewBox="0 0 100 100"><circle class="tr" cx="50" cy="50" r="42"/><circle class="pr" id="ringPr" cx="50" cy="50" r="42" pathLength="1"/></svg><b id="ringN">10</b></div>
+          <p class="fact">Average attention on one screen: 47 seconds. It was 2.5 minutes in 2004.<small>Gloria Mark, UC Irvine</small></p>
+        </div>
+        <span class="unlocked" id="unlocked">✓ 5 more minutes unlocked</span>
+      </article>
+    </div>
+    <div class="earn-foot rv">
+      <img src="{{IMG:hand-on-heart}}" alt="Loop, hand on heart">
+      <p>Back out at any step and it counts as a win. <span class="red">"Look at you. Choosing yourself."</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section id="features" aria-labelledby="feat-h">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="eyebrow">Everything in v1</span>
+      <h2 id="feat-h">Hard to cheat. <span class="red">Fun to lose.</span></h2>
+    </div>
+    <div class="bento">
+      <article class="tile s3 rv" style="--d:0">
+        <span class="tag">Anti-cheat</span><h3>Lower now. Raise tomorrow.</h3>
+        <p>Lowering a limit works instantly. Raising it, or dropping an app, waits until tomorrow. No 11 pm loopholes.</p>
+        <div class="vis">
+          <div class="lim-row dn"><b>1h → 45m</b><span class="st">Applies now</span><span class="arrowv">Instagram · lowered</span></div>
+          <div class="lim-row up"><b>1h → 2h</b><span class="st">From tomorrow</span><span class="arrowv">Instagram · raised</span></div>
+        </div>
+      </article>
+      <article class="tile s3 rv" style="--d:1">
+        <span class="tag">Escalation</span><h3>Back in ten minutes?</h3>
+        <p>Reopen an app right after closing the roast and the next one hits harder. Use both snoozes and the button disappears.</p>
+        <div class="stack">
+          <div class="rc c1"><small>Roast · 7:01 pm</small>You didn't lose track of time.</div>
+          <div class="rc c2"><small>Reopened · 7:06 pm</small>Go on, tell me it was "just five minutes."</div>
+          <div class="rc c3"><small>Snoozes used up</small>No. We're done here.</div>
+        </div>
+      </article>
+      <article class="tile s2 night with-pose rv" style="--d:0">
+        <span class="stars" aria-hidden="true"><i style="left:58%;top:20%;--t:0s"></i><i style="left:72%;top:46%;--t:1s"></i><i style="left:44%;top:34%;--t:2s"></i><i style="left:86%;top:62%;--t:.5s"></i></span>
+        <span class="moon" aria-hidden="true"></span>
+        <span class="tag">Night</span><h3>Late-night nudge</h3>
+        <p>Open a tracked app after your bedtime and get one gentle shove toward sleep.</p>
+        <p class="q">"The feed will still be there tomorrow. Your sleep won't."</p>
+        <img class="pose" src="{{IMG:yawning}}" alt="">
+      </article>
+      <article class="tile s2 rv" style="--d:1">
+        <span class="tag">Stats</span><h3>Streaks and stats</h3>
+        <p>A streak for closing on the first roast, and the time you won back.</p>
+        <span class="streak">🔥 6-day streak</span>
+        <div class="bars" style="margin-bottom:20px"><span style="--h:72%;--i:0"><em>M</em></span><span style="--h:58%;--i:1"><em>T</em></span><span style="--h:80%;--i:2"><em>W</em></span><span style="--h:46%;--i:3"><em>T</em></span><span style="--h:40%;--i:4"><em>F</em></span><span style="--h:52%;--i:5"><em>S</em></span><span class="t" style="--h:30%;--i:6"><em>S</em></span></div>
+      </article>
+      <article class="tile s2 rv" style="--d:2">
+        <span class="tag">Home screen</span><h3>Your roaster as the app icon</h3>
+        <p>Put Loop's or Lupe's face on your home screen, right next to the apps you swore you'd open less.</p>
+        <div class="icons"><span class="dummy"></span><div class="flip three" id="iconFlip"><div><img class="on" src="{{ICON:default}}" alt="Endloop icon"><img src="{{ICON:loop}}" alt="Endloop icon with Loop"><img src="{{ICON:lupe}}" alt="Endloop icon with Lupe"></div></div><span class="dummy"></span></div>
+      </article>
+      <article class="tile s3 lang-card rv" style="--d:0">
+        <span class="tag">Languages</span><h3>Roasted in English or Tanglish</h3>
+        <p>Tamil in English letters, the way people actually text. Switch any time.</p>
+        <div class="lang-tabs"><span class="on" id="ltEn">English</span><span id="ltTa">Tanglish</span></div>
+        <p class="ln" id="langLine">Your thumb ran a marathon today. The rest of you watched.</p>
+      </article>
+      <article class="tile s3 rv" style="--d:1">
+        <span class="tag">Safety</span><h3>Never blocks what matters</h3>
+        <p>Settings, calls, the Play Store and your home screen are never roasted. The roast is a speed bump, not a lock.</p>
+        <div class="safe"><span>{{CHECK}}Phone</span><span>{{CHECK}}Settings</span><span>{{CHECK}}Play Store</span><span>{{CHECK}}Home screen</span><span>{{CHECK}}Emergency</span></div>
+      </article>
+      <article class="tile s2 with-pose rv" style="--d:0">
+        <span class="tag">Control</span><h3>Pause for a day</h3>
+        <p>Holiday? Exam over? Pause until midnight. It shows up in your weekly roast, so it stays honest.</p>
+        <div class="toggle"><span class="sw" id="pauseSw"></span><span id="pauseTxt">Endloop is on</span></div>
+        <img class="pose" src="{{IMG:unplugged}}" alt="">
+      </article>
+      <article class="tile s2 with-pose rv" style="--d:1">
+        <span class="tag">Facts</span><h3>Facts, not lectures</h3>
+        <p>Sourced findings and small tips, in your roast level's voice.</p>
+        <div class="fact-card" id="factCard">Average attention on one screen: 47 seconds. It was 2.5 minutes in 2004.<small>Gloria Mark, UC Irvine</small></div>
+        <img class="pose" src="{{IMG:pointer}}" alt="">
+      </article>
+      <article class="tile s2 rv" style="--d:2">
+        <span class="tag">Share</span><h3>Roasts worth posting</h3>
+        <p>Share any roast or your weekly card to Stories, or save it to your gallery.</p>
+        <div class="share-mini"><div class="story-card">Your thumb ran a marathon today.<img src="{{IMG:selfie}}" alt=""></div><div class="targets"><span>Stories</span><span>Save image</span></div></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ROASTERS ============ -->
+<section id="roasters" aria-labelledby="who-h" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="eyebrow">Your roaster</span>
+      <h2 id="who-h">Two roasters. <span class="red">Pick your poison.</span></h2>
+      <p class="lead" style="max-width:56ch">Choose who shows up when you blow your limit. Same honest numbers, different face judging them.</p>
+    </div>
+    <div class="duo">
+      <article class="rcard rv" style="--d:0" id="cardLoop">
+        <span class="badge-c">Default</span>
+        <div class="rmeta"><h3>Loop</h3><p>Deadpan, unimpressed, permanently in his cap.</p><p class="rq">"I expected this. I'm still disappointed."</p></div>
+        <div class="poses"><img class="a" src="{{IMG:side-eye}}" alt="Loop giving a side-eye"><img class="b" src="{{IMG:finger-wag}}" alt=""></div>
+      </article>
+      <article class="rcard lupe-c rv" style="--d:1" id="cardLupe">
+        <span class="badge-c">New</span>
+        <div class="rmeta"><h3>Lupe</h3><p>Her own looks, her own reactions. Same zero tolerance for your scrolling.</p><p class="rq">"Go on, tell me it was 'just five minutes.'"</p></div>
+        <div class="poses"><img class="a" src="{{LUPE:side-eye}}" alt="Lupe giving a side-eye"><img class="b" src="{{LUPE:hands-on-hips}}" alt=""></div>
+      </article>
+    </div>
+    <div class="swap-strip rv">
+      <div class="icon-trio" id="iconTrio" aria-hidden="true"><img class="on" src="{{ICON:default}}" alt=""><img src="{{ICON:loop}}" alt=""><img src="{{ICON:lupe}}" alt=""></div>
+      <div><h3>Change your roaster any time</h3><p>Pick one when you set up, switch whenever you like. Endloop can swap the app icon to match.</p></div>
+      <div class="swap-steps"><span>Settings</span><i>→</i><span>Roaster</span><i>→</i><span>Loop / Lupe</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HEAT ============ -->
+<section class="heat" id="heat" aria-labelledby="heat-h" style="padding-top:0">
+  <div class="wrap">
+    <div class="heat-face rv">
+      <span class="glow" id="heatGlow"></span><span class="disc"></span>
+      <img id="heatImg" src="{{IMG:honest}}" alt="Your roaster" width="380" height="380">
+      <span class="who-seg seg" role="group" aria-label="Roaster"><button type="button" data-hchar="loop" aria-pressed="true">Loop</button><button type="button" data-hchar="lupe" aria-pressed="false">Lupe</button></span>
+    </div>
+    <div class="heat-ctrl">
+      <div class="sec-head rv" style="margin-bottom:0">
+        <span class="eyebrow">Roast level</span>
+        <h2 id="heat-h">How hard should it hurt?</h2>
+      </div>
+      <div class="meterbox rv" style="--d:1">
+        <div class="heat-labels" role="group" aria-label="Roast level">
+          <button type="button" data-heat="0" aria-pressed="false">Polite<small>Gentle</small></button>
+          <button type="button" data-heat="1" aria-pressed="true">Honest<small>Plain truth</small></button>
+          <button type="button" data-heat="2" aria-pressed="false">Savage<small>It stings</small></button>
+          <button type="button" data-heat="3" aria-pressed="false">Unhinged<small>Premium</small></button>
+        </div>
+        <div class="range" id="heatRange">
+          <input type="range" id="heatInput" min="0" max="3" step="1" value="1" aria-label="Roast level" aria-valuetext="Honest">
+          <span class="track"><i></i></span><span class="thumb" id="heatThumb">🌶️</span>
+        </div>
+      </div>
+      <p class="heat-quote rv" style="--d:2" id="heatQuote" aria-live="polite">You didn't lose track of time. You handed it over.</p>
+      <p class="heat-note rv" style="--d:3">Roasts go after the habit, never your looks, family or who you are. Every level, every language.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRIVACY ============ -->
+<section class="privacy" aria-labelledby="priv-h">
+  <div class="wrap">
+    <div style="display:grid;gap:18px">
+      <span class="eyebrow rv">Privacy</span>
+      <h2 id="priv-h" class="rv">I watch the clock, <span style="color:#FF2E45">not your content.</span></h2>
+      <p class="muted rv" style="max-width:48ch">Endloop knows which app is open and for how long. That's it. No messages, no photos, nothing you watch or type.</p>
+      <ul class="plist">
+        <li class="rv" style="--d:0"><i>{{CHECK}}</i>Everything stays on your phone</li>
+        <li class="rv" style="--d:1"><i>{{CHECK}}</i>No account, no email, no sign-up</li>
+        <li class="rv" style="--d:2"><i>{{CHECK}}</i>No ads, no analytics, no data sold</li>
+        <li class="rv" style="--d:3"><i>{{CHECK}}</i>Delete everything with one button</li>
+      </ul>
+      <p class="rv"><a href="privacy.html">Read the privacy policy →</a></p>
+    </div>
+    <div class="priv-vis rv" aria-hidden="true">
+      <span class="clock"><span class="hand"></span></span>
+      <img src="{{IMG:blind}}" alt="">
+      <span class="priv-tag t1"><b>✓</b> Instagram · 42m</span>
+      <span class="priv-tag t2"><s>Your messages</s></span>
+      <span class="priv-tag t3"><s>Your photos</s></span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PREMIUM ============ -->
+<section id="premium" aria-labelledby="prem-h">
+  <div class="wrap">
+    <div class="vip rv"><img src="{{IMG:vip}}" alt="Loop holding a gold card"><div class="sec-head" style="margin:0"><span class="eyebrow">Premium</span><h2 id="prem-h">Free for your worst three.</h2></div></div>
+    <p class="lead rv" style="max-width:60ch;margin:-8px 0 36px">Three apps cover most people's problem trio. Watching more than that, or want it meaner? Go Premium.</p>
+    <div class="plans">
+      <article class="plan rv" style="--d:0"><h3>Free</h3><p class="price">₹0</p><p>3 tracked apps, every core feature, Polite to Savage roasts.</p></article>
+      <article class="plan rv" style="--d:1"><h3>Monthly</h3><p class="price">₹99<small> / month</small></p><p>Cancel any time in the Play Store.</p></article>
+      <article class="plan best rv" style="--d:2" id="bestPlan"><span class="badge">Best value · 7-day trial</span><h3>Yearly</h3><p class="price">₹699<small> / year</small></p><p>About ₹58 a month.</p></article>
+      <article class="plan rv" style="--d:3"><h3>Lifetime</h3><p class="price">₹1,499<small> once</small></p><p>Pay once. Yours for good.</p></article>
+    </div>
+    <ul class="included" aria-label="Premium includes">
+      <li class="rv" style="--d:0"><i>{{CHECK}}</i><span><b>Unlimited apps</b> to track</span></li>
+      <li class="rv" style="--d:1"><i>{{CHECK}}</i><span><b>Unhinged</b>, the meanest level</span></li>
+      <li class="rv" style="--d:2"><i>{{CHECK}}</i><span><b>Month view</b> and full history</span></li>
+      <li class="rv" style="--d:3"><i>{{CHECK}}</i><span><b>Every weekly roast</b>, kept</span></li>
+    </ul>
+    <p class="muted" style="margin-top:18px;font-size:14px">Coming later: AI roasts about your own habits, more roasters, more languages.</p>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section id="faq" style="padding-top:0" aria-labelledby="faq-h">
+  <div class="wrap faq-wrap">
+    <div class="sec-head rv"><span class="eyebrow">FAQ</span><h2 id="faq-h">Questions, before the roast.</h2><img src="{{IMG:skeptical}}" alt="Loop, one eyebrow raised"></div>
+    <div class="faq">
+      <details class="rv" style="--d:0"><summary>Does Endloop block apps completely?<span class="pm" aria-hidden="true"></span></summary><p>No. The roast is a speed bump, not a lock. You can always close it or earn 5 more minutes, and it never blocks Settings, calls, the Play Store or your home screen.</p></details>
+      <details class="rv" style="--d:1"><summary>Which phones does it work on?<span class="pm" aria-hidden="true"></span></summary><p>Android phones. It needs Usage Access, permission to show over other apps, and notifications. On some brands you'll also set battery usage to unrestricted so your phone doesn't put Endloop to sleep; the app walks you through it for your brand.</p></details>
+      <details class="rv" style="--d:2"><summary>Is there an iPhone version?<span class="pm" aria-hidden="true"></span></summary><p>Not yet. Apple doesn't let apps show a full-screen roast over other apps, so Android comes first.</p></details>
+      <details class="rv" style="--d:3"><summary>Do I need an account?<span class="pm" aria-hidden="true"></span></summary><p>No. There's no sign-up at all. Premium is tied to your Google Play account, so you can restore it on another Android phone.</p></details>
+      <details class="rv" style="--d:4"><summary>What's Tanglish?<span class="pm" aria-hidden="true"></span></summary><p>Tamil written in English letters, the way people actually text. Pick it when you set up, or switch any time in Settings.</p></details>
+      <details class="rv" style="--d:5"><summary>Can I change my roaster?<span class="pm" aria-hidden="true"></span></summary><p>Yes. Pick Loop or Lupe when you set up, and switch any time in Settings. Endloop can change its app icon to match your roaster.</p></details>
+      <details class="rv" style="--d:6"><summary>Can I share my roasts?<span class="pm" aria-hidden="true"></span></summary><p>Yes. Share any roast or your weekly card to Instagram Stories or any app, or save it to your gallery. Nothing is shared unless you tap share.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FINAL ============ -->
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="final rv" id="final">
+      <span class="rings" aria-hidden="true"></span>
+      <div style="position:relative;z-index:1">
+        <h2>Close the app.<br>Or get roasted.</h2>
+        <p>Endloop is coming soon to Google Play. Free to start, no account needed.</p>
+        <div class="ctas"><a class="btn btn-w" href="support.html">Questions? Get in touch</a><a class="btn btn-o" href="#top">Back to top ↑</a></div>
+      </div>
+      <div class="peekers" id="peeker"><img src="{{IMG:binoculars}}" alt="Loop watching through binoculars" width="380" height="380"><img src="{{LUPE:binoculars}}" alt="Lupe watching through binoculars" width="380" height="380"></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="brand">{{WORDMARK_PLAIN}}</span>
+    <span>© 2026 Super Spider · Endloop for Android</span>
+    <nav aria-label="Footer"><a href="support.html">Support</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a></nav>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <img src="{{IMG:eyes-on-you}}" alt="">
+  <div><b>Heads up · this page</b><p id="toastTxt">90 seconds on a website about screen time. I see you.</p><button type="button" id="toastBtn">Fair</button></div>
+</div>
+
+<script>
+(function(){
+  var root=document.documentElement;
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  root.classList.add(reduce?'still':'motion');
+  function $(s,c){return (c||document).querySelector(s)}
+  function $$(s,c){return Array.prototype.slice.call((c||document).querySelectorAll(s))}
+  function esc(t){return t.replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function words(el,text,d0){el.innerHTML=text.split(' ').map(function(w,i){return '<span class="w" style="--i:'+i+'">'+esc(w)+'</span>'}).join(' ');if(d0)el.style.setProperty('--d0',d0)}
+
+  /* theme */
+  var KEY='endloop-theme';
+  try{var saved=localStorage.getItem(KEY);if(saved)root.setAttribute('data-theme',saved)}catch(e){}
+  $('#themeBtn').addEventListener('click',function(){
+    var cur=root.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+    var next=cur==='dark'?'light':'dark';root.setAttribute('data-theme',next);
+    try{localStorage.setItem(KEY,next)}catch(e){}
+  });
+
+  /* reveal on scroll */
+  var io=('IntersectionObserver' in window)?new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{rootMargin:'0px 0px -8% 0px',threshold:.08}):null;
+  $$('.rv,.bars,.plan.best').forEach(function(el){io?io.observe(el):el.classList.add('in')});
+
+  /* header: border + the page's own limit meter */
+  var bar=$('#top-bar'),meter=$('#meter');
+  function onScroll(){
+    var h=document.documentElement.scrollHeight-innerHeight,p=h>0?Math.min(1,scrollY/h):0;
+    meter.style.setProperty('--p',p);
+    meter.className='meter'+(p>=.9?' last':p>=.75?' heads':'');
+    bar.classList.toggle('scrolled',scrollY>8);
+  }
+
+  /* ---------- hero demo ---------- */
+  var L={
+    en:{polite:"Limit reached. Your eyes have earned a break.",honest:"You didn't lose track of time. You handed it over.",savage:"Your thumb ran a marathon today. The rest of you watched.",unhinged:"At this rate, archaeologists will find you mid-scroll."},
+    ta:{polite:"Limit reach aairuchu. Phone-a keela vechittu oru tea kudinga.",honest:"Time pass-ku open panneenga. Time mothama pass aagiduchu.",savage:"Unga thumb innaiku marathon odiduchu. Neenga ukkandhu vedikkai paatheenga.",unhinged:"Unga phone ungala \"roommate\"-nu kooppida aarambichuduchu."}
+  };
+  var FACES={loop:{polite:"{{IMG:polite}}",honest:"{{IMG:honest}}",savage:"{{IMG:savage}}",unhinged:"{{IMG:evil-grin}}",heads:"{{IMG:peeking}}",last:"{{IMG:hourglass}}",win:"{{IMG:impressed}}"},
+              lupe:{polite:"{{LUPE:polite}}",honest:"{{LUPE:honest}}",savage:"{{LUPE:savage}}",unhinged:"{{LUPE:evil-grin}}",heads:"{{LUPE:peeking}}",last:"{{LUPE:hourglass}}",win:"{{LUPE:impressed}}"}};
+  var CLOSE={en:"Fine. Close it.",ta:"Sari, close pannu"},SNOOZE={en:"I need 5 more minutes",ta:"Innum 5 minutes venum"};
+  var st={level:'honest',lang:'en',char:'loop'};
+  var scr=$('#heroScreen'),roast=$('#heroRoast'),line=$('#heroLine'),face=$('#heroFace'),nH=$('#nHeads'),nL=$('#nLast'),win=$('#heroWin'),closeB=$('#heroClose'),snz=$('#heroSnooze'),track=$('#feedTrack');
+  var wBar=$('#wBar'),wI=$('#wBar i'),wTime=$('#wTime'),wNote=$('#wNote'),wPct=$('#wPct');
+  function setLine(animate){
+    if(animate&&!reduce)words(line,L[st.lang][st.level],'250ms');else line.textContent=L[st.lang][st.level];
+    var F=FACES[st.char];face.src=F[st.level];$('#thHeads').src=F.heads;$('#thLast').src=F.last;$('#winImg').src=F.win;closeB.textContent=CLOSE[st.lang];snz.textContent=SNOOZE[st.lang];
+    $$('[data-level]').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.level===st.level)});
+    $$('[data-lang]').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.lang===st.lang)});
+    $$('[data-char]').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.char===st.char)});
+  }
+  function watch(pct){
+    var m=Math.round(pct*60/100);
+    wI.style.setProperty('--w',Math.min(pct,100)+'%');
+    wBar.className='bar'+(pct>=100?' over':pct>=90?' last':pct>=75?' heads':'');
+    wTime.textContent=(m>=60?'1h '+(m-60?(m-60)+'m':''):m+'m')+' of 1h';
+    wPct.textContent=Math.round(pct)+'%';
+    wNote.textContent=pct>=100?'Limit hit. Roast time.':pct>=90?'Last call sent':pct>=75?'Heads-up sent':'Endloop is counting';
+  }
+  var run=0,heroVisible=true,heroIdle=false;
+  function sleep(ms,id){return new Promise(function(res,rej){var left=ms;(function tick(){if(id!==run)return rej('x');if(!heroVisible||document.hidden)return setTimeout(tick,250);if(left<=0)return res();var s=Math.min(left,120);left-=s;setTimeout(tick,s)})()})}
+  function resetScene(){roast.classList.remove('show');nH.classList.remove('show');nL.classList.remove('show');win.classList.remove('show');closeB.classList.remove('press');scr.classList.remove('dark-sb')}
+  function showRoast(){roast.classList.add('show');scr.classList.add('dark-sb');setLine(true)}
+  async function demo(){
+    var id=++run;
+    try{
+      while(true){
+        resetScene();wI.style.transition='none';watch(63);void wI.offsetWidth;wI.style.transition='';
+        track.classList.add('run');
+        await sleep(900,id); watch(75); await sleep(1400,id);
+        nH.classList.add('show'); await sleep(2800,id); nH.classList.remove('show');
+        watch(90); await sleep(1500,id);
+        nL.classList.add('show'); await sleep(2800,id); nL.classList.remove('show');
+        watch(100); await sleep(1300,id);
+        showRoast(); await sleep(6200,id);
+        closeB.classList.add('press'); await sleep(380,id);
+        roast.classList.remove('show');scr.classList.remove('dark-sb');closeB.classList.remove('press');
+        await sleep(450,id); win.classList.add('show'); await sleep(3400,id);
+      }
+    }catch(e){}
+  }
+  function pick(){ run++; resetScene(); watch(100); showRoast(); $('#replay').classList.add('show'); }
+  $$('[data-level]').forEach(function(b){b.addEventListener('click',function(){st.level=b.dataset.level;pick()})});
+  $$('[data-lang]').forEach(function(b){b.addEventListener('click',function(){st.lang=b.dataset.lang;pick()})});
+  $$('[data-char]').forEach(function(b){b.addEventListener('click',function(){st.char=b.dataset.char;pick()})});
+  $('#replay').addEventListener('click',function(){this.classList.remove('show');demo()});
+  if(reduce){watch(100);roast.classList.add('show');scr.classList.add('dark-sb');setLine(false)}
+  else{
+    setLine(false);demo();
+    if(io)new IntersectionObserver(function(es){heroVisible=es[0].isIntersecting;track.style.animationPlayState=heroVisible?'running':'paused'}).observe($('#heroPhone'));
+  }
+
+  /* ---------- story: the phone follows the chapter you're reading ---------- */
+  var chapters=$$('.chapter'),scenes=$$('#storyScreen .scene'),clock=$('#storyClock'),sScr=$('#storyScreen'),railFill=$('#railFill'),cur=-1;
+  var CLOCK={pick:'9:00',home:'9:02',heads:'6:40',last:'6:52',roast:'7:01',earn:'7:01',weekly:'7:00'};
+  var storyTimer=null;
+  function setScene(i){
+    if(i===cur)return;cur=i;var name=chapters[i].dataset.scene;
+    chapters.forEach(function(c,j){c.classList.toggle('on',j===i)});
+    scenes.forEach(function(s){
+      s.classList.toggle('on',s.dataset.s===name)});
+    clock.textContent=CLOCK[name];
+    sScr.classList.toggle('dark-sb',name==='roast'||name==='weekly');
+    if(name==='roast'&&!reduce)words($('#storyLine'),$('#storyLine').textContent,'450ms');
+    if(name==='earn')typeStory();
+  }
+  function storyScroll(){
+    var mobile=innerWidth<=920,ref=innerHeight*(mobile?.74:.5),best=0,bd=1e9;
+    chapters.forEach(function(c,i){var r=c.getBoundingClientRect(),y=mobile?r.top+innerHeight*.08+30:r.top+r.height/2,d=Math.abs(y-ref);if(d<bd){bd=d;best=i}});
+    setScene(best);
+    var wrap=$('#chapters').getBoundingClientRect(),p=(ref-wrap.top)/wrap.height;
+    railFill.style.setProperty('--rp',Math.max(0,Math.min(1,p))*100+'%');
+  }
+  var typedS=$('#storyTyped');
+  function typeStory(){
+    clearTimeout(storyTimer);var t='My thumb makes my decisions now.';
+    if(reduce){typedS.textContent=t;return}
+    typedS.textContent='';var i=0;
+    (function step(){if(chapters[cur].dataset.scene!=='earn')return;typedS.textContent=t.slice(0,++i);if(i<t.length)storyTimer=setTimeout(step,70+Math.random()*60)})();
+  }
+
+  /* ---------- earn it: convince → type → wait ---------- */
+  var cards=$$('.ecard'),chipsE=$$('#eChips span'),typedE=$('#eTyped'),eType=$('#eType'),ringPr=$('#ringPr'),ringN=$('#ringN'),unl=$('#unlocked');
+  var eRun=0,eVisible=false;
+  function eSleep(ms,id){return new Promise(function(res,rej){var left=ms;(function tick(){if(id!==eRun)return rej('x');if(!eVisible||document.hidden)return setTimeout(tick,250);if(left<=0)return res();var s=Math.min(left,100);left-=s;setTimeout(tick,s)})()})}
+  function eReset(){cards.forEach(function(c){c.classList.remove('on','done')});chipsE.forEach(function(c){c.classList.remove('pick')});typedE.innerHTML='';eType.classList.remove('done');ringPr.style.setProperty('--o',0);ringN.textContent='10';unl.classList.remove('show')}
+  async function earnLoop(){
+    var id=++eRun;
+    try{while(true){
+      eReset(); await eSleep(500,id);
+      cards[0].classList.add('on');
+      for(var k=0;k<3;k++){chipsE.forEach(function(c){c.classList.remove('pick')});chipsE[[2,0,1][k]].classList.add('pick');await eSleep(650,id)}
+      await eSleep(700,id); cards[0].classList.remove('on');cards[0].classList.add('done');
+      cards[1].classList.add('on');
+      var target='I am choosing reels over my dreams.',typo='I am choosing reels over my dree',s='';
+      for(var i=0;i<typo.length;i++){s=typo.slice(0,i+1);typedE.textContent=s;await eSleep(55+Math.random()*55,id)}
+      typedE.innerHTML=esc('I am choosing reels over my ')+'<span class="bad">dree</span>';await eSleep(800,id);
+      for(var b=0;b<2;b++){s=s.slice(0,-1);typedE.innerHTML=esc('I am choosing reels over my ')+'<span class="bad">'+esc(s.slice(28))+'</span>';await eSleep(160,id)}
+      for(i=s.length;i<target.length;i++){typedE.textContent=target.slice(0,i+1);await eSleep(70+Math.random()*50,id)}
+      eType.classList.add('done');await eSleep(1100,id);cards[1].classList.remove('on');cards[1].classList.add('done');
+      cards[2].classList.add('on');
+      for(var n=10;n>0;n--){ringN.textContent=n;ringPr.style.setProperty('--o',(10-n)/10);await eSleep(1000,id)}
+      ringN.textContent='0';ringPr.style.setProperty('--o',1);unl.classList.add('show');
+      await eSleep(3200,id);
+    }}catch(e){}
+  }
+  if(reduce){cards.forEach(function(c){c.classList.add('done')});chipsE[1].classList.add('pick');typedE.textContent='I am choosing reels over my dreams.';eType.classList.add('done');ringPr.style.setProperty('--o',1);ringN.textContent='0';unl.classList.add('show')}
+  else if(io){var started=false;new IntersectionObserver(function(es){eVisible=es[0].isIntersecting;if(eVisible&&!started){started=true;earnLoop()}},{threshold:.25}).observe($('#earnGrid'))}
+
+  /* ---------- small tile loops ---------- */
+  var LANG=[['en','Your thumb ran a marathon today. The rest of you watched.'],['ta','Unga thumb innaiku marathon odiduchu. Neenga ukkandhu vedikkai paatheenga.'],['en','The feed has no ending. You were supposed to be the ending.'],['ta','Feed-ku end-e illa. Neenga dhaan end-a irukanum.']];
+  var FACTS=[['Average attention on one screen: 47 seconds. It was 2.5 minutes in 2004.','Gloria Mark, UC Irvine'],['After an interruption, it takes about 23 minutes to get fully back to a task.','Gloria Mark, UC Irvine'],['Tip: move your worst app off the home screen. One extra swipe is a real speed bump.','Tip']];
+  var li=0,fi=0,pausedOn=false,langLine=$('#langLine'),factCard=$('#factCard'),flip=$('#iconFlip'),sw=$('#pauseSw'),swT=$('#pauseTxt');
+  var ic=0;
+  if(!reduce){
+    setInterval(function(){if(document.hidden)return;ic=(ic+1)%3;
+      [$$('#iconFlip img'),$$('#iconTrio img')].forEach(function(g){g.forEach(function(im,k){im.classList.toggle('on',k===ic)})});
+      $('#cardLoop').classList.toggle('alt',ic===1);$('#cardLupe').classList.toggle('alt',ic===2);
+    },2400);
+    setInterval(function(){if(document.hidden)return;
+      li=(li+1)%LANG.length;langLine.classList.add('out');
+      setTimeout(function(){langLine.textContent=LANG[li][1];$('#ltEn').classList.toggle('on',LANG[li][0]==='en');$('#ltTa').classList.toggle('on',LANG[li][0]==='ta');langLine.classList.remove('out')},350);
+      pausedOn=!pausedOn;sw.classList.toggle('on',pausedOn);swT.textContent=pausedOn?'Paused until midnight':'Endloop is on';
+    },3200);
+    setInterval(function(){if(document.hidden)return;fi=(fi+1)%FACTS.length;factCard.style.opacity=0;setTimeout(function(){factCard.innerHTML=esc(FACTS[fi][0])+'<small>'+esc(FACTS[fi][1])+'</small>';factCard.style.opacity=1},350)},4800);
+  }
+
+  /* ---------- heat ---------- */
+  var HEAT=[
+    {k:'polite',img:"{{IMG:polite}}",lupe:"{{LUPE:polite}}",line:"Time's up. Go look at something that doesn't refresh.",c:'#E3F3EC'},
+    {k:'honest',img:"{{IMG:honest}}",lupe:"{{LUPE:honest}}",line:"You didn't lose track of time. You handed it over.",c:'#FFF3E0'},
+    {k:'savage',img:"{{IMG:savage}}",lupe:"{{LUPE:savage}}",line:"You're not \"just checking.\" You're moving in.",c:'#FFC9CF'},
+    {k:'unhinged',img:"{{IMG:evil-grin}}",lupe:"{{LUPE:evil-grin}}",line:"I'm not mad. I'm just going to stare at you until you close it.",c:'#F58A96'}];
+  var NAMES=['Polite','Honest','Savage','Unhinged'],hIn=$('#heatInput'),hImg=$('#heatImg'),hQ=$('#heatQuote'),hR=$('#heatRange'),hG=$('#heatGlow'),hT=$('#heatThumb'),hTouched=false,hCur=1,hChar='loop';
+  function heat(v,anim){
+    v=+v;if(v===hCur&&anim)return;hCur=v;var h=HEAT[v],pct=(v/3)*100;
+    hR.style.setProperty('--hp',pct+'%');hR.style.setProperty('--hf',Math.max(pct/100,.001));
+    hIn.value=v;hIn.setAttribute('aria-valuetext',NAMES[v]);
+    hT.textContent=['🙂','🌶️','🔥','💀'][v];
+    $$('[data-heat]').forEach(function(b){b.setAttribute('aria-pressed',+b.dataset.heat===v)});
+    hG.style.setProperty('--hc',h.c);
+    if(anim&&!reduce){hImg.classList.add('swap');setTimeout(function(){hImg.src=hChar==='lupe'?h.lupe:h.img;hImg.classList.remove('swap')},200);words(hQ,h.line)}
+    else{hImg.src=hChar==='lupe'?h.lupe:h.img;hQ.textContent=h.line}
+  }
+  hIn.addEventListener('input',function(){hTouched=true;heat(hIn.value,true)});
+  $$('[data-heat]').forEach(function(b){b.addEventListener('click',function(){hTouched=true;heat(b.dataset.heat,true)})});
+  $$('[data-hchar]').forEach(function(b){b.addEventListener('click',function(){hTouched=true;hChar=b.dataset.hchar;
+    $$('[data-hchar]').forEach(function(x){x.setAttribute('aria-pressed',x===b)});
+    var h=HEAT[hCur];if(reduce){hImg.src=hChar==='lupe'?h.lupe:h.img;return}
+    hImg.classList.add('swap');setTimeout(function(){hImg.src=hChar==='lupe'?h.lupe:h.img;hImg.classList.remove('swap')},200)})});
+  heat(1,false);
+  if(!reduce&&io){var hs=false;new IntersectionObserver(function(es){if(es[0].isIntersecting&&!hs){hs=true;
+    [[0,700],[2,2600],[3,4600],[1,6800]].forEach(function(p){setTimeout(function(){if(!hTouched)heat(p[0],true)},p[1])})}},{threshold:.5}).observe(hR)}
+
+  /* ---------- final: Loop follows the pointer a little ---------- */
+  var peek=$('#peeker'),fin=$('#final');
+  if(!reduce&&matchMedia('(pointer:fine)').matches){fin.addEventListener('pointermove',function(e){var r=fin.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;peek.style.transform='translate('+(x*24)+'px,'+(y*10)+'px) rotate('+(x*4)+'deg)'});fin.addEventListener('pointerleave',function(){peek.style.transform=''})}
+
+  /* ---------- the page has a limit too ---------- */
+  var toast=$('#toast'),shown=false,seen=0;
+  setInterval(function(){if(document.hidden||shown)return;seen++;if(seen>=90){shown=true;toast.classList.add('show')}},1000);
+  $('#toastBtn').addEventListener('click',function(){toast.classList.remove('show')});
+
+  var ticking=false;
+  addEventListener('scroll',function(){if(!ticking){ticking=true;requestAnimationFrame(function(){onScroll();storyScroll();ticking=false})}},{passive:true});
+  addEventListener('resize',function(){onScroll();storyScroll()});
+  onScroll();storyScroll();
+})();
+</script>

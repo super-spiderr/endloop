@@ -31,6 +31,7 @@
 | 25 Sep 2026 | One pose per moment across all screens (no reusing poses for different moments). |
 | 25 Sep 2026 | Animated clips are done last; only the big moments get animation (see 04). |
 | 25 Sep 2026 | iOS assessed: possible later as a lighter version (Apple's Screen Time shield instead of the full-screen roast, snooze friction moves into the app, no app names or exportable usage numbers, needs the Family Controls entitlement). Android ships first. |
+| 12 Oct 2026 | Optional name: asked once after Welcome (skippable, step 1), editable in Settings → Roasting. Roasts address the user by it now and then (`{name}`, ~1 in 4 lines); the name is never the joke. Filled in JS (`linesFor` / `pickRoast`), so native never sees a raw `{name}`; without a name those lines are skipped. Kept out of the weekly share card. On-device only, so not "collected" for Play data safety; privacy policy and in-app page updated. |
 | Phase 2/3 | After AI roasts: ask for profession and mindset to personalise roasts and tips. |
 
 ## Open / not decided

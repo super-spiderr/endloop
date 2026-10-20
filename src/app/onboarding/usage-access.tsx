@@ -1,15 +1,16 @@
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { pose } from '@/characters';
 import { InfoIcon } from '@/components/icons';
+import { RestrictedHelp } from '@/components/restricted-help';
 import { AppTile, BrandBar, Button, Character, LinkButton, Screen, T } from '@/components/ui';
 import { LoopMark } from '@/brand/logo';
 import { usage } from '@/data/usage';
 import { useOnReturn } from '@/lib/hooks';
-import { openUsageAccessSettings } from '@/lib/permissions';
+import { openUsageAccessSettings, restrictedSettingsLikely } from '@/lib/permissions';
 import { useSettings } from '@/store/settings';
 import { colors, fonts, radius } from '@/theme/tokens';
 
@@ -20,6 +21,8 @@ export default function UsageAccess() {
   const roaster = useSettings((s) => s.roaster);
   const set = useSettings((s) => s.set);
   const [phase, setPhase] = useState<Phase>('ask');
+  // Sideloaded on Android 13+: show the "Allow restricted settings" steps before the first trip.
+  const [restricted] = useState(restrictedSettingsLikely);
 
   // Only react to a trip to Settings that this screen started.
   const waiting = useRef(false);
@@ -68,7 +71,10 @@ export default function UsageAccess() {
             I need Usage Access to count your screen time. I only see how long you use each app.{' '}
             <T v="bodyBold">Never your messages, photos or what you watch.</T>
           </T>
-          {notFound ? <NotFoundNudge /> : <SettingsPreview />}
+          {notFound ? <NotFoundNudge /> : restricted ? null : <SettingsPreview />}
+          {restricted || (notFound && Platform.OS === 'android' && Number(Platform.Version) >= 33) ? (
+            <RestrictedHelp upfront={restricted && !notFound} then="Show me the damage" />
+          ) : null}
         </View>
         <View style={{ flex: 1, minHeight: 24 }} />
         <View style={{ paddingHorizontal: 24, paddingBottom: 16, alignItems: 'center', gap: 4 }}>

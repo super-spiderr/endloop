@@ -9,5 +9,5 @@ export const LINKS = {
 
 export const privacyUrl = () => (LINKS.site ? `${LINKS.site.replace(/\/$/, '')}/privacy.html` : '');
 export const termsUrl = () => (LINKS.site ? `${LINKS.site.replace(/\/$/, '')}/terms.html` : '');
-export const supportUrl = () => (LINKS.site ? `${LINKS.site.replace(/\/$/, '')}/` : '');
+export const supportUrl = () => (LINKS.site ? `${LINKS.site.replace(/\/$/, '')}/support.html` : '');
 export const mailto = (subject: string) => (LINKS.supportEmail ? `mailto:${LINKS.supportEmail}?subject=${encodeURIComponent(subject)}` : '');

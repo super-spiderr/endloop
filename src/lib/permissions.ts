@@ -23,6 +23,12 @@ export const openOverlaySettings = () =>
 export const openBatterySettings = () =>
   EndloopCore ? EndloopCore.openBatterySettings() : openAction('android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS');
 
+/**
+ * Android 13+ greys out Usage access and Display over other apps for apps installed outside the
+ * Play Store until the user allows "restricted settings" in App info. False when we can't tell.
+ */
+export const restrictedSettingsLikely = (): boolean => EndloopCore?.isRestrictedSettingsLikely?.() ?? false;
+
 /** Current state of each permission; null when it can't be checked in this build. */
 export function checkPermissions(): { usage: boolean | null; overlay: boolean | null; battery: boolean | null; notifications: boolean | null } {
   if (!EndloopCore) return { usage: null, overlay: null, battery: null, notifications: null };

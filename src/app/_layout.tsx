@@ -4,11 +4,13 @@ import * as SplashScreen from 'expo-splash-screen';
 import * as SystemUI from 'expo-system-ui';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useState } from 'react';
+import { AppState } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AnimatedSplash } from '@/components/animated-splash';
-import { startWatcherSync } from '@/lib/watcher';
+import { startWatcherSync, syncWatcher } from '@/lib/watcher';
+import { checkRoastUpdates } from '@/roasts/remote';
 import { useSettings } from '@/store/settings';
 import { fonts } from '@/theme/tokens';
 
@@ -37,6 +39,23 @@ export default function RootLayout() {
 
   // Keep the native watcher (limits + roast lines) in sync with settings.
   useEffect(() => startWatcherSync(), []);
+
+  // Fresh roast lines from the cloud (at most every 6 h, in the background), and on every return to
+  // the app re-send the watcher its lines so dated festival lines start and stop on the right day.
+  useEffect(() => {
+    const refresh = () => {
+      syncWatcher().catch(() => {});
+      checkRoastUpdates()
+        .then((r) => (r === 'updated' ? syncWatcher() : undefined))
+        .catch(() => {});
+    };
+    const t = setTimeout(refresh, 4000); // after the splash, never on the start-up path
+    const sub = AppState.addEventListener('change', (st) => st === 'active' && refresh());
+    return () => {
+      clearTimeout(t);
+      sub.remove();
+    };
+  }, []);
 
   // Anti-cheat: raised limits and removals scheduled for "tomorrow" take effect once their day comes.
   useEffect(() => useSettings.getState().applyScheduled(), []);

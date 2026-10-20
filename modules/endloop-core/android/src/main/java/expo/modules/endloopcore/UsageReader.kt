@@ -174,4 +174,28 @@ object UsageReader {
     }
     return fg
   }
+
+  /**
+   * True when [pkg] has an activity that was paused but never stopped since [from]: it's still on
+   * screen without being in front, which is what picture-in-picture looks like. A normal trip to the
+   * background stops the activity within a second or two. Needs ACTIVITY_STOPPED (Android 10+).
+   */
+  fun stillVisibleInBackground(context: Context, pkg: String, from: Long, to: Long): Boolean {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || !hasAccess(context)) return false
+    val usm = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+    val events = usm.queryEvents(from, to) ?: return false
+    var paused = false
+    val e = UsageEvents.Event()
+    while (events.hasNextEvent()) {
+      events.getNextEvent(e)
+      if (e.packageName != pkg) continue
+      when (e.eventType) {
+        PAUSED -> paused = true
+        RESUMED, STOPPED -> paused = false
+      }
+    }
+    return paused
+  }
+
+  private const val STOPPED = 23 // ACTIVITY_STOPPED, API 29
 }

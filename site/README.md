@@ -1,8 +1,9 @@
 # Endloop public site (privacy, terms, support)
 
 Plain static pages for the Play Store listing and the in-app links:
-`index.html` (support/FAQ), `privacy.html`, `terms.html`, shared `style.css`, `wordmark.svg`.
-System fonts only: the licensed Clash Display / Satoshi files must never be published here.
+`index.html` (the Endloop website: how it works, features, Premium), `support.html` (support/FAQ), `privacy.html`, `terms.html`, shared `style.css`, `wordmark.svg`, `favicon.png`.
+The website loads Clash Display and Satoshi from Fontshare's web CDN (allowed); never copy the font files into this folder.
+Legal/support pages use system fonts. The licensed font files must never be published here.
 
 ## Before publishing
 1. `sh site/set-email.sh <support email>` (replaces every `{{SUPPORT_EMAIL}}`).
@@ -21,5 +22,6 @@ a feature is added or changed during testing:
 - Accounts/sign-in, iOS, or new third-party SDKs
 Then also update the Play Console data-safety form to match, and `docs/handoff/05-decisions-and-constraints.md`.
 
-Current facts the policy relies on (29 Sep 2026): no network calls in the app; no analytics/ads/crash SDKs;
-all data in on-device storage; share/save only when the user taps; RevenueCat + Google Play for purchases (billing not wired yet).
+Current facts the policy relies on (12 Oct 2026): the only network call is the roast-update check (`src/roasts/remote.ts`:
+Supabase `roast_manifest` / `roast_pack`, at most every 12 h, sends nothing about the user); no analytics/ads/crash SDKs;
+all data in on-device storage (including the optional name used in roasts); share/save only when the user taps; RevenueCat + Google Play for purchases (billing not wired yet).

@@ -27,9 +27,15 @@ type EndloopCoreModule = {
   canDrawOverlays(): boolean;
   isIgnoringBatteryOptimizations(): boolean;
   areNotificationsEnabled(): boolean;
+  /** Opens the page and brings Endloop back by itself once the switch is on. */
   openUsageAccessSettings(): Promise<void>;
+  /** Opens the page and brings Endloop back by itself once the switch is on. */
   openOverlaySettings(): Promise<void>;
   openBatterySettings(): Promise<void>;
+  /** Package of the store that installed Endloop ("com.android.vending" for Play), or null when sideloaded. */
+  installSource(): string | null;
+  /** Android 13+ and installed from an APK file or download: Usage access and overlay need "Allow restricted settings" first. */
+  isRestrictedSettingsLikely(): boolean;
   listApps(days: number): Promise<NativeApp[]>;
   todayMinutes(packages: string[]): Promise<Record<string, number>>;
   setConfig(json: string): Promise<void>;

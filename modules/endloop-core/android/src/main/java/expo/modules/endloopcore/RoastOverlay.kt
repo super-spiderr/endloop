@@ -6,6 +6,9 @@ import android.content.Intent
 import android.graphics.PixelFormat
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -81,12 +84,69 @@ class RoastOverlay(private val context: Context) {
     val v = view
     view = null
     v?.let { runCatching { wm.removeView(it) } }
+    releaseAudio()
   }
 
-  /** Leave the app that hit its limit. */
-  fun goHome() {
-    val home = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    runCatching { context.startActivity(home) }
+  /**
+   * Leave the app that hit its limit, through [ExitActivity] rather than straight to the home screen:
+   * going home directly tells apps with auto picture-in-picture to shrink and keep playing.
+   * Call it while the roast is still on screen (Android 15 only lets an overlay app start
+   * activities from the background while its overlay is visible).
+   */
+  fun leave() {
+    val exit = Intent(context, ExitActivity::class.java)
+      .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+    try {
+      context.startActivity(exit)
+    } catch (e: Exception) {
+      Log.w(TAG, "exit activity failed, going home directly", e)
+      runCatching {
+        context.startActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+      }
+    }
+  }
+
+  // ---- media: the video or song underneath stops while the roast is up ---------------------
+
+  private val audio = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+  private var focus: AudioFocusRequest? = null
+  private val onFocusChange = AudioManager.OnAudioFocusChangeListener { }
+
+  /**
+   * Take audio focus for good (we never play anything). Well-behaved players pause on a permanent
+   * focus loss and don't start again by themselves.
+   */
+  fun takeAudio() {
+    if (focus != null) return
+    val result = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      val req = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+        .setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION).setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
+        .setOnAudioFocusChangeListener(onFocusChange, main)
+        .build()
+      focus = req
+      audio.requestAudioFocus(req)
+    } else {
+      @Suppress("DEPRECATION")
+      audio.requestAudioFocus(onFocusChange, AudioManager.STREAM_SYSTEM, AudioManager.AUDIOFOCUS_GAIN)
+    }
+    Log.i(TAG, "audio focus ${if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) "taken" else "refused ($result)"}")
+  }
+
+  fun releaseAudio() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      focus?.let { audio.abandonAudioFocusRequest(it) }
+      focus = null
+    } else {
+      @Suppress("DEPRECATION")
+      audio.abandonAudioFocus(onFocusChange)
+    }
+  }
+
+  /** Pause whatever is playing without keeping focus (the watcher's picture-in-picture safety net). */
+  fun pauseMedia() = main.post {
+    if (view != null) return@post // the roast is up and already holds focus
+    takeAudio()
+    main.postDelayed({ if (view == null) releaseAudio() }, 1_000L)
   }
 
   // ---------------------------------------------------------------------------
@@ -179,8 +239,8 @@ class RoastOverlay(private val context: Context) {
     })
 
     fun close() {
+      onClose() // leaves the app while the roast is still on screen
       hide()
-      onClose()
     }
 
     fun roastStep() {
@@ -214,11 +274,13 @@ class RoastOverlay(private val context: Context) {
           Log.w(TAG, "overlay removed by system")
           view = null
           busy = false
+          releaseAudio()
         }
       }
     })
     wm.addView(root, params())
     view = root
+    takeAudio()
     root.requestFocus()
     enter(root)
     runCatching { buzz() }

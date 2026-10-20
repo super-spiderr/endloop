@@ -29,7 +29,7 @@ export default function PrivacyPrefs() {
           <Character source={pose(s.roaster, 'dramatic')} size={150} alt={`${roasterName[s.roaster]}, clutching their chest`} />
         </View>
         <T v="display" style={{ fontSize: 28, lineHeight: 31 }}>Delete everything?</T>
-        <T>Your limits, stats, streaks, roasts and snooze history are wiped from this phone. This can&apos;t be undone.</T>
+        <T>Your name, limits, stats, streaks, roasts and snooze history are wiped from this phone. This can&apos;t be undone.</T>
         <Button label="Keep my data" onPress={() => setDel(false)} />
         <View style={{ alignItems: 'center' }}>
           <LinkButton

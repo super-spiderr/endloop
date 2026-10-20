@@ -394,6 +394,8 @@ class Store(context: Context) {
 
   /** "Closed it" on a roast without snoozing (or backed out of a snooze): a win for the day. */
   fun addWin() = prefs.edit().putInt("wins:${today()}", wins(today()) + 1).apply()
+  /** The close didn't really leave the app (still in front, or in picture-in-picture). */
+  fun undoWin() = prefs.edit().putInt("wins:${today()}", (wins(today()) - 1).coerceAtLeast(0)).apply()
   fun wins(day: String) = prefs.getInt("wins:$day", 0)
 
   /** Every roast shown (newest last, capped): Screen 11's Hall of shame. */

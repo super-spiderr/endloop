@@ -2,6 +2,7 @@ package expo.modules.endloopcore
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageInstaller
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
@@ -34,15 +35,40 @@ class EndloopCoreModule : Module() {
     Function<Boolean>("areNotificationsEnabled") { NotificationManagerCompat.from(context).areNotificationsEnabled() }
 
     // ---- open the right Settings page ----
+    // Both come back to Endloop by themselves once the switch is on (PermissionReturn).
     AsyncFunction<Unit>("openUsageAccessSettings") {
       // Android 10+ can jump straight to Endloop's row on most phones; fall back to the list.
-      open(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS, Uri.parse("package:${context.packageName}")))
+      val opened = open(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS, Uri.parse("package:${context.packageName}")))
         || open(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+      if (opened) PermissionReturn.start(context, PermissionReturn.Kind.USAGE)
     }.runOnQueue(Queues.MAIN)
     AsyncFunction<Unit>("openOverlaySettings") {
-      open(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${context.packageName}")))
+      val opened = open(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${context.packageName}")))
         || open(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION))
+      if (opened) PermissionReturn.start(context, PermissionReturn.Kind.OVERLAY)
     }.runOnQueue(Queues.MAIN)
+    // Back in Endloop (by itself or by the user): no need to keep watching.
+    OnActivityEntersForeground { PermissionReturn.stop("Endloop in front") }
+
+    // ---- where Endloop was installed from ----
+    /** Package of the store that installed Endloop ("com.android.vending" for Play), or null when sideloaded. */
+    Function<String?>("installSource") { installer() }
+    /**
+     * Android 13+ greys out Usage access and Display over other apps until the user allows
+     * "restricted settings" in App info, but only for APKs installed from a file or a download.
+     * Store installs (Play, Galaxy Store...) and adb installs aren't affected, so check the
+     * install source Android recorded rather than just "not the Play Store".
+     */
+    Function<Boolean>("isRestrictedSettingsLikely") {
+      if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) return@Function false
+      val source = runCatching { context.packageManager.getInstallSourceInfo(context.packageName).packageSource }
+        .getOrDefault(PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED)
+      when (source) {
+        PackageInstaller.PACKAGE_SOURCE_LOCAL_FILE, PackageInstaller.PACKAGE_SOURCE_DOWNLOADED_FILE -> true
+        PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED -> installer().let { it != null && it != PLAY_STORE }
+        else -> false // a store or other trusted source
+      }
+    }
     AsyncFunction<Unit>("openBatterySettings") {
       open(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
         || open(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}")))
@@ -252,6 +278,16 @@ class EndloopCoreModule : Module() {
     false
   }
 
+  private fun installer(): String? = runCatching {
+    val pm = context.packageManager
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+      pm.getInstallSourceInfo(context.packageName).installingPackageName
+    } else {
+      @Suppress("DEPRECATION")
+      pm.getInstallerPackageName(context.packageName)
+    }
+  }.getOrNull()
+
   /** App icon as a small PNG in the cache folder, returned as a file:// URI for <Image>. */
   private fun iconUri(pm: PackageManager, pkg: String): String? = try {
     val dir = File(context.cacheDir, "app-icons").apply { mkdirs() }
@@ -267,5 +303,6 @@ class EndloopCoreModule : Module() {
 
   companion object {
     private const val DAY_MS = 24L * 60 * 60 * 1000
+    private const val PLAY_STORE = "com.android.vending"
   }
 }

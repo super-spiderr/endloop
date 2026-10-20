@@ -6,10 +6,11 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { pose, roasterName, type Pose } from '@/characters';
 import { BatteryIcon, BellIcon, CheckIcon, LayersIcon, WarnIcon } from '@/components/icons';
+import { RestrictedHelp } from '@/components/restricted-help';
 import { BrandBar, Button, Character, LinkButton, Screen, T } from '@/components/ui';
 import { appIconSupported } from '@/lib/app-icon';
 import { useOnReturn } from '@/lib/hooks';
-import { batterySteps, checkPermissions, openBatterySettings, openOverlaySettings, requestNotifications } from '@/lib/permissions';
+import { batterySteps, checkPermissions, openBatterySettings, openOverlaySettings, requestNotifications, restrictedSettingsLikely } from '@/lib/permissions';
 import { localDay, useSettings, type PermissionState } from '@/store/settings';
 import { colors, fonts, radius } from '@/theme/tokens';
 
@@ -64,6 +65,9 @@ export default function Permissions() {
   const allAnswered = CARDS.every((c) => permissions[c.key] !== 'pending');
   const face: Pose = done === 3 ? 'knuckles' : permissions.overlay === 'skipped' ? 'disbelief' : done >= 1 ? 'waiting' : 'clipboard';
   const steps = batterySteps();
+  // Sideloaded on Android 13+ and Usage access wasn't granted (that unlock covers both): the overlay
+  // switch will be greyed out until "Allow restricted settings", so say so before the first trip.
+  const restricted = restrictedSettingsLikely() && checkPermissions().usage === false;
 
   const act = async (k: Key) => {
     if (k === 'notifications') {
@@ -99,6 +103,7 @@ export default function Permissions() {
             const s = stateOf(c.key);
             return (
               <PermCard key={c.key} card={c} state={s} onPress={() => act(c.key)} onSkip={c.key === 'overlay' && s === 'active' ? () => setPermission('overlay', 'skipped') : undefined}>
+                {c.key === 'overlay' && s === 'active' && restricted ? <RestrictedHelp upfront then={c.button} /> : null}
                 {c.key === 'battery' && s === 'active' && steps ? (
                   <View style={st.steps}>
                     <T v="bodyBold" style={{ fontSize: 13 }}>On your {steps.brand} phone</T>

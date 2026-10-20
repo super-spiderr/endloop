@@ -30,6 +30,8 @@ export type PermissionState = 'pending' | 'granted' | 'skipped';
 type Settings = {
   onboarded: boolean;
   hasUsageAccess: boolean;
+  /** What Loop / Lupe call the user in some roasts ({name}). Optional; stays on the phone. */
+  name?: string;
   roaster: Roaster;
   roastLang: RoastLang;
   intensity: Intensity;
@@ -72,6 +74,16 @@ export function localDay(plus = 0): string {
   const m = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   return `${d.getFullYear()}-${m}-${day}`;
+}
+
+/** A name as typed, made safe for roast lines: trimmed, no braces or control characters, 20 chars max. */
+export function cleanName(raw: string): string {
+  return raw
+    .replace(/[{}\p{Cc}]/gu, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 20)
+    .trim();
 }
 
 /** Tanglish by default when the phone itself is set to Tamil. */

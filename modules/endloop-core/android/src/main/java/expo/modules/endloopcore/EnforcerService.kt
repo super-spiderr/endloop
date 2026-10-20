@@ -43,6 +43,10 @@ class EnforcerService : Service() {
   // The app in front hid our roast (it hides overlays), so we sent the user home to show it there.
   @Volatile private var sentHome = false
 
+  // The roast was just closed and we left that app through ExitActivity: checked two ticks later.
+  @Volatile private var exitFor: String? = null
+  @Volatile private var exitAt = 0L
+
   // Screen 9: when each app's roast was last closed, how often it came straight back, and the
   // short pause after sharing a roast.
   private val closedAt = HashMap<String, Long>()
@@ -139,6 +143,7 @@ class EnforcerService : Service() {
     eventsUpTo = now
 
     if (overlay.isShowing) keepOrDropRoast(pkg)
+    checkExit(pkg, now)
     if (pkg != foreground) {
       Log.d(TAG, "foreground: $foreground -> $pkg")
       foreground = pkg
@@ -235,8 +240,8 @@ class EnforcerService : Service() {
       awayTicks = 0
       return
     }
-    // We moved the user to the home screen so the roast could show: keep it up there.
-    if (sentHome && pkg == homePkg) {
+    // We moved the user to the home screen so the roast could show (passing through ExitActivity): keep it up there.
+    if (sentHome && (pkg == homePkg || pkg == packageName)) {
       awayTicks = 0
       return
     }
@@ -263,16 +268,39 @@ class EnforcerService : Service() {
     val km = getSystemService(Context.KEYGUARD_SERVICE) as android.app.KeyguardManager
     if (!pm.isInteractive || km.isKeyguardLocked) return
     sentHome = true
-    try {
-      startActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-      Log.i(TAG, "roast hidden by $pkg; sent home to show it")
-    } catch (e: Exception) {
-      Log.w(TAG, "couldn't go home", e)
+    overlay.leave()
+    Log.i(TAG, "roast hidden by $pkg; sent home to show it")
+  }
+
+  /**
+   * Safety net after closing the roast, two ticks on:
+   * - the app is still in front (the exit didn't take): forget the close, so the next tick shows
+   *   the roast again as a plain roast rather than "back already?";
+   * - the app is still on screen without being in front (picture-in-picture): pause its media again
+   *   and take back the win, because the user hasn't really left.
+   */
+  private fun checkExit(pkg: String?, now: Long) {
+    val left = exitFor ?: return
+    if (now - exitAt < 2 * TICK_MS - 500) return
+    exitFor = null
+    when {
+      pkg == left -> {
+        Log.w(TAG, "exit didn't take: $left still in front")
+        closedAt.remove(left)
+        store.undoWin()
+      }
+      UsageReader.stillVisibleInBackground(this, left, exitAt - 1_000L, now) -> {
+        Log.w(TAG, "$left still on screen after the roast (picture-in-picture?): pausing it")
+        overlay.pauseMedia()
+        store.undoWin()
+      }
+      else -> Log.d(TAG, "left $left cleanly")
     }
   }
 
   private fun roast(config: EnforcerConfig, app: TrackedApp, usedMin: Int, now: Long) {
     if (overlay.isShowing || now < store.snoozedUntil(app.packageName) || now < shareGraceUntil) return
+    if (exitFor == app.packageName) return // just closed: checkExit decides what happens next
     val pkg = app.packageName
     overlayFor = pkg
     awayTicks = 0
@@ -342,7 +370,9 @@ class EnforcerService : Service() {
         closedAt[pkg] = System.currentTimeMillis()
         if (!reopened) reopens[pkg] = 0
         store.addWin()
-        overlay.goHome()
+        exitFor = pkg
+        exitAt = System.currentTimeMillis()
+        overlay.leave()
       },
       onSnooze = { reason ->
         overlayFor = null

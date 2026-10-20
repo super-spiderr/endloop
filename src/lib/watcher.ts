@@ -148,7 +148,7 @@ const DEFAULT_BEDTIME_MIN = 23 * 60 + 30;
 
 /** What the Kotlin watcher needs: limits plus the roast lines it may pick from. */
 export function buildConfig(s: S): WatcherConfig {
-  const who = { lang: s.roastLang, intensity: s.intensity, roaster: s.roaster };
+  const who = { lang: s.roastLang, intensity: s.intensity, roaster: s.roaster, name: s.name || undefined };
   return {
     enabled: s.onboarded && s.tracked.length > 0,
     closeLabel: s.roastLang === 'ta-Latn' ? 'Sari, close pannu' : 'Fine. Close it.',

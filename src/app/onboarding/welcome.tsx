@@ -45,7 +45,7 @@ export default function Welcome() {
       {done ? (
         <View style={{ paddingHorizontal: 24, paddingBottom: 24, gap: 14, alignItems: 'center' }}>
           <Animated.View entering={FadeInDown.duration(380)} style={{ alignSelf: 'stretch' }}>
-            <Button label="…yeah, that's me" tone="white" onPress={() => router.push('/onboarding/usage-access')} />
+            <Button label="…yeah, that's me" tone="white" onPress={() => router.push('/onboarding/name')} />
           </Animated.View>
           <Animated.View entering={FadeIn.delay(250)} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             <LockIcon />
