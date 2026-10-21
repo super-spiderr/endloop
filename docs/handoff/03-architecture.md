@@ -8,7 +8,7 @@ React Native (Expo Router screens, zustand store)
    ▼                                               │
 EndloopCore (Kotlin Expo module) ── setConfig ──► Store.kt (SharedPreferences "endloop_core")
                                                     │
-                                   EnforcerService (foreground service, 4 s tick)
+                                   EnforcerService (foreground service, 4 s tick, 1 s while the roast is up)
                                      ├─ UsageReader: which app is in front, minutes today
                                      ├─ Alerts/Notifier/Banner: 75%, 90%, late night, weekly
                                      └─ RoastOverlay: full-screen roast + snooze friction
@@ -31,7 +31,7 @@ The JS side owns settings and copy. The native side only reads the config JSON a
 | File | Job |
 |---|---|
 | `EndloopCoreModule.kt` | JS API: hasUsageAccess, canDrawOverlays, isIgnoringBatteryOptimizations, areNotificationsEnabled, open*Settings, listApps, todayMinutes, appDetail, history, roastLog, snoozeLog, shareRoast, weeklyCard, clearData, installed, setConfig, start/stopWatcher, lastHeartbeat, testNotification, appIconSupported/appIcon/setAppIcon. Settings pages open from `currentActivity` on the main queue. |
-| `EnforcerService.kt` | Foreground service, 4 s tick. Detects the foreground app, warns at 75/90%, roasts at 100%, late-night nudge (bedtime → 5 am, once a night), weekly roast (Sunday 19:00+), live status line, daily summary save, pause support. Keeps or drops the overlay (`keepOrDropRoast`: drops at once for protected apps/home, otherwise after 2 ticks; stays while the user is mid-snooze). Reopen within 10 min escalates. 90 s grace after sharing. |
+| `EnforcerService.kt` | Foreground service, 4 s tick. Detects the foreground app, warns at 75/90%, roasts at 100%, late-night nudge (bedtime → 5 am, once a night), weekly roast (Sunday 19:00+), live status line, daily summary save, pause support. Keeps or drops the overlay (`keepOrDropRoast`: drops at once for protected apps/home, otherwise after 4 s; stays while the user is mid-snooze). While the roast is up it ticks every second and `keepUnderRoast` keeps the roasted app out of sight: if it comes back to the front (Recents, its icon, a link) or shows in picture-in-picture, it takes audio focus again and leaves the app again through ExitActivity, at most every 1.5 s. Reopen within 10 min escalates. 90 s grace after sharing. |
 | `RoastOverlay.kt` | `TYPE_APPLICATION_OVERLAY`, edge-to-edge (covers status bar), focusable (back key = close, keyboard for typing step), Clash Display font, slide-up + word-by-word reveal, convince → type → wait (custom `Ring` view with the character's face) → ready. `onHiddenBySystem` callback when an app hides overlays. |
 | `Alerts.kt` | Builds every Screen 8 notification (shared by the watcher and `testNotification`). |
 | `Notifier.kt` | Channels: watching (min), heads_up, last_call, late_night, weekly; `rich()` with BigPicture banners; deep links. |

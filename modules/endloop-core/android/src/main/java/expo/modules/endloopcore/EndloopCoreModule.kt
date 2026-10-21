@@ -50,6 +50,15 @@ class EndloopCoreModule : Module() {
     // Back in Endloop (by itself or by the user): no need to keep watching.
     OnActivityEntersForeground { PermissionReturn.stop("Endloop in front") }
 
+    /** Settings → Status notification: the system page for just the "Loop is watching" channel. */
+    AsyncFunction<Unit>("openStatusNotificationSettings") {
+      open(
+        Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+          .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+          .putExtra(Settings.EXTRA_CHANNEL_ID, Notifier.CHANNEL_WATCHING)
+      ) || open(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName))
+    }.runOnQueue(Queues.MAIN)
+
     // ---- where Endloop was installed from ----
     /** Package of the store that installed Endloop ("com.android.vending" for Play), or null when sideloaded. */
     Function<String?>("installSource") { installer() }
@@ -69,8 +78,24 @@ class EndloopCoreModule : Module() {
         else -> false // a store or other trusted source
       }
     }
+    /**
+     * Endloop's own App info page (Battery → Unrestricted, 2 taps) instead of the full optimisation list,
+     * and back to Endloop by itself once it's exempt. No REQUEST_IGNORE_BATTERY_OPTIMIZATIONS:
+     * Play only allows that one-tap dialog for some app categories, and screen-time apps aren't one.
+     */
     AsyncFunction<Unit>("openBatterySettings") {
-      open(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+      val opened = open(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}")))
+        || open(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+      if (opened) PermissionReturn.startBattery(context)
+    }.runOnQueue(Queues.MAIN)
+    /**
+     * The phone maker's own autostart / background page (Xiaomi, Oppo/Realme, Vivo/iQOO, OnePlus, Samsung).
+     * Component names differ by OS version, so try each and fall back to App info. False if nothing opened.
+     */
+    AsyncFunction<Boolean>("openBrandBackgroundSettings") {
+      val brand = (android.os.Build.MANUFACTURER ?: "").lowercase()
+      val candidates = BRAND_PAGES.filter { (key, _) -> key.any { brand.contains(it) } }.flatMap { it.second }
+      candidates.any { (pkg, cls) -> open(Intent().setClassName(pkg, cls)) }
         || open(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}")))
     }.runOnQueue(Queues.MAIN)
 
@@ -259,6 +284,8 @@ class EndloopCoreModule : Module() {
     /** JSON array of { packageName, reason, at } from the "Convince me" step. */
     Function<String>("snoozeLog") { Store(context).snoozeLogJson }
     Function<Double>("lastHeartbeat") { Store(context).heartbeat.toDouble() }
+    /** H7: JSON array of { from, to } when Endloop was off while the phone was on. */
+    Function<String>("offGaps") { Store(context).offGapsJson }
   }
 
   /**
@@ -304,5 +331,27 @@ class EndloopCoreModule : Module() {
   companion object {
     private const val DAY_MS = 24L * 60 * 60 * 1000
     private const val PLAY_STORE = "com.android.vending"
+
+    /** Known autostart / background pages per brand (dontkillmyapp.com). First one that opens wins. */
+    private val BRAND_PAGES: List<Pair<List<String>, List<Pair<String, String>>>> = listOf(
+      listOf("xiaomi", "redmi", "poco") to listOf(
+        "com.miui.securitycenter" to "com.miui.permcenter.autostart.AutoStartManagementActivity",
+      ),
+      listOf("oppo", "realme", "oneplus") to listOf(
+        "com.coloros.safecenter" to "com.coloros.safecenter.permission.startup.StartupAppListActivity",
+        "com.coloros.safecenter" to "com.coloros.safecenter.startupapp.StartupAppListActivity",
+        "com.oppo.safe" to "com.oppo.safe.permission.startup.StartupAppListActivity",
+        "com.oneplus.security" to "com.oneplus.security.chainlaunch.view.ChainLaunchAppListActivity",
+      ),
+      listOf("vivo", "iqoo") to listOf(
+        "com.vivo.permissionmanager" to "com.vivo.permissionmanager.activity.BgStartUpManagerActivity",
+        "com.iqoo.secure" to "com.iqoo.secure.ui.phoneoptimize.BgStartUpManager",
+        "com.iqoo.secure" to "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity",
+      ),
+      listOf("samsung") to listOf(
+        "com.samsung.android.lool" to "com.samsung.android.sm.battery.ui.BatteryActivity",
+        "com.samsung.android.lool" to "com.samsung.android.sm.ui.battery.BatteryActivity",
+      ),
+    )
   }
 }

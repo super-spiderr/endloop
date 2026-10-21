@@ -12,7 +12,7 @@ import { Chevron, Group, NOTIFY_ROWS, NavRow, Row, settingsStyles } from '@/comp
 import { Avatar, Button, Character, LinkButton, Sheet, T } from '@/components/ui';
 import { APP_ICON_LABEL, AppIconImage, appIconSupported, getAppIcon, setAppIcon, type AppIconName } from '@/lib/app-icon';
 import { useOnReturn } from '@/lib/hooks';
-import { checkPermissions, requestNotifications } from '@/lib/permissions';
+import { batteryNeededUpfront, checkPermissions, requestNotifications } from '@/lib/permissions';
 import { localDay, useSettings } from '@/store/settings';
 import { colors } from '@/theme/tokens';
 
@@ -40,7 +40,8 @@ export default function Settings() {
   useOnReturn(() => setPerms(checkPermissions()));
 
   const paused = s.pausedOn === localDay();
-  const toFix = [perms.usage, perms.overlay, perms.battery, perms.notifications].filter((x) => x === false).length;
+  // battery only counts as a problem on brands that kill background apps (elsewhere the service is enough)
+  const toFix = [perms.usage, perms.overlay, batteryNeededUpfront() ? perms.battery : true, perms.notifications].filter((x) => x === false).length;
   const notifOn = NOTIFY_ROWS.filter(([k]) => s.notify[k]).length;
 
   const pickRoaster = (r: Roaster) => {

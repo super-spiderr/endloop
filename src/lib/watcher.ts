@@ -92,6 +92,9 @@ const NOTIF: Record<S['roastLang'], NonNullable<WatcherConfig['notif']>> = {
     weeklyText: 'Brace yourself.',
     weeklyLabel: 'THIS WEEK',
     weeklyOpen: 'See my roast',
+    minimalText: 'Endloop is on.',
+    browserTitle: 'Switched to the browser? Cute.',
+    browserText: "{app} in a browser is still {app}. Add your browser to Endloop and I'll watch that too.",
   },
   'ta-Latn': {
     headsUpTitle: '{app}: innum {left} dhaan',
@@ -111,6 +114,9 @@ const NOTIF: Record<S['roastLang'], NonNullable<WatcherConfig['notif']>> = {
     weeklyText: 'Thayaaraa irunga.',
     weeklyLabel: 'INDHA VAARAM',
     weeklyOpen: 'Roast-a paaru',
+    minimalText: 'Endloop on-la irukku.',
+    browserTitle: 'Browser-ku poitiya? Cute.',
+    browserText: 'Browser-la {app} paathaalum adhu {app} dhaan. Browser-ayum Endloop-la add pannu, adhayum paapen.',
   },
 };
 
@@ -127,6 +133,8 @@ const ROAST: Record<S['roastLang'], NonNullable<WatcherConfig['roast']>> = {
     shareStat: '{app} · {time} today',
     shareTagline: 'Get roasted. Scroll less.',
     shareLabel: 'Share this roast',
+    clockEyebrow: 'CLOCK CHANGED?',
+    clockLine: "Moved your clock? Time doesn't work like that. Neither do limits.",
   },
   'ta-Latn': {
     eyebrow: "TIME'S UP",
@@ -140,6 +148,8 @@ const ROAST: Record<S['roastLang'], NonNullable<WatcherConfig['roast']>> = {
     shareStat: '{app} · innaiku {time}',
     shareTagline: 'Get roasted. Scroll less.',
     shareLabel: 'Indha roast-a share pannu',
+    clockEyebrow: 'CLOCK-A MAATHINIYA?',
+    clockLine: 'Clock-a maathina time maaridumaa? Limit-um maaradhu.',
   },
 };
 
@@ -165,6 +175,7 @@ export function buildConfig(s: S): WatcherConfig {
     roast: ROAST[s.roastLang],
     bedtimeMin: s.bedtimeMin ?? DEFAULT_BEDTIME_MIN,
     notify: s.notify,
+    statusMode: s.statusMode ?? 'live',
     pausedUntil: s.pausedOn === localDay() ? endOfToday() : 0,
     roaster: s.roaster,
     intensity: s.intensity,

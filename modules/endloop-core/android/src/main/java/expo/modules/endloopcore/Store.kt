@@ -154,6 +154,9 @@ data class NotifCopy(
   val weeklyText: String,
   val weeklyLabel: String,
   val weeklyOpen: String,
+  val minimalText: String, // Settings → Status notification: Minimal
+  val browserTitle: String, // H2: went to the browser right after a roast
+  val browserText: String,
 ) {
   companion object {
     val DEFAULT = NotifCopy(
@@ -174,6 +177,9 @@ data class NotifCopy(
       weeklyText = "Brace yourself.",
       weeklyLabel = "THIS WEEK",
       weeklyOpen = "See my roast",
+      minimalText = "Endloop is on.",
+      browserTitle = "Switched to the browser? Cute.",
+      browserText = "{app} in a browser is still {app}. Add your browser to Endloop and I'll watch that too.",
     )
 
     fun parse(o: JSONObject?): NotifCopy {
@@ -198,6 +204,9 @@ data class NotifCopy(
         weeklyText = s("weeklyText", d.weeklyText),
         weeklyLabel = s("weeklyLabel", d.weeklyLabel),
         weeklyOpen = s("weeklyOpen", d.weeklyOpen),
+        minimalText = s("minimalText", d.minimalText),
+        browserTitle = s("browserTitle", d.browserTitle),
+        browserText = s("browserText", d.browserText),
       )
     }
   }
@@ -216,6 +225,8 @@ data class RoastText(
   val shareStat: String,
   val shareTagline: String,
   val shareLabel: String,
+  val clockEyebrow: String, // H6
+  val clockLine: String,
 ) {
   companion object {
     val DEFAULT = RoastText(
@@ -230,6 +241,8 @@ data class RoastText(
       shareStat = "{app} · {time} today",
       shareTagline = "Get roasted. Scroll less.",
       shareLabel = "Share this roast",
+      clockEyebrow = "CLOCK CHANGED?",
+      clockLine = "Moved your clock? Time doesn't work like that. Neither do limits.",
     )
 
     fun parse(o: JSONObject?): RoastText {
@@ -249,6 +262,8 @@ data class RoastText(
         shareStat = s("shareStat", d.shareStat),
         shareTagline = s("shareTagline", d.shareTagline),
         shareLabel = s("shareLabel", d.shareLabel),
+        clockEyebrow = s("clockEyebrow", d.clockEyebrow),
+        clockLine = s("clockLine", d.clockLine),
       )
     }
   }
@@ -271,6 +286,7 @@ data class EnforcerConfig(
   val bedtimeMin: Int, // minutes after midnight; late-night nudges run from here until 5 am. -1 = off
   val notify: Notify, // Settings: which notification types are on
   val pausedUntil: Long, // Settings → Pause for today: no warnings or roasts before this (ms)
+  val statusMinimal: Boolean, // Settings → Status notification: Minimal (no live counter)
 ) {
   fun app(pkg: String) = apps.firstOrNull { it.packageName == pkg }
 
@@ -316,6 +332,7 @@ data class EnforcerConfig(
             )
           },
           pausedUntil = o.optLong("pausedUntil", 0L),
+          statusMinimal = o.optString("statusMode", "live") == "minimal",
         )
       } catch (e: Exception) {
         null
@@ -338,6 +355,34 @@ class Store(context: Context) {
     get() = prefs.getLong("heartbeat", 0L)
     set(v) = prefs.edit().putLong("heartbeat", v).apply()
 
+  // ---- H6: changing the phone's clock ----
+  /** Wall clock minus time since boot, as last trusted. A big change without a reboot means the clock was moved. */
+  var clockOffset: Long
+    get() = prefs.getLong("clockOffset", Long.MIN_VALUE)
+    set(v) = prefs.edit().putLong("clockOffset", v).apply()
+  var bootCount: Int
+    get() = prefs.getInt("bootCount", -1)
+    set(v) = prefs.edit().putInt("bootCount", v).apply()
+  /** Clock moved: every tracked app counts as over its limit until this time since boot (ms). */
+  var tamperUntilElapsed: Long
+    get() = prefs.getLong("tamperUntilElapsed", 0L)
+    set(v) = prefs.edit().putLong("tamperUntilElapsed", v).apply()
+
+  // ---- H7: Endloop switched off (force stop, killed, permission off) while the phone was on ----
+  /** Add a gap: [from, to] in ms since epoch. Newest last, capped. */
+  fun logOffGap(from: Long, to: Long) {
+    val arr = runCatching { org.json.JSONArray(offGapsJson) }.getOrDefault(org.json.JSONArray())
+    arr.put(JSONObject().put("from", from).put("to", to))
+    while (arr.length() > 100) arr.remove(0)
+    prefs.edit().putString("offGaps", arr.toString()).apply()
+  }
+  val offGapsJson: String get() = prefs.getString("offGaps", "[]") ?: "[]"
+
+  /** When the user last swiped the status notification away: it stays away for the rest of that day. */
+  var statusDismissedAt: Long
+    get() = prefs.getLong("statusDismissedAt", 0L)
+    set(v) = prefs.edit().putLong("statusDismissedAt", v).apply()
+
   private fun today() = dayKey(System.currentTimeMillis())
 
   /** Remember that a warning (75 / 90) was sent today, so it's sent once per app per day. */
@@ -348,6 +393,10 @@ class Store(context: Context) {
   private fun night(): String = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date(System.currentTimeMillis() - 5 * 3_600_000L))
   fun lateNightSent() = prefs.getBoolean("late:${night()}", false)
   fun markLateNight() = prefs.edit().putBoolean("late:${night()}", true).apply()
+
+  /** H2: the "switched to the browser" nudge, once a day. */
+  fun browserNudged() = prefs.getBoolean("browser:${today()}", false)
+  fun markBrowserNudged() = prefs.edit().putBoolean("browser:${today()}", true).apply()
 
   /** The one-time "why this notification" explainer. */
   var explained: Boolean

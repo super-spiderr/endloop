@@ -31,7 +31,12 @@ type EndloopCoreModule = {
   openUsageAccessSettings(): Promise<void>;
   /** Opens the page and brings Endloop back by itself once the switch is on. */
   openOverlaySettings(): Promise<void>;
+  /** Endloop's App info page (Battery → Unrestricted); comes back by itself once exempt. */
   openBatterySettings(): Promise<void>;
+  /** The phone maker's autostart / background page, falling back to App info. False if nothing opened. */
+  openBrandBackgroundSettings(): Promise<boolean>;
+  /** System settings for just the status ("Loop is watching") channel. */
+  openStatusNotificationSettings?(): Promise<void>;
   /** Package of the store that installed Endloop ("com.android.vending" for Play), or null when sideloaded. */
   installSource(): string | null;
   /** Android 13+ and installed from an APK file or download: Usage access and overlay need "Allow restricted settings" first. */
@@ -42,6 +47,8 @@ type EndloopCoreModule = {
   startWatcher(): Promise<void>;
   stopWatcher(): Promise<void>;
   lastHeartbeat(): number;
+  /** JSON array of { from, to } (ms) when Endloop was off while the phone was on. */
+  offGaps?(): string;
   /** JSON array of { packageName, reason, at } from the "Convince me" step. */
   snoozeLog(): string;
   appDetail(packageName: string, days: number): Promise<NativeAppDetail>;
@@ -100,6 +107,9 @@ export type WatcherConfig = {
     weeklyText: string;
     weeklyLabel: string;
     weeklyOpen: string;
+    minimalText?: string;
+    browserTitle?: string;
+    browserText?: string;
   };
   /** Roast screen copy (Screen 9). */
   roast?: {
@@ -114,6 +124,8 @@ export type WatcherConfig = {
     shareStat: string;
     shareTagline: string;
     shareLabel: string;
+    clockEyebrow?: string;
+    clockLine?: string;
   };
   /** Minutes after midnight when late-night nudges start (until 5 am); -1 turns them off. */
   bedtimeMin?: number;
@@ -121,6 +133,8 @@ export type WatcherConfig = {
   notify?: { headsUp: boolean; lastCall: boolean; lateNight: boolean; weekly: boolean };
   /** Pause for today: no warnings or roasts before this time (ms). */
   pausedUntil?: number;
+  /** Settings → Status notification: "live" counter (default) or "minimal". */
+  statusMode?: 'live' | 'minimal';
   /** Copy for the "Convince me" step behind the snooze button. {app} and {n} are filled natively. */
   friction?: {
     eyebrow: string;

@@ -14,7 +14,7 @@ import { usage, type TodayUsage } from '@/data/usage';
 import { fill, pickRoast } from '@/roasts';
 import { dismissNews, useRoastNews } from '@/roasts/news';
 import { comparison, fmt } from '@/lib/time';
-import { batterySteps, openBatterySettings, openUsageAccessSettings } from '@/lib/permissions';
+import { batterySteps, openBatterySettings, openBrandBackgroundSettings, openUsageAccessSettings } from '@/lib/permissions';
 import { watcherLooksDead } from '@/lib/watcher';
 import { localDay, useSettings } from '@/store/settings';
 import { colors, fonts, gradients, radius, stateStyle, usageState } from '@/theme/tokens';
@@ -280,7 +280,7 @@ function KilledCard({ face, name, onClose }: { face: number; name: string; onClo
     <View accessibilityRole="alert" style={st.killed}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
         <Avatar source={face} size={48} bg="#3A3A3A" />
-        <T v="bodyBold" style={{ flex: 1, fontSize: 17, lineHeight: 22, color: colors.white }} accessibilityLabel={`${name}, asleep. Your phone put me to sleep. Let's stop that from happening again.`}>Your phone put me to sleep. Let&apos;s stop that from happening again.</T>
+        <T v="bodyBold" style={{ flex: 1, fontSize: 17, lineHeight: 22, color: colors.white }} accessibilityLabel={`${name}, asleep. Your phone put me to sleep, so your apps got a free pass. Let's stop that.`}>Your phone put me to sleep, so your apps got a free pass. Let&apos;s stop that.</T>
         <Pressable accessibilityLabel="Dismiss" onPress={onClose} hitSlop={8}>
           <CloseIcon color={colors.white} />
         </Pressable>
@@ -296,8 +296,13 @@ function KilledCard({ face, name, onClose }: { face: number; name: string; onClo
         <T style={{ fontSize: 14, lineHeight: 20, color: 'rgba(255,255,255,0.85)' }}>Set Endloop&apos;s battery use to Unrestricted so I stay awake.</T>
       )}
       <Pressable accessibilityRole="button" onPress={openBatterySettings} style={st.killedBtn}>
-        <T v="bodyBold" style={{ fontSize: 15 }}>Open battery settings</T>
+        <T v="bodyBold" style={{ fontSize: 15 }}>Fix it in 2 taps</T>
       </Pressable>
+      {steps ? (
+        <Pressable accessibilityRole="button" onPress={() => openBrandBackgroundSettings()} style={[st.killedBtn, { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.6)' }]}>
+          <T v="bodyBold" style={{ fontSize: 15, color: colors.white }}>{steps.brandPage}</T>
+        </Pressable>
+      ) : null}
     </View>
   );
 }

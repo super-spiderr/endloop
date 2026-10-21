@@ -10,7 +10,7 @@ import { RestrictedHelp } from '@/components/restricted-help';
 import { BrandBar, Button, Character, LinkButton, Screen, T } from '@/components/ui';
 import { appIconSupported } from '@/lib/app-icon';
 import { useOnReturn } from '@/lib/hooks';
-import { batterySteps, checkPermissions, openBatterySettings, openOverlaySettings, requestNotifications, restrictedSettingsLikely } from '@/lib/permissions';
+import { batteryNeededUpfront, batterySteps, checkPermissions, openBatterySettings, openBrandBackgroundSettings, openOverlaySettings, requestNotifications, restrictedSettingsLikely } from '@/lib/permissions';
 import { localDay, useSettings, type PermissionState } from '@/store/settings';
 import { colors, fonts, radius } from '@/theme/tokens';
 
@@ -18,15 +18,21 @@ type Key = 'notifications' | 'overlay' | 'battery';
 type CardState = 'waiting' | 'active' | 'done' | 'skipped';
 
 const CARDS: { key: Key; title: string; line: string; button: string; Icon: typeof BellIcon }[] = [
-  { key: 'notifications', title: 'Notifications', line: 'So I can warn you before I get mean.', button: 'Allow', Icon: BellIcon },
+  { key: 'notifications', title: 'Notifications', line: "So I can warn you before I get mean. You'll also see a small one that keeps me awake. Swipe it away if you like.", button: 'Allow', Icon: BellIcon },
   { key: 'overlay', title: 'Display over apps', line: 'So I can interrupt you mid-scroll. Rudely.', button: 'Turn on', Icon: LayersIcon },
   { key: 'battery', title: 'Battery', line: "So your phone doesn't put me to sleep on the job.", button: 'Fix it', Icon: BatteryIcon },
 ];
 
-/** Screen 6 · Final permissions. Easiest first; each card lights up in turn. */
+/**
+ * Screen 6 · Final permissions. Easiest first; each card lights up in turn.
+ * Battery is only asked here on brands that kill background apps; on other phones the
+ * foreground service is enough, and Today asks just-in-time if the watcher ever gets killed.
+ */
 export default function Permissions() {
   const { roaster, permissions, setPermission, set } = useSettings();
   const waitingFor = useRef<Key | null>(null);
+  const cards = batteryNeededUpfront() ? CARDS : CARDS.filter((c) => c.key !== 'battery');
+  const total = cards.length;
 
   // Check the real state when the user comes back from a Settings page.
   // (Without the native core we can't check, so returning counts as granted.)
@@ -53,7 +59,7 @@ export default function Permissions() {
     });
   }, [setPermission]);
 
-  const firstOpen = CARDS.find((c) => permissions[c.key] === 'pending')?.key;
+  const firstOpen = cards.find((c) => permissions[c.key] === 'pending')?.key;
   const stateOf = (k: Key): CardState => {
     const p: PermissionState = permissions[k];
     if (p === 'granted') return 'done';
@@ -61,9 +67,9 @@ export default function Permissions() {
     return k === firstOpen ? 'active' : 'waiting';
   };
 
-  const done = CARDS.filter((c) => permissions[c.key] === 'granted').length;
-  const allAnswered = CARDS.every((c) => permissions[c.key] !== 'pending');
-  const face: Pose = done === 3 ? 'knuckles' : permissions.overlay === 'skipped' ? 'disbelief' : done >= 1 ? 'waiting' : 'clipboard';
+  const done = cards.filter((c) => permissions[c.key] === 'granted').length;
+  const allAnswered = cards.every((c) => permissions[c.key] !== 'pending');
+  const face: Pose = done === total ? 'knuckles' : permissions.overlay === 'skipped' ? 'disbelief' : done >= 1 ? 'waiting' : 'clipboard';
   const steps = batterySteps();
   // Sideloaded on Android 13+ and Usage access wasn't granted (that unlock covers both): the overlay
   // switch will be greyed out until "Allow restricted settings", so say so before the first trip.
@@ -85,21 +91,21 @@ export default function Permissions() {
       <BrandBar step={6} />
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} bounces={false}>
         {/* Hero: the roaster gets the space, the title sits beside them. */}
-        <LinearGradient colors={done === 3 ? [colors.chillTint, '#C4E8D7'] : [colors.surface, colors.blush]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={st.hero}>
+        <LinearGradient colors={done === total ? [colors.chillTint, '#C4E8D7'] : [colors.surface, colors.blush]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={st.hero}>
           <View style={st.heroChar} pointerEvents="none">
             <Character source={pose(roaster, face)} size={210} alt={`${roasterName[roaster]}, getting ready`} />
           </View>
           <View style={{ width: '56%', gap: 12 }}>
-            <T v="display" style={{ fontSize: 28, lineHeight: 31 }}>3 quick things and I&apos;m ready.</T>
+            <T v="display" style={{ fontSize: 28, lineHeight: 31 }}>{total === 3 ? 'Three' : 'Two'} quick things and I&apos;m ready.</T>
             <View style={[st.donePill, { backgroundColor: colors.white }]}>
-              <View style={[st.doneDot, { backgroundColor: done === 3 ? colors.chill : colors.red }]} />
-              <T v="bodyBold" style={{ fontSize: 13, color: done === 3 ? colors.chill : colors.red }}>{done} of 3 done</T>
+              <View style={[st.doneDot, { backgroundColor: done === total ? colors.chill : colors.red }]} />
+              <T v="bodyBold" style={{ fontSize: 13, color: done === total ? colors.chill : colors.red }}>{done} of {total} done</T>
             </View>
           </View>
         </LinearGradient>
 
         <View style={{ paddingHorizontal: 24, paddingTop: 16, gap: 10 }}>
-          {CARDS.map((c) => {
+          {cards.map((c) => {
             const s = stateOf(c.key);
             return (
               <PermCard key={c.key} card={c} state={s} onPress={() => act(c.key)} onSkip={c.key === 'overlay' && s === 'active' ? () => setPermission('overlay', 'skipped') : undefined}>
@@ -110,6 +116,9 @@ export default function Permissions() {
                     {steps.steps.map((line, i) => (
                       <T key={i} style={{ fontFamily: fonts.medium, fontSize: 13, color: colors.ink }}>{`${i + 1}. ${line}`}</T>
                     ))}
+                    <View style={{ alignItems: 'flex-start' }}>
+                      <LinkButton label={`${steps.brandPage} →`} onPress={() => openBrandBackgroundSettings()} />
+                    </View>
                   </View>
                 ) : null}
               </PermCard>

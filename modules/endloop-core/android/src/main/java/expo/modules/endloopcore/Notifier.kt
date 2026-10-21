@@ -26,6 +26,7 @@ object Notifier {
   const val ID_EXPLAIN = 1002
   const val ID_LATE_NIGHT = 1003
   const val ID_WEEKLY = 1004
+  const val ID_BROWSER = 1005
   private const val RED = 0xFFE5132B.toInt()
   private const val WARNING_TIMEOUT_MS = 30 * 60_000L
 
@@ -79,13 +80,23 @@ object Notifier {
       .setContentTitle(title)
       .setContentText(status)
       .setStyle(NotificationCompat.BigTextStyle().bigText(status))
-      .setOngoing(true)
+      // Not ongoing: Android 13+ lets people swipe it away and the service keeps running.
+      // StatusDismissReceiver remembers the swipe so we don't keep re-posting it that day.
+      .setOngoing(false)
+      .setOnlyAlertOnce(true)
       .setSilent(true)
       .setShowWhen(false)
       .setPriority(NotificationCompat.PRIORITY_MIN)
       .setCategory(NotificationCompat.CATEGORY_STATUS)
       .setContentIntent(openApp(context))
+      .setDeleteIntent(dismissed(context))
       .build()
+
+  private fun dismissed(context: Context): PendingIntent =
+    PendingIntent.getBroadcast(
+      context, 3, Intent(context, StatusDismissReceiver::class.java),
+      PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+    )
 
   fun updateService(context: Context, title: String, status: String) =
     post(context, ID_SERVICE, serviceNotification(context, title, status))
@@ -104,6 +115,22 @@ object Notifier {
       .setContentIntent(openApp(context))
       .build()
     post(context, ID_EXPLAIN, n)
+  }
+
+  /** H2: a plain heads-up nudge (the browser loophole). */
+  fun nudge(context: Context, id: Int, title: String, text: String, character: Int) {
+    val n = NotificationCompat.Builder(context, CHANNEL_HEADS_UP)
+      .setSmallIcon(smallIcon)
+      .setColor(RED)
+      .setLargeIcon(runCatching { Banner.face(context, character) }.getOrNull())
+      .setContentTitle(title)
+      .setContentText(text)
+      .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+      .setAutoCancel(true)
+      .setTimeoutAfter(WARNING_TIMEOUT_MS)
+      .setContentIntent(openApp(context))
+      .build()
+    post(context, id, n)
   }
 
   // ---- warnings (75 / 90) and late night ----

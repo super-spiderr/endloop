@@ -51,6 +51,8 @@ type Settings = {
   /** Days paused, for "1 day off" in the weekly roast. */
   pausedDays: string[];
   roastSound: boolean;
+  /** Settings → Status notification: live counter or a plain "Endloop is on". */
+  statusMode: 'live' | 'minimal';
   /** Day the perfect-day card was last dismissed or shared (YYYY-MM-DD). */
   perfectSeen?: string;
 
@@ -106,6 +108,7 @@ const initial = {
   notify: { headsUp: true, lastCall: true, lateNight: true, weekly: true },
   pausedDays: [] as string[],
   roastSound: false,
+  statusMode: 'live' as 'live' | 'minimal',
 };
 
 export const useSettings = create<Settings>()(

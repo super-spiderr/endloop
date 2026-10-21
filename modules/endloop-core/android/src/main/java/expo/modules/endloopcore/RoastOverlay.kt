@@ -3,6 +3,7 @@ package expo.modules.endloopcore
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.PixelFormat
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
@@ -63,23 +64,75 @@ class RoastOverlay(private val context: Context) {
 
   val isShowing get() = view != null
 
+  // ---- landscape (games, full-screen video): character on the left, text and buttons on the right ----
+  private var side: ImageView? = null
+  private var columnRef: LinearLayout? = null
+  private var cutLeft = 0
+  private var cutRight = 0
+
+  /** The whole screen right now, in pixels (follows rotation). */
+  private fun screen(): Pair<Int, Int> =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) wm.maximumWindowMetrics.bounds.let { it.width() to it.height() }
+    else context.resources.displayMetrics.let { it.widthPixels to it.heightPixels }
+
+  private val isLandscape get() = screen().let { (w, h) -> w > h }
+
+  /**
+   * Portrait keeps the layout as it was. Landscape moves the step's character (tagged in [character])
+   * into the left 40% and pads the column so text and buttons sit on the right: one look, no scrolling.
+   * Re-run after every step change and on rotation, so the current step and its state are kept.
+   */
+  private fun applyOrientation() {
+    val col = columnRef ?: return
+    val s = side ?: return
+    val (w, _) = screen()
+    val land = isLandscape
+    val top = systemBar("status_bar_height")
+    col.setPadding(
+      if (land) (w * 0.40).toInt() else dp(24) + cutLeft,
+      top + dp(if (land) 60 else 72),
+      dp(24) + cutRight,
+      col.paddingBottom,
+    )
+    var res = 0
+    for (i in 0 until col.childCount) {
+      val c = col.getChildAt(i)
+      val r = c.tag as? Int ?: continue
+      res = r
+      c.visibility = if (land) View.GONE else View.VISIBLE
+    }
+    if (land && res != 0) {
+      s.setImageResource(res)
+      s.layoutParams = (s.layoutParams as FrameLayout.LayoutParams).apply { width = (w * 0.40).toInt() - dp(8) + cutLeft; leftMargin = cutLeft }
+      s.visibility = View.VISIBLE
+    } else {
+      s.visibility = View.GONE
+    }
+  }
+
   /** True while the user is on the "Convince me" step, i.e. actively answering the roast. */
   @Volatile var busy = false
 
   /** Some apps (Files, Settings-like screens) tell Android to hide other apps' overlays. Called when that happens. */
   @Volatile var onHiddenBySystem: (() -> Unit)? = null
 
-  fun show(copy: RoastCopy, onClose: () -> Unit, onSnooze: (reason: String) -> Unit, onShare: () -> Unit) = main.post {
+  /** [onVisible] runs once, when the roast is really on screen (activity starts from the background need that on Android 15). */
+  fun show(copy: RoastCopy, onClose: () -> Unit, onSnooze: (reason: String) -> Unit, onShare: () -> Unit, onVisible: () -> Unit = {}) = main.post {
     try {
-      build(copy, onClose, onSnooze, onShare)
+      build(copy, onClose, onSnooze, onShare, onVisible)
     } catch (e: Exception) {
       // never crash the app (and the watcher with it) over the overlay
       Log.e(TAG, "roast overlay failed", e)
     }
   }
 
+  private val relayout = Runnable { applyOrientation() }
+
   fun hide() = main.post {
     busy = false
+    main.removeCallbacks(relayout)
+    side = null
+    columnRef = null
     main.removeCallbacksAndMessages(COUNTDOWN)
     val v = view
     view = null
@@ -94,16 +147,29 @@ class RoastOverlay(private val context: Context) {
    * activities from the background while its overlay is visible).
    */
   fun leave() {
+    // NO_USER_ACTION: without it Android treats any activity start as "the user is leaving", which
+    // is what fires onUserLeaveHint and auto-enter picture-in-picture in the app underneath.
     val exit = Intent(context, ExitActivity::class.java)
-      .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+      .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS or Intent.FLAG_ACTIVITY_NO_USER_ACTION)
     try {
       context.startActivity(exit)
     } catch (e: Exception) {
       Log.w(TAG, "exit activity failed, going home directly", e)
       runCatching {
-        context.startActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        context.startActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_USER_ACTION))
       }
     }
+  }
+
+  /**
+   * Bring [pkg] back to the front where it left off: after a snooze (the roast had already moved it
+   * to the background), or to pull a picture-in-picture window back to full screen so [leave] can
+   * close it properly. Call it while the roast is still on screen, like [leave].
+   */
+  fun open(pkg: String) {
+    val launch = context.packageManager.getLaunchIntentForPackage(pkg) ?: return
+    launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION)
+    runCatching { context.startActivity(launch) }.onFailure { Log.w(TAG, "couldn't reopen $pkg", it) }
   }
 
   // ---- media: the video or song underneath stops while the roast is up ---------------------
@@ -142,6 +208,16 @@ class RoastOverlay(private val context: Context) {
     }
   }
 
+  /**
+   * The app under the roast came back and took audio focus from us (it starts playing again on
+   * return): ask for it again so it pauses. A paused video doesn't drop into picture-in-picture.
+   */
+  fun reclaimAudio() = main.post {
+    if (view == null) return@post
+    releaseAudio()
+    takeAudio()
+  }
+
   /** Pause whatever is playing without keeping focus (the watcher's picture-in-picture safety net). */
   fun pauseMedia() = main.post {
     if (view != null) return@post // the roast is up and already holds focus
@@ -151,7 +227,7 @@ class RoastOverlay(private val context: Context) {
 
   // ---------------------------------------------------------------------------
 
-  private fun build(copy: RoastCopy, onClose: () -> Unit, onSnooze: (String) -> Unit, onShare: () -> Unit) {
+  private fun build(copy: RoastCopy, onClose: () -> Unit, onSnooze: (String) -> Unit, onShare: () -> Unit, onVisible: () -> Unit) {
     if (view != null) return
     if (!Settings.canDrawOverlays(context)) {
       Log.w(TAG, "no overlay permission, roast skipped")
@@ -159,6 +235,7 @@ class RoastOverlay(private val context: Context) {
     }
 
     var onBack: () -> Unit = {}
+    var visibleOnce = false
     val root = object : FrameLayout(context) {
       // Back acts as "Close it" (on "Convince me" it steps back to the roast); the roast can't be swiped away.
       override fun dispatchKeyEvent(event: KeyEvent): Boolean {
@@ -169,11 +246,23 @@ class RoastOverlay(private val context: Context) {
         return super.dispatchKeyEvent(event)
       }
 
+      // Rotated mid-roast: resize the window to the new screen and re-lay out the same step.
+      override fun onConfigurationChanged(newConfig: Configuration?) {
+        super.onConfigurationChanged(newConfig)
+        if (view === this) runCatching { wm.updateViewLayout(this, params()) }
+        main.post { applyOrientation() }
+      }
+
       override fun onWindowVisibilityChanged(visibility: Int) {
         super.onWindowVisibilityChanged(visibility)
         // Our own hide() clears `view` first, so only log hiding we didn't ask for.
-        if (visibility == View.VISIBLE) Log.i(TAG, "overlay window visible")
-        else if (view === this) {
+        if (visibility == View.VISIBLE) {
+          Log.i(TAG, "overlay window visible")
+          if (!visibleOnce && view === this) {
+            visibleOnce = true
+            onVisible()
+          }
+        } else if (view === this) {
           Log.w(TAG, "overlay window hidden by system ($visibility)")
           onHiddenBySystem?.invoke()
         }
@@ -200,6 +289,24 @@ class RoastOverlay(private val context: Context) {
       addView(column, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT))
     }
     root.addView(scroll, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT))
+    // Landscape only: the step's character, bottom left.
+    val sideImage = ImageView(context).apply {
+      scaleType = ImageView.ScaleType.FIT_END
+      adjustViewBounds = false
+      visibility = View.GONE
+      importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+    }
+    root.addView(sideImage, FrameLayout.LayoutParams(dp(200), FrameLayout.LayoutParams.MATCH_PARENT).apply {
+      gravity = Gravity.BOTTOM or Gravity.START
+      topMargin = top + dp(60)
+    })
+    side = sideImage
+    columnRef = column
+    // Every step rebuilds the column: re-apply the layout once it's done.
+    column.setOnHierarchyChangeListener(object : android.view.ViewGroup.OnHierarchyChangeListener {
+      override fun onChildViewAdded(parent: View?, child: View?) { main.removeCallbacks(relayout); main.post(relayout) }
+      override fun onChildViewRemoved(parent: View?, child: View?) {}
+    })
     // Edge to edge means Android won't shrink the window for the keyboard on 11+: lift the content ourselves.
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
       root.setOnApplyWindowInsetsListener { _, insets ->
@@ -208,6 +315,12 @@ class RoastOverlay(private val context: Context) {
         // The real navigation bar (3-button or gesture) on this phone: the dimen above is only a guess.
         val nav = insets.getInsets(android.view.WindowInsets.Type.navigationBars()).bottom
         if (nav > 0) column.setPadding(column.paddingLeft, column.paddingTop, column.paddingRight, nav + dp(28))
+        // In landscape the camera cutout and the nav bar sit on the sides: keep text and buttons clear of them.
+        val sides = insets.getInsets(android.view.WindowInsets.Type.displayCutout() or android.view.WindowInsets.Type.navigationBars())
+        cutLeft = sides.left
+        cutRight = sides.right
+        main.removeCallbacks(relayout)
+        main.post(relayout)
         insets
       }
     }
@@ -631,6 +744,7 @@ class RoastOverlay(private val context: Context) {
   private fun character(res: Int, heightDp: Int): ImageView? {
     if (res == 0) return null
     return ImageView(context).apply {
+      tag = res // landscape: moved to the left column by applyOrientation()
       setImageResource(res)
       scaleType = ImageView.ScaleType.FIT_CENTER
       adjustViewBounds = true
@@ -657,7 +771,7 @@ class RoastOverlay(private val context: Context) {
   private fun headline(text: String, size: Float = 34f, bottom: Int = 36, display: Boolean = true) = TextView(context).apply {
     this.text = text
     setTextColor(0xFFFFFFFF.toInt())
-    setTextSize(TypedValue.COMPLEX_UNIT_SP, size)
+    setTextSize(TypedValue.COMPLEX_UNIT_SP, if (isLandscape) size * 0.8f else size)
     typeface = if (display) clash else Typeface.create("sans-serif-black", Typeface.NORMAL)
     setLineSpacing(0f, 1.08f)
     setPadding(0, dp(12), 0, dp(bottom))

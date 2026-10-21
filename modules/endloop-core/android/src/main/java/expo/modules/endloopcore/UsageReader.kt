@@ -15,8 +15,12 @@ import java.util.Calendar
  *
  * We count time between "activity resumed" and "activity paused" per package, and close every
  * open session when the screen turns off. This is more accurate than the daily buckets from
- * queryUsageStats, which lag and double count on some phones. ACTIVITY_STOPPED is ignored on
- * purpose: it arrives late when moving between screens of the same app and would cut sessions.
+ * queryUsageStats, which lag and double count on some phones. ACTIVITY_STOPPED doesn't end a
+ * session: it arrives late when moving between screens of the same app and would cut sessions.
+ *
+ * Picture-in-picture counts too (Android 10+): an app paused but not stopped is still on screen, so
+ * the time until it stops (or comes back, or the screen turns off) is added when it lasts at least
+ * [VISIBLE_AFTER_MS]. A normal switch stops the app within a second or two and adds nothing.
  */
 object UsageReader {
   // UsageEvents.Event constants, kept as ints so they work on every API level we support.
@@ -24,6 +28,9 @@ object UsageReader {
   private const val PAUSED = 2 // ACTIVITY_PAUSED / MOVE_TO_BACKGROUND
   private const val SCREEN_NON_INTERACTIVE = 16 // API 28
   private const val DEVICE_SHUTDOWN = 26 // API 29
+
+  /** Paused this long without stopping = still on screen (picture-in-picture, split screen). */
+  const val VISIBLE_AFTER_MS = 3_000L
 
   fun hasAccess(context: Context): Boolean {
     val ops = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
@@ -55,14 +62,22 @@ object UsageReader {
     val events = usm.queryEvents(start, end) ?: return emptyMap()
     val totals = HashMap<String, Long>()
     val open = HashMap<String, Long>() // package -> resumed at
+    val visible = HashMap<String, Long>() // package -> paused at, not stopped yet (maybe picture-in-picture)
+    val pip = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
     val seen = HashSet<String>()
     val e = UsageEvents.Event()
 
     fun close(pkg: String, at: Long) {
       val from = open.remove(pkg) ?: return
       if (at > from) totals[pkg] = (totals[pkg] ?: 0L) + (at - from)
+      if (pip) visible[pkg] = at
+    }
+    fun hidden(pkg: String, at: Long) {
+      val from = visible.remove(pkg) ?: return
+      if (at - from >= VISIBLE_AFTER_MS) totals[pkg] = (totals[pkg] ?: 0L) + (at - from)
     }
     fun closeAll(at: Long) = open.keys.toList().forEach { close(it, at) }
+    fun hideAll(at: Long) = visible.keys.toList().forEach { hidden(it, at) }
 
     while (events.hasNextEvent()) {
       events.getNextEvent(e)
@@ -70,6 +85,7 @@ object UsageReader {
       when (e.eventType) {
         RESUMED -> {
           if (!open.containsKey(pkg)) closeAll(e.timeStamp)
+          hidden(pkg, e.timeStamp)
           if (only == null || pkg in only) {
             if (!open.containsKey(pkg)) open[pkg] = e.timeStamp
           }
@@ -84,16 +100,22 @@ object UsageReader {
           }
           seen.add(pkg)
         }
-        SCREEN_NON_INTERACTIVE, DEVICE_SHUTDOWN -> closeAll(e.timeStamp)
+        STOPPED -> hidden(pkg, e.timeStamp)
+        SCREEN_NON_INTERACTIVE, DEVICE_SHUTDOWN -> {
+          closeAll(e.timeStamp)
+          hideAll(e.timeStamp)
+        }
       }
     }
     closeAll(end)
+    hideAll(end)
     return totals
   }
 
   /**
    * Every foreground session of [pkg] between [start] and [end] as (from, to) pairs, using the same
-   * rules as [foregroundMs]: resumed → paused, cut at screen off; a session open at [end] ends there.
+   * rules as [foregroundMs]: resumed → paused (or stopped, after picture-in-picture), cut at screen off;
+   * a session open at [end] ends there.
    */
   fun sessions(context: Context, start: Long, end: Long, pkg: String): List<Pair<Long, Long>> {
     if (!hasAccess(context)) return emptyList()
@@ -101,17 +123,31 @@ object UsageReader {
     val events = usm.queryEvents(start, end) ?: return emptyList()
     val out = ArrayList<Pair<Long, Long>>()
     var openAt = -1L
+    var pausedAt = -1L // paused but not stopped yet: maybe still on screen in picture-in-picture
+    val pip = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
     var seen = false
     val e = UsageEvents.Event()
     fun closeAt(t: Long) {
-      if (openAt >= 0 && t > openAt) out.add(openAt to t)
+      if (openAt >= 0 && t > openAt) {
+        out.add(openAt to t)
+        if (pip) pausedAt = t
+      }
       openAt = -1L
+    }
+    // Still on screen for a while after the pause: stretch the session that pause ended.
+    fun hiddenAt(t: Long) {
+      if (pausedAt >= 0 && t - pausedAt >= VISIBLE_AFTER_MS) {
+        val last = out.lastOrNull()
+        if (last != null && last.second == pausedAt) out[out.size - 1] = last.first to t else out.add(pausedAt to t)
+      }
+      pausedAt = -1L
     }
     while (events.hasNextEvent()) {
       events.getNextEvent(e)
       when (e.eventType) {
         RESUMED -> {
           if (e.packageName == pkg) {
+            hiddenAt(e.timeStamp)
             if (openAt < 0) openAt = e.timeStamp
           } else {
             closeAt(e.timeStamp)
@@ -122,10 +158,15 @@ object UsageReader {
           if (openAt >= 0) closeAt(e.timeStamp) else if (!seen) out.add(start to e.timeStamp)
           seen = true
         }
-        SCREEN_NON_INTERACTIVE, DEVICE_SHUTDOWN -> closeAt(e.timeStamp)
+        STOPPED -> if (e.packageName == pkg) hiddenAt(e.timeStamp)
+        SCREEN_NON_INTERACTIVE, DEVICE_SHUTDOWN -> {
+          closeAt(e.timeStamp)
+          hiddenAt(e.timeStamp)
+        }
       }
     }
     closeAt(end)
+    hiddenAt(end)
     return out
   }
 
@@ -157,18 +198,30 @@ object UsageReader {
    * Walk events from [from] to [to] and return the app in front at the end, starting from [current].
    * The watcher calls this every tick with only the new events, so an app used for an hour without
    * any new events stays "current" (a fixed look-back window would forget it).
+   *
+   * [paused] is kept up to date in the same pass: apps paused but not stopped, with when they paused.
+   * One that stays there for more than a moment is still on screen without being in front
+   * (picture-in-picture). Needs ACTIVITY_STOPPED (Android 10+); left alone below that.
    */
-  fun advanceForeground(context: Context, current: String?, from: Long, to: Long): String? {
+  fun advanceForeground(context: Context, current: String?, from: Long, to: Long, paused: MutableMap<String, Long>? = null): String? {
     if (!hasAccess(context)) return null
     val usm = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
     val events = usm.queryEvents(from, to) ?: return current
+    val pip = paused.takeIf { Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q }
     var fg = current
     val e = UsageEvents.Event()
     while (events.hasNextEvent()) {
       events.getNextEvent(e)
       when (e.eventType) {
-        RESUMED -> fg = e.packageName
-        PAUSED -> if (e.packageName == fg) fg = null
+        RESUMED -> {
+          fg = e.packageName
+          pip?.remove(e.packageName)
+        }
+        PAUSED -> {
+          if (e.packageName == fg) fg = null
+          pip?.put(e.packageName, e.timeStamp)
+        }
+        STOPPED -> pip?.remove(e.packageName)
         SCREEN_NON_INTERACTIVE, DEVICE_SHUTDOWN -> fg = null
       }
     }

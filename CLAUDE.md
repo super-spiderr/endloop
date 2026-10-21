@@ -4,7 +4,7 @@
 
 Android-first screen-time limiter that roasts you at your limit, fronted by two characters (Loop and Lupe). Published by Super Spider. Expo SDK 57 + a local Kotlin Expo module (`modules/endloop-core`).
 
-Before working on anything, read `docs/handoff/README.md`. It links the full master plan, build status per screen, architecture, character/pose library and the decisions log.
+Before working on anything, read `docs/handoff/README.md`, then `docs/handoff/08-product-book.md` (the current product spec; it wins over older docs). New screen designs are in `design/screens/new/`. It links the full master plan, build status per screen, architecture, character/pose library and the decisions log.
 
 Must-follow rules (details in `docs/handoff/05-decisions-and-constraints.md`):
 - Commit only when Vignesh asks; use the Super Spider GitHub identity, never the office one.

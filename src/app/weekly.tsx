@@ -22,6 +22,7 @@ const DARK = ['#2A0A0E', '#140A0B'] as const;
 export default function Weekly() {
   const { tracked, roaster, roastLang, intensity, startedAt, baselineDailyMin, pausedDays } = useSettings();
   const daysOff = pausedDays.filter((d) => d >= localDay(-6)).length;
+  const offLine = switchedOffLine();
   const [report, setReport] = useState<WeeklyReport | null>(null);
   const [step, setStep] = useState(0);
   const [hide, setHide] = useState(false);
@@ -124,7 +125,7 @@ export default function Weekly() {
 
           {step === 0 ? <Total report={report} tracked={tracked.map((a) => a.label)} face={pose(roaster, 'jawDrop')} name={roasterName[roaster]} /> : null}
           {step === 1 ? <Worst report={report} face={pose(roaster, 'headShake')} name={roasterName[roaster]} /> : null}
-          {step === 2 ? <Wins report={report} daysOff={daysOff} face={pose(roaster, 'handOnHeart')} name={roasterName[roaster]} /> : null}
+          {step === 2 ? <Wins report={report} daysOff={daysOff} offLine={offLine} face={pose(roaster, 'handOnHeart')} name={roasterName[roaster]} /> : null}
 
           <View style={st.tapHint} pointerEvents="none">
             <T v="bodyBold" style={{ fontSize: 13, color: light ? colors.white : colors.ink }}>Tap to continue</T>
@@ -185,12 +186,29 @@ function Worst({ report, face, name }: { report: WeeklyReport; face: number; nam
 }
 
 /** 3 · but also… ends positive. */
-function Wins({ report, daysOff, face, name }: { report: WeeklyReport; daysOff: number; face: number; name: string }) {
+/** H7: the longest stretch Endloop was off this week while the phone was on, e.g. ["3h 10m off", "on Tuesday. I noticed."]. */
+function switchedOffLine(): [string, string] | null {
+  let gaps: { from: number; to: number }[] = [];
+  try {
+    gaps = JSON.parse(EndloopCore?.offGaps?.() ?? '[]');
+  } catch {
+    return null;
+  }
+  const weekAgo = Date.now() - 7 * 86_400_000;
+  const recent = gaps.filter((g) => g.to > weekAgo && g.to - g.from >= 10 * 60_000);
+  if (!recent.length) return null;
+  const longest = recent.reduce((a, b) => (b.to - b.from > a.to - a.from ? b : a));
+  const day = new Date(longest.from).toLocaleDateString('en-IN', { weekday: 'long' });
+  return [`${fmt(Math.round((longest.to - longest.from) / 60_000))} off`, `I was switched off on ${day}. I noticed.`];
+}
+
+function Wins({ report, daysOff, offLine, face, name }: { report: WeeklyReport; daysOff: number; offLine: [string, string] | null; face: number; name: string }) {
   const items: [string, string][] = [];
   if (report.wonBack != null && report.wonBack > 0) items.push([fmt(report.wonBack), 'won back vs before Endloop']);
   items.push([`${report.underDays} of ${Math.max(report.countedDays, 1)}`, 'days under every limit']);
   items.push([`${report.wins} ${report.wins === 1 ? 'time' : 'times'}`, 'you closed it on the first roast']);
   if (daysOff > 0) items.push([`${daysOff} ${daysOff === 1 ? 'day' : 'days'} off`, 'paused in Settings. I remember.']);
+  if (offLine) items.push(offLine);
   const closing =
     report.type === 'good'
       ? "Fine. You did well. Don't let it go to your head."

@@ -6,6 +6,8 @@ import android.content.Intent
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
+import android.os.SystemClock
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
@@ -53,13 +55,50 @@ object PermissionReturn {
     hint(app, kind)
   }
 
+  /**
+   * Battery has no app-op to watch, so poll PowerManager once a second while Endloop's App info
+   * page is open, and come back as soon as battery use is Unrestricted (exempt from optimisation).
+   */
+  fun startBattery(context: Context) {
+    val app = context.applicationContext
+    stop(null)
+    if (ignoringBattery(app)) return
+    val started = SystemClock.uptimeMillis()
+    val tick = object : Runnable {
+      override fun run() {
+        if (polling !== this) return
+        when {
+          ignoringBattery(app) -> {
+            stop("battery unrestricted")
+            bringBack(app)
+          }
+          SystemClock.uptimeMillis() - started > TIMEOUT_MS -> stop("timed out")
+          else -> main.postDelayed(this, 1_000)
+        }
+      }
+    }
+    polling = tick
+    main.postDelayed(tick, 1_000)
+    val text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) "Tap App battery usage, then Unrestricted." else "Tap Battery, then Don't optimise."
+    main.postDelayed({ Toast.makeText(app, text, Toast.LENGTH_LONG).show() }, 600)
+  }
+
+  private var polling: Runnable? = null
+
+  private fun ignoringBattery(context: Context): Boolean =
+    (context.getSystemService(Context.POWER_SERVICE) as PowerManager).isIgnoringBatteryOptimizations(context.packageName)
+
   /** Endloop is in front again (or the watch is no longer needed). */
   fun stop(reason: String?) {
     main.removeCallbacks(timeout)
-    val l = listener ?: return
+    val p = polling
+    polling = null
+    p?.let { main.removeCallbacks(it) }
+    val l = listener
     listener = null
+    if (l == null && p == null) return
     reason?.let { Log.d(TAG, "permission return stopped: $it") }
-    runCatching { appOps?.stopWatchingMode(l) }
+    l?.let { runCatching { appOps?.stopWatchingMode(it) } }
   }
 
   private var appOps: AppOpsManager? = null
