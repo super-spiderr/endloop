@@ -35,13 +35,17 @@ export function posToLimit(pos: number): number {
 }
 
 /**
- * Default limit: about 30% below the daily average, snapped to a slider step.
+ * Default limit: 30% below the daily average (20% for heavy users, over 4 h a day across all apps,
+ * so week 1 is winnable), snapped to a slider step.
  * Apps used under 5 minutes a day have no habit to cut, so they start at 30 minutes.
  */
-export function suggestedLimit(avgDailyMin: number): number {
+export function suggestedLimit(avgDailyMin: number, heavy = false): number {
   if (avgDailyMin < 5) return 30;
-  return snapLimit(avgDailyMin * 0.7);
+  return snapLimit(avgDailyMin * (heavy ? 0.8 : 0.7));
 }
+
+/** Over 4 h a day across all apps: suggestions cut 20% instead of 30%. */
+export const HEAVY_DAILY_MIN = 240;
 
 /** Human comparisons for today's total (India-first references). */
 export function comparison(min: number): string {

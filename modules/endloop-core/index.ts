@@ -87,7 +87,7 @@ export type WatcherConfig = {
   maxSnoozesPerDay: number;
   /** Who roasts and how hard: picks Loop / Lupe's pose on the native roast screen. */
   roaster?: 'loop' | 'lupe';
-  intensity?: 'polite' | 'honest' | 'savage';
+  intensity?: 'polite' | 'honest' | 'savage'; // Unhinged is sent as 'savage' (image name)
   /** Notification copy (Screen 8). {app}, {left}, {clock} are filled natively. */
   notif?: {
     headsUpTitle: string;

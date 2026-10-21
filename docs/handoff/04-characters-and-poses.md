@@ -36,6 +36,7 @@ Every moment on every screen gets its own pose. A pose is shared only when the e
 | S15 | Unhinged → evil grin; lifetime → chess; welcome → bow; 4th app → savage ✓ | ✓ (bow + all Lupe 6 Oct; bow has no screen until purchases exist) |
 | S16 | no apps → bored; phone killed Endloop → asleep (Zzz); every limit hit → fuming; perfect day → party popper (`party`); app uninstalled → impressed; Premium ended → goodbye | ✓ (6 Oct; wired on Today: bored, asleep on the killed card, fuming, party on the perfect-day card, impressed on the uninstall toast. goodbye waits for "Premium ended") |
 | S17 | onboarding ask → frame (hands framing a photo) | ✓ (6 Oct; above the icon preview) |
+| Onboarding v2 · 1a | roaster chooser → **choose** (animated WebP loop: Loop rubs his chin, Lupe inspects you through a magnifying glass; 640 px, 12 fps, green keyed out, Loop plays forward then back) | ✓ (21 Oct) |
 
 Pose keys in code (`src/characters.ts`): idle, peer, armsCrossed, ohNo, present, polite, honest, savage, vip, blind, thinking, skeptical, facepalm, shrug, deadpan, clipboard, waiting, disbelief, knuckles, binoculars, chill, eyesOnYou, disgusted, unplugged, coffee … chess (S11–S15), bow, bored, asleep, fuming, party, impressed, goodbye, frame. Files are kebab-case (`eyes-on-you.webp`).
 

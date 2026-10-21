@@ -30,6 +30,8 @@ const BENEFITS: [string, string][] = [
 export default function Paywall() {
   const { reason = 'apps' } = useLocalSearchParams<{ reason?: Reason }>();
   const roaster = useSettings((s) => s.roaster);
+  const premium = useSettings((s) => s.premium);
+  const setSettings = useSettings((s) => s.set);
   const [plan, setPlan] = useState<PlanId>('yearly');
   const [note, setNote] = useState<string | null>(null);
   const dark = reason === 'unhinged';
@@ -101,9 +103,23 @@ export default function Paywall() {
 
         <View style={{ gap: 10, paddingHorizontal: 24, paddingTop: 18 }}>
           <Button
-            label={PLAN_TERMS[plan].cta}
-            onPress={() => setNote('Purchases open when Endloop launches on the Play Store. Nothing was charged.')}
+            label={__DEV__ && premium ? 'Turn off test Premium' : PLAN_TERMS[plan].cta}
+            onPress={() => {
+              // No Play Billing yet. Dev builds flip a test switch so the Premium screens can be checked.
+              if (__DEV__) {
+                // Turning it off takes Unhinged away too.
+                setSettings(premium ? { premium: false, ...(useSettings.getState().intensity === 'unhinged' ? { intensity: 'savage' as const } : {}) } : { premium: true });
+                close();
+                return;
+              }
+              setNote('Purchases open when Endloop launches on the Play Store. Nothing was charged.');
+            }}
           />
+          {__DEV__ ? (
+            <T v="caption" style={{ fontSize: 12, textAlign: 'center', color: muted }}>
+              {premium ? 'Dev build: test Premium is on.' : 'Dev build: this turns on test Premium. Nothing is charged.'}
+            </T>
+          ) : null}
           {note ? <T v="bodyBold" style={{ fontSize: 13, textAlign: 'center', color: colors.heads }}>{note}</T> : null}
           <T v="caption" style={{ fontSize: 12, textAlign: 'center', color: muted }}>{PLAN_TERMS[plan].terms}</T>
           <T v="caption" style={{ fontSize: 12, textAlign: 'center', color: muted }}>Restore purchase · Terms · Privacy</T>

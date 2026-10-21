@@ -28,7 +28,7 @@ export const SearchIcon = ({ size = 18, color = '#5F5F5F', strokeWidth = 2 }: P)
 export const InfoIcon = ({ size = 22, color = '#E5132B', strokeWidth = 2 }: P) => (
   <Svg width={size} height={size} viewBox="0 0 24 24">
     <Circle cx={12} cy={12} r={9} {...stroke(color, strokeWidth)} />
-    <Path d="M12 8v5M12 16.5h.01" {...stroke(color, strokeWidth)} />
+    <Path d="M12 11v5M12 7.5h.01" {...stroke(color, strokeWidth)} />
   </Svg>
 );
 
@@ -69,6 +69,12 @@ export const BatteryIcon = ({ size = 22, color = '#E5132B', strokeWidth = 1.9 }:
 export const FlameIcon = ({ size = 14, color = '#E5132B' }: P) => (
   <Svg width={size} height={size} viewBox="0 0 24 24">
     <Path d="M12 2c1 3.5 5 5.5 5 11a5 5 0 0 1-10 0c0-2.6 1.3-4.4 2.6-5.6.3 1.9 1.2 3 2.2 3.4C11.5 8 11.2 5 12 2z" fill={color} />
+  </Svg>
+);
+
+export const StarIcon = ({ size = 12, color = '#E8A317' }: P) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24">
+    <Path fill={color} d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z" />
   </Svg>
 );
 

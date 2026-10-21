@@ -6,11 +6,13 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import { pose } from '@/characters';
 import { InfoIcon } from '@/components/icons';
 import { RestrictedHelp } from '@/components/restricted-help';
-import { AppTile, BrandBar, Button, Character, LinkButton, Screen, T } from '@/components/ui';
+import { AppTile, Button, Character, LinkButton, Screen, T } from '@/components/ui';
 import { LoopMark } from '@/brand/logo';
 import { usage } from '@/data/usage';
 import { useOnReturn } from '@/lib/hooks';
 import { openUsageAccessSettings, restrictedSettingsLikely } from '@/lib/permissions';
+import { Heading, StepBar } from '@/components/onboarding-ui';
+import { OB, say } from '@/content/onboarding';
 import { useSettings } from '@/store/settings';
 import { colors, fonts, radius } from '@/theme/tokens';
 
@@ -19,10 +21,17 @@ type Phase = 'ask' | 'notFound' | 'granted';
 /** Screen 2 · Usage Access. Checks again every time the user comes back from Settings. */
 export default function UsageAccess() {
   const roaster = useSettings((s) => s.roaster);
+  const lang = useSettings((s) => s.roastLang);
   const set = useSettings((s) => s.set);
   const [phase, setPhase] = useState<Phase>('ask');
   // Sideloaded on Android 13+: show the "Allow restricted settings" steps before the first trip.
   const [restricted] = useState(restrictedSettingsLikely);
+
+  const onGranted = () => {
+    set({ hasUsageAccess: true });
+    setPhase('granted');
+    setTimeout(() => router.replace('/onboarding/reveal'), 1600);
+  };
 
   // Only react to a trip to Settings that this screen started.
   const waiting = useRef(false);
@@ -31,21 +40,19 @@ export default function UsageAccess() {
     waiting.current = false;
     const ok = await usage.hasUsageAccess();
     if (!ok) return setPhase('notFound');
-    set({ hasUsageAccess: true });
-    setPhase('granted');
-    setTimeout(() => router.replace('/onboarding/pick-apps'), 1600);
+    onGranted();
   });
 
   if (phase === 'granted') {
     return (
       <Screen>
-        <BrandBar step={2} />
+        <StepBar step={2} />
         <Animated.View entering={FadeIn} style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 28, paddingHorizontal: 24 }}>
           <Character source={pose(roaster, 'ohNo')} size={280} alt="Loop, hand over his mouth" fadeTo={colors.bg} />
-          <T style={{ fontFamily: fonts.display, fontSize: 52, lineHeight: 54, color: colors.ink }}>…oh no.</T>
+          <T style={{ fontFamily: fonts.display, fontSize: 40, lineHeight: 44, color: colors.ink }}>{say(OB.usageGranted, lang)}</T>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             <ActivityIndicator color={colors.red} />
-            <T>Counting your hours…</T>
+            <T>{say(OB.usageCounting, lang)}</T>
           </View>
         </Animated.View>
       </Screen>
@@ -55,7 +62,7 @@ export default function UsageAccess() {
   const notFound = phase === 'notFound';
   return (
     <Screen>
-      <BrandBar step={2} />
+      <StepBar step={2} />
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} bounces={false}>
         <View style={{ paddingHorizontal: 24, paddingTop: 12, gap: 20 }}>
           <View style={{ alignItems: 'center' }}>
@@ -66,10 +73,10 @@ export default function UsageAccess() {
               fadeTo={colors.bg}
             />
           </View>
-          <T v="display">{notFound ? "Nice try. Still can't see anything." : 'Let me see how bad it is.'}</T>
-          <T>
-            I need Usage Access to count your screen time. I only see how long you use each app.{' '}
-            <T v="bodyBold">Never your messages, photos or what you watch.</T>
+          <Heading title={say(notFound ? OB.usageBack : OB.usageAsk, lang)} size={24} />
+          <T style={{ fontSize: 14, lineHeight: 20, color: colors.muted }}>
+            I need Usage Access to count it. I only see how long you use each app.{' '}
+            <T v="bodyBold" style={{ fontSize: 14 }}>Never your messages, photos or what you watch.</T>
           </T>
           {notFound ? <NotFoundNudge /> : restricted ? null : <SettingsPreview />}
           {restricted || (notFound && Platform.OS === 'android' && Number(Platform.Version) >= 33) ? (
@@ -80,7 +87,9 @@ export default function UsageAccess() {
         <View style={{ paddingHorizontal: 24, paddingBottom: 16, alignItems: 'center', gap: 4 }}>
           <Button
             label="Show me the damage"
-            onPress={() => {
+            onPress={async () => {
+              // Already on (replay, reinstall): no pointless trip to Settings.
+              if (await usage.hasUsageAccess()) return onGranted();
               waiting.current = true;
               openUsageAccessSettings();
             }}
@@ -89,7 +98,7 @@ export default function UsageAccess() {
             label="Not now"
             onPress={() => {
               set({ hasUsageAccess: false });
-              router.push('/onboarding/pick-apps');
+              router.push('/onboarding/reveal');
             }}
           />
         </View>

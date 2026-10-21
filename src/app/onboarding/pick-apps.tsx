@@ -5,14 +5,16 @@ import { FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { pose } from '@/characters';
 import { CheckIcon, SearchIcon } from '@/components/icons';
-import { PremiumSheet } from '@/components/premium-sheet';
-import { AppTile, BrandBar, Button, Character, Pill, Screen, SpeechBubble, T } from '@/components/ui';
+import { btn, Heading, Label, NudgeSheet, PremiumTag, Quote, StepBar } from '@/components/onboarding-ui';
+import { AppTile, Button, Character, Screen, T } from '@/components/ui';
+import { OB, say } from '@/content/onboarding';
 import { usage, USUAL_SUSPECTS, type InstalledApp } from '@/data/usage';
-import { fmt, suggestedLimit } from '@/lib/time';
+import { fmt, HEAVY_DAILY_MIN, suggestedLimit } from '@/lib/time';
 import { useSettings } from '@/store/settings';
 import { colors, fonts, radius } from '@/theme/tokens';
 
 const FREE_APPS = 3;
+const PREMIUM_APPS = 6;
 
 const REACTIONS: Record<string, string> = {
   'com.instagram.android': 'Classic.',
@@ -22,7 +24,8 @@ const REACTIONS: Record<string, string> = {
 
 /** Screen 3 · The damage / pick apps. */
 export default function PickApps() {
-  const { roaster, hasUsageAccess, set } = useSettings();
+  const { roaster, roastLang: lang, hasUsageAccess, premium: isPremium, set } = useSettings();
+  const maxApps = isPremium ? PREMIUM_APPS : FREE_APPS;
   const [apps, setApps] = useState<InstalledApp[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [query, setQuery] = useState('');
@@ -30,12 +33,13 @@ export default function PickApps() {
   const [premium, setPremium] = useState(false);
 
   useEffect(() => {
-    usage.listApps().then((list) => {
+    usage.listApps().then((all) => {
       const ordered = hasUsageAccess
-        ? list
-        : [...list.filter((a) => USUAL_SUSPECTS.includes(a.packageName)), ...list.filter((a) => !USUAL_SUSPECTS.includes(a.packageName))];
+        ? all
+        : [...all.filter((a) => USUAL_SUSPECTS.includes(a.packageName)), ...all.filter((a) => !USUAL_SUSPECTS.includes(a.packageName))];
       setApps(ordered);
-      if (hasUsageAccess) setSelected(ordered.slice(0, FREE_APPS).map((a) => a.packageName));
+      // Pre-tick the top apps, but only ones actually used this week.
+      if (hasUsageAccess) setSelected(ordered.filter((a) => a.avgDailyMin > 0).slice(0, FREE_APPS).map((a) => a.packageName));
     });
   }, [hasUsageAccess]);
 
@@ -47,10 +51,9 @@ export default function PickApps() {
       setSelected(selected.filter((p) => p !== app.packageName));
       return;
     }
-    if (selected.length >= FREE_APPS) {
+    if (selected.length >= maxApps) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      setReaction('Interesting choice.');
-      setPremium(true);
+      if (!isPremium) setPremium(true);
       return;
     }
     Haptics.selectionAsync();
@@ -60,6 +63,7 @@ export default function PickApps() {
 
   const confirm = () => {
     const chosen = apps.filter((a) => selected.includes(a.packageName));
+    const heavy = apps.reduce((t, a) => t + a.avgDailyMin, 0) > HEAVY_DAILY_MIN;
     set({
       tracked: chosen.map((a) => ({
         packageName: a.packageName,
@@ -68,40 +72,51 @@ export default function PickApps() {
         iconUri: a.iconUri,
         avgDailyMin: a.avgDailyMin,
         weekMin: a.weekMin,
-        limitMin: hasUsageAccess ? suggestedLimit(a.avgDailyMin) : 60,
+        limitMin: hasUsageAccess ? suggestedLimit(a.avgDailyMin, heavy) : 60,
       })),
       // Stats compares against this: the last 7 days on these apps, before Endloop
       baselineDailyMin: hasUsageAccess && chosen.some((a) => a.avgDailyMin > 0) ? chosen.reduce((s, a) => s + a.avgDailyMin, 0) : undefined,
     });
-    router.push('/onboarding/intensity');
+    router.push('/onboarding/limits');
   };
 
   return (
     <Screen>
-      <BrandBar step={3} />
-      <View style={{ alignItems: 'center', paddingHorizontal: 24, gap: 6 }}>
-        <Character source={pose(roaster, hasUsageAccess ? 'present' : 'blind')} size={{ width: 250, height: 188 }} alt={hasUsageAccess ? 'Loop, palms up, presenting the damage' : "Loop, blindfolded: can't see your usage"} fadeTo={colors.bg} position="top" />
-        <T v="display" style={{ fontSize: 30, lineHeight: 33, textAlign: 'center' }}>
-          {hasUsageAccess ? "Okay. Here's the damage." : 'Which apps are ruining your life?'}
-        </T>
-        <T style={{ textAlign: 'center' }}>Pick up to 3. I&apos;ll keep an eye on them.</T>
-      </View>
-
-      <View style={{ paddingHorizontal: 24, paddingTop: 12, gap: 12 }}>
-        <View style={st.search}>
-          <SearchIcon />
-          <TextInput
-            value={query}
-            onChangeText={setQuery}
-            placeholder="Search apps"
-            placeholderTextColor={colors.muted}
-            accessibilityLabel="Search apps"
-            style={{ flex: 1, fontFamily: fonts.medium, fontSize: 15, color: colors.ink, paddingVertical: 0 }}
+      <StepBar step={4} />
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8, paddingHorizontal: 24, paddingTop: 12 }}>
+        <View style={{ flex: 1, paddingBottom: 6, gap: 8, alignItems: 'flex-start' }}>
+          {isPremium ? <PremiumTag /> : null}
+          <Heading
+            title={say(hasUsageAccess ? OB.appsTitle : OB.appsBlind, lang)}
+            sub={
+              hasUsageAccess
+                ? isPremium
+                  ? 'Your top 3 are picked. Swap any, or add up to 6.'
+                  : 'Your top 3 are picked. Swap any. Free watches 3 apps.'
+                : `No Usage Access, so I can't see your numbers. Pick up to ${maxApps}.`
+            }
           />
         </View>
-        <View style={{ flexDirection: 'row', justifyContent: hasUsageAccess ? 'space-between' : 'flex-end', alignItems: 'center' }}>
-          {hasUsageAccess ? <T v="label">Last 7 days</T> : null}
-          <Pill text={`${selected.length} of ${FREE_APPS} free`} color={colors.red} bg={colors.blush} />
+        <Character source={pose(roaster, hasUsageAccess ? 'present' : 'blind')} size={104} alt={hasUsageAccess ? 'Presenting the damage' : 'Blindfolded'} fadeTo={colors.bg} />
+      </View>
+
+      <View style={{ paddingHorizontal: 24, paddingTop: 14, gap: 10 }}>
+        {hasUsageAccess ? null : (
+          <View style={st.search}>
+            <SearchIcon />
+            <TextInput
+              value={query}
+              onChangeText={setQuery}
+              placeholder="Search your apps"
+              placeholderTextColor={colors.muted}
+              accessibilityLabel="Search apps"
+              style={{ flex: 1, fontFamily: fonts.medium, fontSize: 15, color: colors.ink, paddingVertical: 0 }}
+            />
+          </View>
+        )}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
+          <Label>{hasUsageAccess ? 'Your top apps · last 7 days' : 'Installed apps'}</Label>
+          <T style={{ fontFamily: fonts.bold, fontSize: 12, color: colors.red }}>{`${selected.length} of ${maxApps}`}</T>
         </View>
       </View>
 
@@ -109,19 +124,21 @@ export default function PickApps() {
         data={visible}
         keyExtractor={(a) => a.packageName}
         style={{ flex: 1 }}
-        contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 10, gap: 10 }}
+        contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 8, gap: 8 }}
         renderItem={({ item }) => {
           const on = selected.includes(item.packageName);
           return (
             <Pressable
               accessibilityRole="checkbox"
               accessibilityState={{ checked: on }}
-              accessibilityLabel={`${item.label}${hasUsageAccess ? `, ${fmt(item.weekMin)} last week` : ''}`}
+              accessibilityLabel={`${item.label}${hasUsageAccess ? `, ${fmt(item.avgDailyMin)} a day` : ''}`}
               onPress={() => toggle(item)}
               style={[st.row, on ? { backgroundColor: colors.surface, borderColor: colors.red, borderWidth: 2 } : null]}>
               <AppTile label={item.label} color={item.color} iconUri={item.iconUri} />
-              <T v="bodyBold" style={{ flex: 1 }}>{item.label}</T>
-              {hasUsageAccess ? <T v="bodyBold" style={{ fontSize: 15 }}>{fmt(item.weekMin)}</T> : null}
+              <View style={{ flex: 1, gap: 1 }}>
+                <T style={{ fontFamily: fonts.bold, fontSize: 15, color: colors.ink }}>{item.label}</T>
+                {hasUsageAccess ? <T style={{ fontSize: 13, color: colors.muted }}>{fmt(item.avgDailyMin)} a day</T> : null}
+              </View>
               {on ? (
                 <View style={[st.check, { backgroundColor: colors.red }]}>
                   <CheckIcon />
@@ -135,17 +152,27 @@ export default function PickApps() {
       />
 
       <View style={{ paddingHorizontal: 24, paddingBottom: 16, paddingTop: 8, gap: 14 }}>
-        {reaction ? <SpeechBubble face={pose(roaster, 'armsCrossed')} text={reaction} /> : null}
-        <Button label="Watch these" disabled={!selected.length} onPress={confirm} />
+        {reaction ? <Quote face={pose(roaster, 'idle')} text={reaction} /> : null}
+        <Button label="These ones" disabled={!selected.length} style={btn} onPress={confirm} />
       </View>
 
-      <PremiumSheet visible={premium} onClose={() => setPremium(false)} roaster={roaster} reason="apps" />
+      <NudgeSheet
+        visible={premium}
+        onClose={() => setPremium(false)}
+        face={pose(roaster, 'vip')}
+        title={say(OB.apps4thTitle, lang)}
+        body={say(OB.apps4thBody, lang)}
+        onSeePremium={() => {
+          setPremium(false);
+          router.push('/paywall');
+        }}
+      />
     </Screen>
   );
 }
 
 const st = StyleSheet.create({
   search: { flexDirection: 'row', alignItems: 'center', gap: 10, height: 46, paddingHorizontal: 14, borderRadius: 14, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 14, paddingVertical: 10, borderRadius: radius.md, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.white },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 12, paddingVertical: 9, borderRadius: radius.md, borderWidth: 1, borderColor: '#EDE3E4', backgroundColor: colors.white },
   check: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
 });

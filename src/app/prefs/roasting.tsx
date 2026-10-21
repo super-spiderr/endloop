@@ -11,6 +11,7 @@ const LEVEL_NOTE: Record<string, string> = {
   polite: 'Gentle nudges. I still notice everything.',
   honest: 'Plain facts about your scrolling. No sugar.',
   savage: 'No mercy. About the habit, never about you.',
+  unhinged: 'The meanest level. Still never about looks or family.',
 };
 
 /** Settings → Roasting: name, level, language, sound. */
@@ -45,7 +46,7 @@ export default function RoastingPrefs() {
 
       <Group title="Roast level" note={LEVEL_NOTE[s.intensity]}>
         <View style={{ paddingTop: 12 }}>
-          <Segment<Intensity | 'unhinged'>
+          <Segment<Intensity>
             options={[
               ['polite', 'Polite'],
               ['honest', 'Honest'],
@@ -53,8 +54,8 @@ export default function RoastingPrefs() {
               ['unhinged', 'Unhinged'],
             ]}
             value={s.intensity}
-            locked={['unhinged']}
-            onChange={(v) => (v === 'unhinged' ? setPremium(true) : s.set({ intensity: v }))}
+            locked={s.premium && s.group !== 'school' ? [] : ['unhinged']}
+            onChange={(v) => (v === 'unhinged' && (!s.premium || s.group === 'school') ? setPremium(true) : s.set({ intensity: v }))}
           />
         </View>
       </Group>

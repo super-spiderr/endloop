@@ -2,7 +2,7 @@ import { EndloopCore, type WatcherConfig } from 'endloop-core';
 
 import { linesFor } from '@/roasts';
 import { FACT_LABEL, factsFor } from '@/roasts/facts';
-import { localDay, useSettings } from '@/store/settings';
+import { localDay, toneOf, useSettings } from '@/store/settings';
 
 function endOfToday(): number {
   const d = new Date();
@@ -178,7 +178,8 @@ export function buildConfig(s: S): WatcherConfig {
     statusMode: s.statusMode ?? 'live',
     pausedUntil: s.pausedOn === localDay() ? endOfToday() : 0,
     roaster: s.roaster,
-    intensity: s.intensity,
+    // The roast image exists for three tones only; Unhinged uses Savage's.
+    intensity: toneOf(s.intensity),
     apps: s.tracked.map((a) => ({
       packageName: a.packageName,
       label: a.label,

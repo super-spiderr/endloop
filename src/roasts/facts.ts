@@ -1,4 +1,4 @@
-import type { Intensity, RoastLang } from '@/store/settings';
+import { toneOf, type Intensity, type RoastLang, type Tone } from '@/store/settings';
 
 /**
  * Cards shown while the snooze countdown runs (Screen 10, step 3). Three kinds:
@@ -8,7 +8,7 @@ import type { Intensity, RoastLang } from '@/store/settings';
  * - tip: a practical way to manage time and the phone. Advice, not a claim, so no study is cited.
  * Re-check numbers and links before launch and once a year.
  */
-type Toned = Record<Intensity, string>;
+type Toned = Record<Tone, string>;
 type Card = {
   id: string;
   kind: 'research' | 'math' | 'tip';
@@ -196,6 +196,6 @@ export const FACT_LABEL: Record<RoastLang, string> = { en: 'WHILE YOU WAIT', 'ta
 export function factsFor(lang: RoastLang, intensity: Intensity): { text: string; source: string }[] {
   return CARDS.map((c) => {
     const v = lang === 'ta-Latn' ? c.ta : c.en;
-    return { text: typeof v === 'string' ? v : v[intensity], source: c.source };
+    return { text: typeof v === 'string' ? v : v[toneOf(intensity)], source: c.source };
   });
 }

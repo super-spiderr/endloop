@@ -26,7 +26,7 @@ import {
 import { usage, type AppDetail, type RoastEntry } from "@/data/usage";
 import { fmt, fmtLimit, suggestedLimit } from "@/lib/time";
 import { factsFor } from "@/roasts/facts";
-import { localDay, useSettings, type RoastLang } from "@/store/settings";
+import { localDay, toneOf, useSettings, type RoastLang } from "@/store/settings";
 import { colors, fonts, radius, stateStyle, usageState } from "@/theme/tokens";
 
 /** Screen 11 · App detail: one app up close, its limit (anti-cheat), and its Hall of shame. */
@@ -262,7 +262,7 @@ export default function AppDetailScreen() {
               Try this
             </T>
             <T v="bodyBold" style={{ fontSize: 15, lineHeight: 21 }}>
-              {tipFor(heaviest, app.label, roastLang, intensity)}
+              {tipFor(heaviest, app.label, roastLang, toneOf(intensity))}
             </T>
           </View>
         </Section>

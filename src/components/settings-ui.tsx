@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import type { ReactNode } from 'react';
-import { Linking, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, Switch, View, type StyleProp, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path, Rect } from 'react-native-svg';
 
@@ -73,9 +73,9 @@ export function NavRow({ label, value, valueColor, href, onPress, first, icon }:
   );
 }
 
-export function Segment<V extends string>({ options, value, onChange, locked = [] }: { options: [V, string][]; value: string; onChange: (v: V) => void; locked?: V[] }) {
+export function Segment<V extends string>({ options, value, onChange, locked = [], style }: { options: [V, string][]; value: string; onChange: (v: V) => void; locked?: V[]; style?: StyleProp<ViewStyle> }) {
   return (
-    <View accessibilityRole="radiogroup" style={st.segment}>
+    <View accessibilityRole="radiogroup" style={[st.segment, style]}>
       {options.map(([v, label]) => {
         const on = v === value;
         return (

@@ -58,7 +58,9 @@ export type Pose =
   | 'impressed' // S16 tracked app uninstalled
   | 'goodbye' // S16 Premium ended (not built yet)
   | 'frame' // S17 app-icon ask
-  | 'envelope'; // S08 weekly notification; also the Stats weekly-roast card
+  | 'envelope' // S08 weekly notification; also the Stats weekly-roast card
+  | 'choose'
+  | 'fingerWag'; // onboarding v2 6a: Unhinged locked for school students // onboarding v2 roaster chooser: animated WebP loop (Loop rubs his chin, Lupe inspects you through a magnifying glass)
 
 const loop = {
   idle: require('../assets/characters/loop/idle.webp'),
@@ -116,6 +118,8 @@ const loop = {
   goodbye: require('../assets/characters/loop/goodbye.webp'),
   frame: require('../assets/characters/loop/frame.webp'),
   envelope: require('../assets/characters/loop/envelope.webp'),
+  choose: require('../assets/characters/loop/choose.webp'),
+  fingerWag: require('../assets/characters/loop/finger-wag.webp'),
 } satisfies Record<Pose, number>;
 
 // Lupe has every pose too (Screen 3 runs before the roaster is picked, so present is rarely shown).
@@ -175,6 +179,8 @@ const lupe = {
   goodbye: require('../assets/characters/lupe/goodbye.webp'),
   frame: require('../assets/characters/lupe/frame.webp'),
   envelope: require('../assets/characters/lupe/envelope.webp'),
+  choose: require('../assets/characters/lupe/choose.webp'),
+  fingerWag: require('../assets/characters/lupe/finger-wag.webp'),
 } satisfies Record<Pose, number>;
 
 export const characters: Record<Roaster, Record<Pose, number>> = { loop, lupe };

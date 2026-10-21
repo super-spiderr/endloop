@@ -2,11 +2,12 @@
 
 Everything decided and built for Endloop, collected so Claude Code (or anyone new) can pick up without the original chats. Snapshot: 28 Sep 2026.
 
-Read in this order. **Start with 08:** it is the newest spec (21 Oct) and wins wherever it disagrees with 01 or 05.
+Read in this order. **Start with 08, then 09 if you're working on onboarding:** it is the newest spec (21 Oct) and wins wherever it disagrees with 01 or 05.
 
 | File | What's in it |
 |---|---|
 | [08-product-book.md](08-product-book.md) | **The current product spec (21 Oct).** Every screen and system with what's decided, Free vs Premium, calculations (Loops, leaves, streaks), the snooze ladder and games, Premium pricing, roast-screen holes H1–H8, and Part D: what must exist before feature code (content, UI, new poses). |
+| [09-onboarding-v2.md](09-onboarding-v2.md) | **Onboarding v2 (21 Oct): approved designs on the canvas, decisions newer than 08, copy doc, build plan with progress ticks.** Read this before touching onboarding. |
 | [01-master-plan.md](01-master-plan.md) | The product plan: positioning, v1 scope, pricing, roadmap, brand, characters, every screen spec, roast and fact libraries, open decisions. Exported from the living "Endloop Master Plan" doc. |
 | [02-build-status.md](02-build-status.md) | What exists in code, screen by screen (S01–S17), and what's still missing or untested. |
 | [03-architecture.md](03-architecture.md) | How the app works: Expo app, the Kotlin module, config flow, overlay, notifications, anti-cheat, app icon, test hooks, gotchas. |

@@ -1,4 +1,4 @@
-import type { Intensity, RoastLang } from '@/store/settings';
+import { toneOf, type Intensity, type RoastLang, type Tone } from '@/store/settings';
 import type { Roaster } from '@/characters';
 
 import en from './core.en.json';
@@ -217,7 +217,7 @@ export function linesFor(category: string, o: { lang: RoastLang; intensity: Inte
 
 /** Screen 4 preview: the first roast, built from the user's top app. */
 export function previewRoast(intensity: Intensity, lang: RoastLang, app: string, weekHours: string): string {
-  const lines: Record<RoastLang, Record<Intensity, string>> = {
+  const lines: Record<RoastLang, Record<Tone, string>> = {
     en: {
       polite: `${weekHours} on ${app} last week. Maybe a little less this week?`,
       honest: `${weekHours} on ${app}. That's two workdays of other people's lives.`,
@@ -229,5 +229,5 @@ export function previewRoast(intensity: Intensity, lang: RoastLang, app: string,
       savage: `${weekHours} ${app}. Unnoda thumb unna vida jaasti exercise pannudhu, boss.`,
     },
   };
-  return lines[lang][intensity];
+  return lines[lang][toneOf(intensity)];
 }

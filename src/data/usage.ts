@@ -73,7 +73,8 @@ const nativeUsage: UsageSource | null = EndloopCore
       },
       async listApps() {
         const apps = await EndloopCore!.listApps(DAYS);
-        return apps.map((a) => {
+        // Never offer Endloop itself (any build of it) as an app to limit.
+        return apps.filter((a) => !/endloop/i.test(a.packageName) && !/^endloop$/i.test(a.label.trim())).map((a) => {
           const weekMin = Math.round(a.totalMs / 60000);
           return {
             packageName: a.packageName,

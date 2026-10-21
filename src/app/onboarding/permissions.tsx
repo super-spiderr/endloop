@@ -1,26 +1,26 @@
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { pose, roasterName, type Pose } from '@/characters';
 import { BatteryIcon, BellIcon, CheckIcon, LayersIcon, WarnIcon } from '@/components/icons';
 import { RestrictedHelp } from '@/components/restricted-help';
-import { BrandBar, Button, Character, LinkButton, Screen, T } from '@/components/ui';
-import { appIconSupported } from '@/lib/app-icon';
+import { btn, Heading, StepBar } from '@/components/onboarding-ui';
+import { Button, Character, LinkButton, Screen, T } from '@/components/ui';
 import { useOnReturn } from '@/lib/hooks';
 import { batteryNeededUpfront, batterySteps, checkPermissions, openBatterySettings, openBrandBackgroundSettings, openOverlaySettings, requestNotifications, restrictedSettingsLikely } from '@/lib/permissions';
-import { localDay, useSettings, type PermissionState } from '@/store/settings';
+import { useSettings, type PermissionState } from '@/store/settings';
 import { colors, fonts, radius } from '@/theme/tokens';
 
 type Key = 'notifications' | 'overlay' | 'battery';
+const MORE: Record<number, string> = { 1: 'One more thing', 2: 'Two more things', 3: 'Three more things' };
 type CardState = 'waiting' | 'active' | 'done' | 'skipped';
 
 const CARDS: { key: Key; title: string; line: string; button: string; Icon: typeof BellIcon }[] = [
+  { key: 'overlay', title: 'Display over other apps', line: 'So I can roast you right on top of {app}.', button: 'Allow', Icon: LayersIcon },
   { key: 'notifications', title: 'Notifications', line: "So I can warn you before I get mean. You'll also see a small one that keeps me awake. Swipe it away if you like.", button: 'Allow', Icon: BellIcon },
-  { key: 'overlay', title: 'Display over apps', line: 'So I can interrupt you mid-scroll. Rudely.', button: 'Turn on', Icon: LayersIcon },
-  { key: 'battery', title: 'Battery', line: "So your phone doesn't put me to sleep on the job.", button: 'Fix it', Icon: BatteryIcon },
+  { key: 'battery', title: "Don't put me to sleep", line: "Your phone puts apps to sleep to save battery. I don't nap. 2 taps.", button: 'Fix it', Icon: BatteryIcon },
 ];
 
 /**
@@ -29,16 +29,29 @@ const CARDS: { key: Key; title: string; line: string; button: string; Icon: type
  * foreground service is enough, and Today asks just-in-time if the watcher ever gets killed.
  */
 export default function Permissions() {
-  const { roaster, permissions, setPermission, set } = useSettings();
+  const { roaster, permissions, setPermission, name, tracked } = useSettings();
+  const topApp = [...tracked].sort((a, b) => b.weekMin - a.weekMin)[0]?.label;
   const waitingFor = useRef<Key | null>(null);
-  const cards = batteryNeededUpfront() ? CARDS : CARDS.filter((c) => c.key !== 'battery');
+  const cards = (batteryNeededUpfront() ? CARDS : CARDS.filter((c) => c.key !== 'battery')).map((c) => ({ ...c, line: c.line.replace('{app}', topApp ?? 'your apps') }));
   const total = cards.length;
+
+  // Match the stored state to the phone: anything already allowed (reinstall, granted earlier) is
+  // ticked straight away, and anything switched off since (replay) is asked again.
+  const sync = useCallback(() => {
+    const now = checkPermissions();
+    const stored = useSettings.getState().permissions;
+    (['notifications', 'overlay', 'battery'] as Key[]).forEach((k) => {
+      if (now[k] === true && stored[k] !== 'granted') setPermission(k, 'granted');
+      else if (now[k] === false && stored[k] === 'granted') setPermission(k, 'pending');
+    });
+  }, [setPermission]);
+  useEffect(sync, [sync]);
 
   // Check the real state when the user comes back from a Settings page.
   // (Without the native core we can't check, so returning counts as granted.)
   useOnReturn(() => {
     const k = waitingFor.current;
-    if (!k) return;
+    if (!k) return sync();
     waitingFor.current = null;
     const real = checkPermissions()[k];
     const ok = real === null ? true : real;
@@ -50,14 +63,6 @@ export default function Permissions() {
       setPermission('battery', 'skipped');
     }
   });
-
-  // Anything already allowed (reinstall, or granted earlier) is ticked straight away.
-  useEffect(() => {
-    const now = checkPermissions();
-    (['notifications', 'overlay', 'battery'] as Key[]).forEach((k) => {
-      if (now[k] === true && useSettings.getState().permissions[k] !== 'granted') setPermission(k, 'granted');
-    });
-  }, [setPermission]);
 
   const firstOpen = cards.find((c) => permissions[c.key] === 'pending')?.key;
   const stateOf = (k: Key): CardState => {
@@ -88,21 +93,25 @@ export default function Permissions() {
 
   return (
     <Screen>
-      <BrandBar step={6} />
+      <StepBar step={7} />
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} bounces={false}>
-        {/* Hero: the roaster gets the space, the title sits beside them. */}
-        <LinearGradient colors={done === total ? [colors.chillTint, '#C4E8D7'] : [colors.surface, colors.blush]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={st.hero}>
-          <View style={st.heroChar} pointerEvents="none">
-            <Character source={pose(roaster, face)} size={210} alt={`${roasterName[roaster]}, getting ready`} />
+        <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8, paddingHorizontal: 24, paddingTop: 12 }}>
+          <View style={{ flex: 1, paddingBottom: 6 }}>
+            <Heading
+              title={done === total ? (name ? `All set, ${name}. Let's test it.` : "All set. Let's test it.") : permissions.overlay === 'skipped' ? 'You skipped the main one?' : `${MORE[total - done] ?? 'A few more things'}, then I'm in.`}
+              sub={
+                done === total
+                  ? "Everything's on. Next: your first roast, on purpose."
+                  : permissions.overlay === 'skipped'
+                    ? "The roast can't show up without it. That's kind of my whole thing."
+                    : total === 3
+                      ? 'Your phone needs one more. Sorry, not my rule.'
+                      : 'Each one has a reason. Nothing else gets asked.'
+              }
+            />
           </View>
-          <View style={{ width: '56%', gap: 12 }}>
-            <T v="display" style={{ fontSize: 28, lineHeight: 31 }}>{total === 3 ? 'Three' : 'Two'} quick things and I&apos;m ready.</T>
-            <View style={[st.donePill, { backgroundColor: colors.white }]}>
-              <View style={[st.doneDot, { backgroundColor: done === total ? colors.chill : colors.red }]} />
-              <T v="bodyBold" style={{ fontSize: 13, color: done === total ? colors.chill : colors.red }}>{done} of {total} done</T>
-            </View>
-          </View>
-        </LinearGradient>
+          <Character source={pose(roaster, face)} size={110} alt={`${roasterName[roaster]}, getting ready`} fadeTo={colors.bg} />
+        </View>
 
         <View style={{ paddingHorizontal: 24, paddingTop: 16, gap: 10 }}>
           {cards.map((c) => {
@@ -112,7 +121,7 @@ export default function Permissions() {
                 {c.key === 'overlay' && s === 'active' && restricted ? <RestrictedHelp upfront then={c.button} /> : null}
                 {c.key === 'battery' && s === 'active' && steps ? (
                   <View style={st.steps}>
-                    <T v="bodyBold" style={{ fontSize: 13 }}>On your {steps.brand} phone</T>
+                    <T v="bodyBold" style={{ fontSize: 13 }}>On your phone</T>
                     {steps.steps.map((line, i) => (
                       <T key={i} style={{ fontFamily: fonts.medium, fontSize: 13, color: colors.ink }}>{`${i + 1}. ${line}`}</T>
                     ))}
@@ -134,15 +143,14 @@ export default function Permissions() {
 
         <View style={{ flex: 1, minHeight: 16 }} />
         <View style={{ paddingHorizontal: 24, paddingBottom: 16 }}>
+          {done === total ? (
+            <T style={{ textAlign: 'center', fontStyle: 'italic', fontSize: 14, color: colors.ink, marginBottom: 12 }}>“Knuckles cracked. Let&apos;s see if you can take it.”</T>
+          ) : null}
           <Button
-            label="I'm ready"
+            label={allAnswered ? 'Roast me now' : `${done} of ${total} done`}
             disabled={!allAnswered}
-            onPress={() => {
-              // Screen 17: offer the roaster's face as the app icon when this build supports it.
-              if (appIconSupported()) return router.push('/onboarding/app-icon');
-              set({ onboarded: true, streakDays: 1, startedAt: localDay() });
-              router.replace('/today');
-            }}
+            style={btn}
+            onPress={() => router.push('/onboarding/finish')}
           />
         </View>
       </ScrollView>
@@ -209,10 +217,6 @@ function PermCard({
 }
 
 const st = StyleSheet.create({
-  hero: { marginHorizontal: 24, marginTop: 8, minHeight: 210, padding: 20, borderRadius: 28, overflow: 'hidden', justifyContent: 'center' },
-  heroChar: { position: 'absolute', right: -34, bottom: 0 },
-  donePill: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, height: 30, paddingHorizontal: 12, borderRadius: 999 },
-  doneDot: { width: 8, height: 8, borderRadius: 4 },
   card: { padding: 14, borderRadius: 18, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.surface, gap: 10 },
   icon: { width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   tick: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },

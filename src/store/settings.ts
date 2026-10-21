@@ -6,8 +6,12 @@ import type { Roaster } from '@/characters';
 
 import { zustandStorage } from './storage';
 
-export type Intensity = 'polite' | 'honest' | 'savage';
+/** 'unhinged' is Premium only (and never for school students). */
+export type Intensity = 'polite' | 'honest' | 'savage' | 'unhinged';
 export type RoastLang = 'en' | 'ta-Latn';
+/** The three tones most text is written in; Unhinged borrows Savage wherever it has nothing of its own. */
+export type Tone = Exclude<Intensity, 'unhinged'>;
+export const toneOf = (i: Intensity): Tone => (i === 'unhinged' ? 'savage' : i);
 
 export type TrackedApp = {
   packageName: string;
@@ -17,6 +21,8 @@ export type TrackedApp = {
   avgDailyMin: number;
   weekMin: number;
   limitMin: number;
+  /** Premium: Saturday and Sunday limit, used when `weekendLimits` is on. Stored only; the watcher doesn't read it yet. */
+  weekendLimitMin?: number;
   /** Anti-cheat (Screen 11): a raised limit waits for tomorrow… */
   nextLimitMin?: number;
   /** …from this local date (YYYY-MM-DD). */
@@ -26,12 +32,33 @@ export type TrackedApp = {
 };
 
 export type PermissionState = 'pending' | 'granted' | 'skipped';
+/** Onboarding "Which one are you?" (optional; steers roast flavour, never an exact age). */
+export type UserGroup = 'school' | 'college' | 'working' | 'other';
+/** Onboarding "Why are you here?". */
+export type Goal = 'exams' | 'sleep' | 'focus' | 'family' | 'checking' | 'own';
 
 type Settings = {
   onboarded: boolean;
+  /**
+   * Premium. Play Billing isn't built yet, so this is only ever switched on by the paywall in dev
+   * builds, to test the Premium screens. Release builds keep it false.
+   */
+  premium: boolean;
+  /** Premium: separate weekend limits on (see TrackedApp.weekendLimitMin). */
+  weekendLimits?: boolean;
   hasUsageAccess: boolean;
   /** What Loop / Lupe call the user in some roasts ({name}). Optional; stays on the phone. */
   name?: string;
+  /** True when the roaster picked the name (an earned title) because the user skipped. */
+  nameAuto?: boolean;
+  group?: UserGroup;
+  goal?: Goal;
+  /** The user's own words when goal is 'own' (60 chars max). */
+  goalText?: string;
+  /** Welcome bonus granted at the end of onboarding (the Loops & Leaves system reads it later). */
+  welcomeBonus?: { loops: number; leaves: number; on: string };
+  /** Daily average across all apps from the onboarding reveal (minutes); over 4 h → gentler 20% suggestions. */
+  revealDailyMin?: number;
   roaster: Roaster;
   roastLang: RoastLang;
   intensity: Intensity;
@@ -96,6 +123,7 @@ function defaultLang(): RoastLang {
 
 const initial = {
   onboarded: false,
+  premium: false,
   hasUsageAccess: false,
   roaster: 'loop' as Roaster,
   roastLang: defaultLang(),
