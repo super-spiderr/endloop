@@ -44,6 +44,8 @@ type Settings = {
    * builds, to test the Premium screens. Release builds keep it false.
    */
   premium: boolean;
+  /** Premium: Today's look. 'premium' (default) = black and red; 'classic' = the white Free look. */
+  homeLook?: 'premium' | 'classic';
   /** Premium: separate weekend limits on (see TrackedApp.weekendLimitMin). */
   weekendLimits?: boolean;
   hasUsageAccess: boolean;

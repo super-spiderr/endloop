@@ -37,8 +37,8 @@ type BarProps = {
 
 function Bar({ state, navigation, bottom }: BarProps) {
   const [width, setWidth] = useState(0);
-  // Premium Today is deep red: the strip matches it and the bar turns white (canvas TD2-P1).
-  const premium = useSettings((s) => s.premium);
+  // Premium Today is black and red: the strip matches its bottom and the bar turns white (canvas TD2-P1).
+  const premium = useSettings((s) => s.premium && s.homeLook !== 'classic');
   const light = premium && state.routes[state.index]?.name === 'today';
   const count = state.routes.length;
   const slot = width > 0 ? (width - PAD * 2) / count : 0;
@@ -54,7 +54,7 @@ function Bar({ state, navigation, bottom }: BarProps) {
   const pill = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }], width: slot }));
 
   return (
-    <View style={[st.wrap, { paddingBottom: bottom }, light && { backgroundColor: '#26020A' }]}>
+    <View style={[st.wrap, { paddingBottom: bottom }, light && { backgroundColor: '#060203' }]}>
       <View style={[st.bar, light && { backgroundColor: colors.white }]} onLayout={(e) => setWidth(e.nativeEvent.layout.width)} accessibilityRole="tablist">
         {slot > 0 ? <Animated.View pointerEvents="none" style={[st.pill, pill]} /> : null}
         {state.routes.map((route, i) => (

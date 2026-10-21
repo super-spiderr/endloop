@@ -26,7 +26,7 @@ import { colors, fonts, gradients, radius, stateStyle, usageState } from '@/them
 const VARS = ['app', 'time', 'limit'] as const;
 
 export default function Today() {
-  const { roaster, roastLang, intensity, name, tracked, hasUsageAccess, howItWorksDismissed, streakDays, startedAt, pausedOn, perfectSeen, premium: isPremium, weekendLimits, welcomeBonus, goal, goalText, set } = useSettings();
+  const { roaster, roastLang, intensity, name, tracked, hasUsageAccess, howItWorksDismissed, streakDays, startedAt, pausedOn, perfectSeen, premium: isPremium, homeLook, weekendLimits, welcomeBonus, goal, goalText, set } = useSettings();
   const [today, setToday] = useState<TodayUsage>({});
   const [premium, setPremium] = useState(false);
   const [killed, setKilled] = useState(false);
@@ -141,8 +141,8 @@ export default function Today() {
               ? 'dayOne'
               : null;
 
-  // Premium: the whole screen goes deep red (canvas TD2-P1/P2). Free stays white.
-  const P = isPremium;
+  // Premium: the whole screen goes black with red light (canvas TD2-P1/P2), unless they picked Classic in Settings.
+  const P = isPremium && homeLook !== 'classic';
   const ink = P ? colors.white : colors.ink;
   const soft = P ? 'rgba(255,255,255,0.72)' : colors.muted;
   const heroColors: readonly [string, string, string] = P
@@ -403,24 +403,24 @@ function KilledCard({ face, name, onClose }: { face: number; name: string; onClo
 const GLASS = 'rgba(255,255,255,0.1)';
 const CORAL = '#FF8C99';
 /** Bottom colour of the Premium background (the tab bar strip in (tabs)/_layout.tsx matches it). */
-const PREMIUM_BOTTOM = '#26020A';
+const PREMIUM_BOTTOM = '#060203';
 const PREMIUM_STATE = {
   chill: { color: '#5BD6A0', tint: 'rgba(91,214,160,0.16)' },
   heads: { color: '#FFB547', tint: 'rgba(255,181,71,0.16)' },
   roasted: { color: '#FF5A6A', tint: 'rgba(255,90,106,0.18)' },
 } as const;
 
-/** Premium Today background: deep red, red light from the top, one big faint loop. */
+/** Premium Today background: black, red light from the top fading down, one big faint loop. */
 function PremiumBackdrop() {
   const { width, height } = useWindowDimensions();
   const loop = width * 2.33;
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-      <LinearGradient colors={['#6E0918', '#4A0510', PREMIUM_BOTTOM]} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={['#4A0610', '#1A0306', '#0B0405', PREMIUM_BOTTOM]} locations={[0, 0.35, 0.7, 1]} style={StyleSheet.absoluteFill} />
       <Svg width={width} height={height} style={StyleSheet.absoluteFill}>
         <Defs>
           <RadialGradient id="pTop" cx="50%" cy="0%" rx="70%" ry="35%">
-            <Stop offset="0" stopColor="#E5132B" stopOpacity={0.75} />
+            <Stop offset="0" stopColor="#E5132B" stopOpacity={0.6} />
             <Stop offset="1" stopColor="#E5132B" stopOpacity={0} />
           </RadialGradient>
         </Defs>

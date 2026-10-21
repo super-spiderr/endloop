@@ -8,7 +8,7 @@ import { Wordmark } from '@/brand/logo';
 import { pose, roasterName, type Roaster } from '@/characters';
 import { PremiumSheet } from '@/components/premium-sheet';
 import { RoasterSheet } from '@/components/roaster-sheet';
-import { Chevron, Group, NOTIFY_ROWS, NavRow, Row, settingsStyles } from '@/components/settings-ui';
+import { Chevron, Group, NOTIFY_ROWS, NavRow, Row, Segment, settingsStyles } from '@/components/settings-ui';
 import { Avatar, Button, Character, LinkButton, Sheet, T } from '@/components/ui';
 import { APP_ICON_LABEL, AppIconImage, appIconSupported, getAppIcon, setAppIcon, type AppIconName } from '@/lib/app-icon';
 import { useOnReturn } from '@/lib/hooks';
@@ -105,16 +105,33 @@ export default function Settings() {
           />
         </Group>
 
+        {s.premium ? (
+          <Group title="Home look" note={s.homeLook === 'classic' ? 'The white look, like Free.' : 'Black and red, Premium only.'}>
+            <View style={{ paddingTop: 12 }}>
+              <Segment<'premium' | 'classic'>
+                options={[
+                  ['premium', 'Premium'],
+                  ['classic', 'Classic'],
+                ]}
+                value={s.homeLook ?? 'premium'}
+                onChange={(v) => s.set({ homeLook: v })}
+              />
+            </View>
+          </Group>
+        ) : null}
+
         <Group>
           <NavRow first label="Privacy and data" href="/prefs/privacy-data" />
           <NavRow label="About and help" href="/prefs/about" />
         </Group>
 
+        {s.premium ? null : (
         <Pressable accessibilityRole="button" onPress={() => setPremium(true)} style={st.premium}>
           <Avatar source={pose(s.roaster, 'vip')} size={40} />
           <T v="bodyBold" style={{ flex: 1, color: colors.white, fontSize: 15 }}>Watch more than 3 apps with Premium</T>
           <Chevron color="#FFB38A" />
         </Pressable>
+        )}
 
         {__DEV__ ? (
           <View style={{ paddingHorizontal: 24, paddingTop: 20, gap: 12 }}>
