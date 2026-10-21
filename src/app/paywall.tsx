@@ -14,14 +14,14 @@ import { colors, fonts } from '@/theme/tokens';
 type Reason = 'apps' | 'unhinged' | 'stats' | 'archive';
 
 const HEADLINES: Record<Reason, string> = {
-  apps: 'Watching more than 3 apps? Go unlimited.',
+  apps: 'Watching more than 3 apps? Go up to 6.',
   unhinged: 'You want it meaner? Respect.',
   stats: 'The long game is Premium.',
   archive: 'Every roast, kept forever? Premium.',
 };
 
 const BENEFITS: [string, string][] = [
-  ['Unlimited apps', 'Free watches 3.'],
+  ['Up to 6 apps', 'Free watches 3.'],
   ['Unhinged mode', 'The meanest level. Still never about looks or family.'],
   ['Month view and full history', 'Plus every past weekly roast.'],
 ];

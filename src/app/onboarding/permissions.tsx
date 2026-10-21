@@ -146,12 +146,23 @@ export default function Permissions() {
           {done === total ? (
             <T style={{ textAlign: 'center', fontStyle: 'italic', fontSize: 14, color: colors.ink, marginBottom: 12 }}>“Knuckles cracked. Let&apos;s see if you can take it.”</T>
           ) : null}
-          <Button
-            label={allAnswered ? 'Roast me now' : `${done} of ${total} done`}
-            disabled={!allAnswered}
-            style={btn}
-            onPress={() => router.push('/onboarding/finish')}
-          />
+          {allAnswered && permissions.overlay === 'skipped' ? (
+            // Overlay skipped: push once more for it, but let them through on notifications alone.
+            <View style={{ alignItems: 'center', gap: 4 }}>
+              <Button label="Fine, allow it" style={btn} onPress={() => act('overlay')} />
+              <LinkButton
+                label={permissions.notifications === 'granted' ? 'Continue with notifications only' : 'Continue anyway'}
+                onPress={() => router.push('/onboarding/finish')}
+              />
+            </View>
+          ) : (
+            <Button
+              label={allAnswered ? 'Roast me now' : `${done} of ${total} done`}
+              disabled={!allAnswered}
+              style={btn}
+              onPress={() => router.push('/onboarding/finish')}
+            />
+          )}
         </View>
       </ScrollView>
     </Screen>

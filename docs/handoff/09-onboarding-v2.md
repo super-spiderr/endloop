@@ -80,6 +80,9 @@ Tick these as they land. Premium-only behaviour stays out.
 - [x] 6a v2 built (21 Oct): big "stage" card (level name 44 px, chillies, 4-step heat meter, one-line meaning, roaster pose), 76 px level cards, first roast as a speech bubble from the roaster; background crossfades per level; Unhinged gets a gold button. Seen on the emulator: Honest (white), Savage (red), Unhinged (gold). Not seen yet: Polite, the locked Unhinged card on Savage, school note.
 - [x] Welcome v2 built (21 Oct): shared red background, marquee (4 tilted rows, alternate directions, still with Reduce motion), new copy. Seen on the emulator. The chest fade is painted in the background colour, so the marquee and the big loop are kept above it (a real alpha mask would need masked-view as a direct dependency + native rebuild).
 - [ ] Not yet looked at on screen after round 3: 6a and 6b on white (Free and Premium), roaster zoom, reveal drumroll padding.
+- [x] Emulator pass 4 (21 Oct, late): paywall (6 apps copy), 6a Free on Polite/Honest/Savage + locked Unhinged + Unhinged nudge (Lupe, Tanglish), school lock + note, 6b white with own words, 7 one-left title + skipped-overlay state, 8a test roast, 8b welcome bonus, Welcome v2 (no big loop on this screen; marquee between wordmark and chest fade), roaster, reveal drumroll (padding + centred headline). All look right.
+  - Decided 21 Oct: Premium = up to 6 apps (paywall, Premium sheet and website say so now); the under-1 h "monk" reveal stays as is.
+  - After skipping the overlay, C4 says the main button should read "Fine, allow it" with a link "Continue with notifications only"; the app shows "Roast me now". The roaster clip is a head crop, so showing more body needs a re-export from the source video.
 - [ ] Vignesh tests on device (`npx expo run:android`, Settings → Replay onboarding)
 - [ ] Update `02-build-status.md`, `06-next-steps.md` and 08 (onboarding section) once built
 

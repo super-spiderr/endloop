@@ -28,11 +28,12 @@ export default function Welcome() {
   const img = Math.min(width, height * 0.47);
   const { shown, done } = useTypewriter([HEADLINE, SECOND], { startDelay: 1500, charMs: 40, gapMs: 350 });
 
+  // No big loop here: the marquee is the decoration, and the loop would be cut by the chest fade.
   return (
-    <SpotlightScreen loopY={0.22}>
+    <SpotlightScreen loop={false}>
       <RedStatusBar />
       {/* Kept above the chest fade: the fade is painted in the background colour and would cut the rows. */}
-      <Marquee top={img * 0.12} />
+      <Marquee top={img * 0.2 + 30} />
       <View style={{ alignItems: 'center', paddingTop: 16 }}>
         <Wordmark width={132} variant="white" />
       </View>

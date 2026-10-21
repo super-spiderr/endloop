@@ -21,7 +21,7 @@ export function PremiumSheet({ visible, onClose, onSeePremium, roaster, reason }
   const copy: Record<Props['reason'], [string, string]> = {
     apps: ["Watching more than 3? That's Premium.", 'Free keeps an eye on 3 apps. Premium watches all of them.'],
     unhinged: ['You want it meaner? Respect.', 'Unhinged is Premium. Absurd, chaotic, still never about your looks or your family.'],
-    stats: ['The long game is Premium.', 'Month view, your full history, every past weekly roast, and unlimited apps.'],
+    stats: ['The long game is Premium.', 'Month view, your full history, every past weekly roast, and up to 6 apps.'],
     archive: ['Every roast, kept forever? Premium.', 'Free shows this week and last. Premium keeps every weekly roast so you can see how far you came.'],
   };
   const [title, body] = copy[reason];

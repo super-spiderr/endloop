@@ -27,7 +27,7 @@ export function RedStatusBar({ light = true }: { light?: boolean }) {
  * The red onboarding background (canvas "OB2-BG-3-Motif" loop): deep maroon, red light from the top
  * and one big faint infinity loop, centred at `loopY` (0..1 of the height), bleeding off both sides.
  */
-export function SpotlightScreen({ children, loopY = 0.45 }: { children: ReactNode; loopY?: number }) {
+export function SpotlightScreen({ children, loopY = 0.45, loop: showLoop = true }: { children: ReactNode; loopY?: number; loop?: boolean }) {
   const { width, height } = useWindowDimensions();
   // The mark's loop fills ~72% of its box; this makes the loop itself ~1.7x the screen width.
   const loop = width * 2.33;
@@ -48,12 +48,14 @@ export function SpotlightScreen({ children, loopY = 0.45 }: { children: ReactNod
         <Rect width={width} height={height} fill="url(#base)" />
         <Rect width={width} height={height} fill="url(#top)" />
       </Svg>
-      <View
-        pointerEvents="none"
-        style={{ position: 'absolute', left: (width - loop) / 2, top: height * loopY - loop / 2, opacity: 0.1, transform: [{ rotate: '-14deg' }] }}
-      >
-        <LoopMark size={loop} color={colors.white} strokeWidth={30} />
-      </View>
+      {showLoop ? (
+        <View
+          pointerEvents="none"
+          style={{ position: 'absolute', left: (width - loop) / 2, top: height * loopY - loop / 2, opacity: 0.1, transform: [{ rotate: '-14deg' }] }}
+        >
+          <LoopMark size={loop} color={colors.white} strokeWidth={30} />
+        </View>
+      ) : null}
       <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
         {children}
       </SafeAreaView>
@@ -76,13 +78,13 @@ export function Label({ children, extra, light = false }: { children: string; ex
 }
 
 /** Title (a roaster line, so it may be Tanglish) + grey subtitle. */
-export function Heading({ title, sub, light = false, size = 22 }: { title: string; sub?: string; light?: boolean; size?: number }) {
+export function Heading({ title, sub, light = false, size = 22, center = false }: { title: string; sub?: string; light?: boolean; size?: number; center?: boolean }) {
   return (
     <View style={{ gap: 6 }}>
-      <T accessibilityRole="header" style={{ fontFamily: fonts.display, fontSize: size, lineHeight: size * 1.2, color: light ? colors.white : colors.ink }}>
+      <T accessibilityRole="header" style={{ fontFamily: fonts.display, fontSize: size, lineHeight: size * 1.2, color: light ? colors.white : colors.ink, textAlign: center ? 'center' : 'left' }}>
         {title}
       </T>
-      {sub ? <T style={{ fontFamily: fonts.regular, fontSize: 13, lineHeight: 19, color: light ? 'rgba(255,255,255,0.78)' : colors.muted }}>{sub}</T> : null}
+      {sub ? <T style={{ fontFamily: fonts.regular, fontSize: 13, lineHeight: 19, color: light ? 'rgba(255,255,255,0.78)' : colors.muted, textAlign: center ? 'center' : 'left' }}>{sub}</T> : null}
     </View>
   );
 }

@@ -170,7 +170,7 @@ export default function IntensityScreen() {
               <View style={{ flexDirection: 'row', gap: 4, width: 132 }}>
                 {LEVELS.map((l, i) =>
                   i === 3 && !canUnhinged && i > levelIdx ? (
-                    <View key={l.key} style={[st.seg, { borderWidth: 1.5, borderStyle: 'dashed', borderColor: GOLD }]} />
+                    <View key={l.key} style={[st.seg, { borderWidth: 1.5, borderStyle: 'dashed', borderColor: school ? look.meterOff : GOLD }]} />
                   ) : (
                     <View key={l.key} style={[st.seg, { backgroundColor: i <= levelIdx ? look.meterOn : look.meterOff }]} />
                   ),

@@ -64,7 +64,7 @@ export default function Reveal() {
         <Animated.View entering={FadeIn} style={{ flex: 1, alignItems: 'center', paddingHorizontal: 24 }}>
           <T style={st.eyebrow}>The reveal</T>
           <FadedPose source={pose(roaster, 'waiting')} size={330} alt="Drumming fingers" />
-          <Heading title={say(OB.revealReady, lang)} light size={26} />
+          <Heading title={say(OB.revealReady, lang)} light size={26} center />
           <T style={{ marginTop: 8, color: 'rgba(255,255,255,0.8)', fontSize: 14 }}>Counting up…</T>
         </Animated.View>
       ) : (
