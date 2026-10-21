@@ -84,7 +84,7 @@ Tick these as they land. Premium-only behaviour stays out.
   - Decided 21 Oct: Premium = up to 6 apps (paywall, Premium sheet and website say so now); the under-1 h "monk" reveal stays as is.
   - After skipping the overlay, C4 says the main button should read "Fine, allow it" with a link "Continue with notifications only"; the app shows "Roast me now". The roaster clip is a head crop, so showing more body needs a re-export from the source video.
 - [ ] Vignesh tests on device (`npx expo run:android`, Settings → Replay onboarding)
-- [ ] Update `02-build-status.md`, `06-next-steps.md` and 08 (onboarding section) once built
+- [x] Updated `02-build-status.md`, `06-next-steps.md` and 08 (onboarding section) (21 Oct)
 
 ## Notes for whoever continues
 - The canvas mockups were generated with throwaway Python scripts in a session scratchpad (not in the repo). To change a board, read it from the canvas, edit the HTML, publish to the same URL (re-read `project/canvas.json` before sending it).

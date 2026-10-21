@@ -2,9 +2,9 @@
 
 ## Priority order
 
-1. **Test the whole app on a real phone** (checklist below) and fix what breaks. Most of S08–S17 has never run on a device.
+1. **Test the whole app on a real phone** (checklist below) and fix what breaks. Most of S08–S17 has never run on a device, and onboarding v2 (21 Oct) has only run on the emulator.
 2. ~~Poses for S08 → S17~~ Done 6 Oct for both roasters and wired in (bow and goodbye wait for payments).
-3. **Payments:** RevenueCat + Play Console products (₹99 / ₹699 with 7-day trial / ₹1,499 lifetime), real Premium state, restore, then build "Premium ended → pick 3 apps to keep" (S16-H).
+3. **Payments:** RevenueCat + Play Console products (₹39 / ₹199 with 7-day trial / ₹499 lifetime, founding ₹299 lifetime for the first 500 or 30 days), real Premium state, restore, then build "Premium ended → pick 3 apps to keep" (S16-H).
 4. **Publish the privacy policy, terms and support pages** (`site/`, written 29 Sep): fill the support email with `sh site/set-email.sh`, host on a public Super Spider GitHub Pages repo, then set `src/lib/links.ts` so the Settings rows go live. Required for the Play Store.
 5. **Play Store listing:** screenshots, feature graphic, descriptions, data-safety form (usage data stays on device, no account).
 6. **After release:** animated clips ship as updates, one at a time (decided 6 Oct), starting with the S09 eye-roll. Not needed for v1; the stills are the release art.
@@ -14,9 +14,12 @@
 
 Build: `npx expo prebuild --clean && npx expo run:android`. Logs: `adb logcat -s Endloop AndroidRuntime`.
 
-Onboarding
-- [ ] S01–S06 flow end to end on a fresh install (Settings → Replay onboarding in dev builds)
-- [ ] S17 app icon ask appears after "I'm ready"; pick Loop, press Home, icon changes (`app icon → loop` in logcat)
+Onboarding (v2, see 09-onboarding-v2.md)
+- [ ] Welcome → roaster → … → welcome bonus → Today on a fresh install (Settings → Replay onboarding in dev builds), both roasters, English and Tanglish
+- [ ] Welcome marquee moves smoothly; still with Reduce motion on
+- [ ] Reveal numbers match the phone's own Digital Wellbeing roughly; Endloop itself never listed
+- [ ] Battery card shows on the Vivo (and never names the brand)
+- [ ] Test Premium (dev): paywall button → 6 apps, weekend tabs, Unhinged gold screen; button again turns it off
 
 Home and watcher
 - [ ] Mood card poses: first visit, chill, close, over, Usage Access off

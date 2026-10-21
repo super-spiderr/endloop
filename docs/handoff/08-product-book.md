@@ -70,16 +70,19 @@ The most important 2 minutes. Shock them with their own numbers, ask for permiss
 
 Redesigned 15 Oct
 
-| \#  | Screen                            | What happens                                                                                                                                                                                                                                                                                                     |
-|-----|-----------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1   | Welcome                           | Pick **Loop or Lupe** and **English or Tanglish**. Optional **nickname** ("What should Loop call you?"). Optional **"Which one are you?"**: 🎒 School student · 🎓 College student · 💼 Working · 🙂 Other.                                                                                                      |
-| 2   | Usage Access                      | "Let me see how bad it is." Auto-return after the switch, a hint toast, and the restricted-settings steps up front for sideloaded installs.                                                                                                                                                                      |
-| 3   | 💥 The reveal                     | Their real 7-day numbers: "You spent **4 h 12 m** a day. **Instagram 2 h 05 m**. That's 1 month a year." The roaster reacts. Saves the **baseline** for Loops.                                                                                                                                                   |
-| 4   | Pick apps                         | Top 3 time-sinks pre-selected. A 4th tap shows a soft Premium nudge with "Maybe later".                                                                                                                                                                                                                          |
-| 5   | Limits                            | Suggested limit **30% below their own average** (**20%** if the average is over 4 h a day, so heavy users can actually win week 1), rounded to 5 minutes, adjustable. Note: "Below your normal = you earn Loops."                                                                                                |
-| 6   | Roast level + your goal           | Polite / Honest / Savage (Unhinged shown as Premium; **locked for school students**). Then **"Why are you here?"**: pick 📚 Exams / studies, 😴 Better sleep, 🎯 Focus at work, 👨‍👩‍👧 Family time or 🤷 Just checking how bad it is, or type your own. The goal steers some roasts (study burns, late-night lines). |
-| 7   | Display over apps + notifications | Asked just before they're needed: "So I can roast you on top of Instagram." **Battery** only on Xiaomi/Redmi/POCO, Oppo/Realme, Vivo/iQOO, OnePlus, Samsung.                                                                                                                                                     |
-| 8   | 🔥 Test the roast                 | A live demo roast, then "🎁 Welcome bonus: 100 Loops + 2 leaves. Day 1 starts now." → Today.                                                                                                                                                                                                                     |
+Redesigned 15 Oct, **built 21 Oct** (onboarding v2; details, copy and later decisions in `09-onboarding-v2.md` and `docs/content/C4-onboarding.md`).
+
+| #   | Screen | What happens |
+|-----|--------|--------------|
+| 0   | Welcome | Loop sneaks in: "Here we go again." / "Another patient. Let me guess: 'just five minutes' turned into three hours?" Excuse marquee behind him. → "Okay doc. Roast me." |
+| 1   | Pick your roaster + a bit about you | Full-screen **Loop or Lupe** chooser, then a sheet: **English or Tanglish**, optional **"Which one are you?"** (School student · College student · Working · Other). |
+| 2   | Usage Access | "Show me your screen time. I promise to judge." Auto-return, restricted-settings help up front for sideloaded installs. |
+| 3   | 💥 The reveal + what should I call you | Real 7-day numbers, top app with a year line, band reaction; saves the **baseline**. Then the **nickname**: earned titles (Doomscroller, Night Owl…) or their own name; skip = the roaster picks one. |
+| 4   | Pick apps | Top 3 used apps pre-selected; a 4th tap shows a soft Premium nudge. |
+| 5   | Limits | **30% below their own average** (**20%** over 4 h a day), Earning Loops pill, "What are Loops?" sheet, weekend limits (★ Premium). |
+| 6   | Roast level + why are you here | Polite / Honest / Savage / Unhinged (★ Premium; **locked for school students**). The screen's look follows the level (white → red → black and gold). Then the goal: Exams, Sleep, Focus at work, Family time, Just checking, or their own words. |
+| 7   | Display over apps + notifications | Asked just before they're needed; **battery** only on aggressive-battery brands, never naming the brand. |
+| 8   | 🔥 Test the roast + 🎁 welcome bonus | A real-looking test roast with their numbers, then 100 Loops + 2 Leaves. "Day 1 starts now" → Today. |
 
 #### What the profile answers drive
 

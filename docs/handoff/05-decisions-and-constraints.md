@@ -22,6 +22,7 @@
 | Sep 2026 | Two roasters: Loop (default, mascot) and Lupe. More characters later, each with its own name. |
 | Sep 2026 | Free tier tracks 3 apps; Premium unlocks unlimited apps, Unhinged level, month view/full history, weekly archive. |
 | 25 Sep 2026 | Prices: Monthly ₹99, Yearly ₹699 (7-day free trial, default), Lifetime ₹1,499. Billing through Google Play via RevenueCat (anonymous app user IDs; purchases tied to the Google account; "Restore purchase" on the paywall; set RevenueCat restore behaviour so both devices keep Premium). |
+| 16 Oct 2026 | Prices lowered (see 08): Monthly ₹39, Yearly ₹199 (7-day trial), Lifetime ₹499, founding lifetime ₹299 (first 500 or 30 days). Paywall and website updated 21 Oct; the founding offer isn't shown yet. |
 | Sep 2026 | Snooze: 2 per app per day, with friction (reason → type a sentence → 10 s wait, 20 s for the 2nd); backing out counts as a win. |
 | Sep 2026 | Anti-cheat: lower limit = now; raise limit / stop tracking = tomorrow. |
 | Sep 2026 | Roast overlay is full screen and covers the status bar; "5 more minutes" first asks the user to convince. |
