@@ -16,7 +16,7 @@ import { dismissNews, useRoastNews } from '@/roasts/news';
 import { comparison, fmt } from '@/lib/time';
 import { batterySteps, openBatterySettings, openBrandBackgroundSettings, openUsageAccessSettings } from '@/lib/permissions';
 import { watcherLooksDead } from '@/lib/watcher';
-import { localDay, useSettings } from '@/store/settings';
+import { limitOn, localDay, useSettings } from '@/store/settings';
 import { colors, fonts, gradients, radius, stateStyle, usageState } from '@/theme/tokens';
 
 /** Screen 7 · Home ("Today" tab). */
@@ -24,7 +24,7 @@ import { colors, fonts, gradients, radius, stateStyle, usageState } from '@/them
 const VARS = ['app', 'time', 'limit'] as const;
 
 export default function Today() {
-  const { roaster, roastLang, intensity, name, tracked, hasUsageAccess, howItWorksDismissed, streakDays, startedAt, pausedOn, perfectSeen, set } = useSettings();
+  const { roaster, roastLang, intensity, name, tracked, hasUsageAccess, howItWorksDismissed, streakDays, startedAt, pausedOn, perfectSeen, premium: isPremium, weekendLimits, set } = useSettings();
   const [today, setToday] = useState<TodayUsage>({});
   const [demo, setDemo] = useState(false);
   const [premium, setPremium] = useState(false);
@@ -60,7 +60,7 @@ export default function Today() {
           const y = days[0];
           const started = useSettings.getState().startedAt;
           const counted = !!y && (!started || y.day >= new Date(`${started}T00:00:00`).getTime());
-          setPerfectYesterday(counted && tracked.every((a) => (y.apps[a.packageName] ?? 0) <= a.limitMin) && Object.values(y.apps).some((m) => m > 0));
+          setPerfectYesterday(counted && tracked.every((a) => (y.apps[a.packageName] ?? 0) <= limitOn(a, useSettings.getState(), new Date(y.day))) && Object.values(y.apps).some((m) => m > 0));
         });
       }
     };
@@ -72,7 +72,8 @@ export default function Today() {
   const firstVisit = !howItWorksDismissed;
   const paused = pausedOn === localDay();
   const dayOne = !firstVisit && (!startedAt || startedAt === localDay());
-  const rows = tracked.map((a) => ({ ...a, used: today[a.packageName] ?? 0, state: usageState(today[a.packageName] ?? 0, a.limitMin) }));
+  // Today's limit (the Premium weekend one on Saturday and Sunday), same as the watcher uses.
+  const rows = tracked.map((a) => ({ ...a, limitMin: limitOn(a, { premium: isPremium, weekendLimits }), used: today[a.packageName] ?? 0 })).map((a) => ({ ...a, state: usageState(a.used, a.limitMin) }));
   const total = rows.reduce((s, r) => s + r.used, 0);
   const over = rows.filter((r) => r.state === 'roasted');
   const close = rows.filter((r) => r.state === 'heads');

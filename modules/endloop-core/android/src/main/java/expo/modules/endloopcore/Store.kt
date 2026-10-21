@@ -11,13 +11,25 @@ import java.util.Locale
 data class TrackedApp(
   val packageName: String,
   val label: String,
-  val limitMin: Int,
+  /** The everyday limit (Monday to Friday, and every day when there's no weekend limit). */
+  val baseLimitMin: Int,
+  /** Premium: Saturday and Sunday limit. Null = same as every other day. */
+  val weekendLimitMin: Int? = null,
   val headsUp: List<String>,
   val lastCall: List<String>,
   val limitHit: List<String>,
   val lateNight: List<String>,
   val snoozesUsedUp: List<String>,
-)
+) {
+  /** Today's limit, read fresh on every check so it switches at midnight on Friday and Sunday. */
+  val limitMin: Int
+    get() = weekendLimitMin?.takeIf { isWeekend() } ?: baseLimitMin
+
+  private fun isWeekend(): Boolean {
+    val day = java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_WEEK)
+    return day == java.util.Calendar.SATURDAY || day == java.util.Calendar.SUNDAY
+  }
+}
 
 /** A real, sourced fact, already in the user's tone (Screen 10's wait step). */
 data class Fact(val text: String, val source: String)
@@ -303,7 +315,8 @@ data class EnforcerConfig(
           TrackedApp(
             packageName = a.getString("packageName"),
             label = a.optString("label", a.getString("packageName")),
-            limitMin = a.optInt("limitMin", 60),
+            baseLimitMin = a.optInt("limitMin", 60),
+            weekendLimitMin = if (a.has("weekendLimitMin")) a.optInt("weekendLimitMin", 60) else null,
             headsUp = list("heads_up"),
             lastCall = list("last_call"),
             limitHit = list("limit_hit"),

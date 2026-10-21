@@ -96,6 +96,15 @@ type Settings = {
   reset: () => void;
 };
 
+/**
+ * The limit that applies on `date`: the Premium weekend limit on Saturday and Sunday when it's on,
+ * else the everyday one. The native watcher makes the same choice (TrackedApp.limitMin in Store.kt).
+ */
+export function limitOn(app: TrackedApp, s: { premium: boolean; weekendLimits?: boolean }, date = new Date()): number {
+  const weekend = date.getDay() === 0 || date.getDay() === 6;
+  return weekend && s.premium && s.weekendLimits && app.weekendLimitMin != null ? app.weekendLimitMin : app.limitMin;
+}
+
 /** Local date as YYYY-MM-DD; `plus` days ahead. */
 export function localDay(plus = 0): string {
   const d = new Date();

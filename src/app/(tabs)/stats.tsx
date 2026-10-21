@@ -11,7 +11,7 @@ import { AppTile, Character, T } from '@/components/ui';
 import { PremiumSheet } from '@/components/premium-sheet';
 import { usage, type HistoryDay } from '@/data/usage';
 import { fmt } from '@/lib/time';
-import { localDay, useSettings, type TrackedApp } from '@/store/settings';
+import { limitOn, localDay, useSettings, type TrackedApp } from '@/store/settings';
 import { colors, fonts, gradients, radius } from '@/theme/tokens';
 
 const DAY = 86_400_000;
@@ -95,7 +95,7 @@ function metrics(days: HistoryDay[], tracked: TrackedApp[], startedAt: string, b
   const start = new Date(`${startedAt}T00:00:00`).getTime();
   const sinceStart = Math.max(0, Math.floor((Date.now() - start) / DAY)); // 0 on day 1
   const total = (d: HistoryDay) => tracked.reduce((s, a) => s + (d.apps[a.packageName] ?? 0), 0);
-  const underAll = (d: HistoryDay) => tracked.every((a) => (d.apps[a.packageName] ?? 0) <= a.limitMin);
+  const underAll = (d: HistoryDay) => tracked.every((a) => (d.apps[a.packageName] ?? 0) <= limitOn(a, useSettings.getState(), new Date(d.day)));
 
   const week = days.slice(-7);
   const lastWeek = days.slice(-14, -7);

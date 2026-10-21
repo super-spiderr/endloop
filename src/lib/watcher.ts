@@ -184,6 +184,7 @@ export function buildConfig(s: S): WatcherConfig {
       packageName: a.packageName,
       label: a.label,
       limitMin: a.limitMin,
+      ...(s.premium && s.weekendLimits && a.weekendLimitMin != null ? { weekendLimitMin: a.weekendLimitMin } : {}),
       lines: {
         heads_up: linesFor('heads_up', { ...who, packageName: a.packageName, appLabel: a.label }),
         last_call: linesFor('last_call', { ...who, packageName: a.packageName, appLabel: a.label }),

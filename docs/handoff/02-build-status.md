@@ -13,7 +13,7 @@ Stack: Expo SDK 57 · React Native 0.86 · Expo Router (routes in `src/app`) · 
 | OB 2 | Usage Access | `onboarding/usage-access.tsx` | Built, emulator-checked. Skips Settings when access is already on. |
 | OB 3 | Reveal + what should I call you | `onboarding/reveal.tsx` | Built, emulator-checked. 7-day average, top app, band reaction; earned-title name sheet (skip = roaster picks). |
 | OB 4 | Pick apps | `onboarding/pick-apps.tsx` | Built, emulator-checked. Top used apps pre-ticked, Endloop never listed; 4th app → Premium nudge (6 with test Premium). |
-| OB 5 | Limits | `onboarding/limits.tsx` | Built, emulator-checked. Earning-Loops pill, Loops sheet, weekend nudge; Premium: weekend switch + tabs (stored only, not enforced). |
+| OB 5 | Limits | `onboarding/limits.tsx` | Built, emulator-checked. Earning-Loops pill, Loops sheet, weekend nudge; Premium: weekend switch + tabs. Weekend limits apply on Saturday and Sunday (watcher `TrackedApp.limitMin` in `Store.kt`, JS `limitOn()`), 21 Oct. |
 | OB 6a | Roast level | `onboarding/intensity.tsx` | Built, emulator-checked. Stage card + heat meter; white (Polite/Honest), red (Savage), black/gold (Unhinged, Premium). School: Unhinged locked. |
 | OB 6b | Why are you here? | `onboarding/goal.tsx` | Built, emulator-checked. 6 goals + own words; Premium "★ ON" note. |
 | OB 7 | Permissions | `onboarding/permissions.tsx` | Built, emulator-checked. Overlay + notifications (+ battery on listed brands, never named); syncs with the phone on replay; skipped: "Fine, allow it" / "Continue with notifications only". |
@@ -38,7 +38,6 @@ Stack: Expo SDK 57 · React Native 0.86 · Expo Router (routes in `src/app`) · 
 ## Not built yet
 
 - Real purchases (RevenueCat + Play Console products), restore, and the "Premium ended" state. A `premium` flag exists, but only dev builds can set it (paywall button), for testing the Premium screens.
-- Weekend limits are stored (Premium) but the watcher doesn't apply them yet.
 - Privacy policy / terms pages and feedback link (need a URL and an email).
 - Roast sound (toggle is stored but nothing plays).
 - Animated clips (planned last).

@@ -169,6 +169,8 @@ export type WatcherConfig = {
     packageName: string;
     label: string;
     limitMin: number;
+    /** Premium: Saturday and Sunday limit; the watcher uses it on those days. Left out = same as limitMin. */
+    weekendLimitMin?: number;
     lines: { heads_up: string[]; last_call: string[]; limit_hit: string[]; late_night: string[]; snoozes_used_up: string[] };
   }[];
 };

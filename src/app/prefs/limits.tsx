@@ -24,7 +24,7 @@ export default function LimitPrefs() {
               first={i === 0}
               icon={<AppTile label={a.label} color={a.color} iconUri={a.iconUri} size={36} />}
               label={a.label}
-              sub={`${fmtLimit(a.limitMin)} a day${a.nextLimitMin != null ? ` · ${fmtLimit(a.nextLimitMin)} from tomorrow` : ''}${a.removeFrom ? ' · stops tomorrow' : ''}`}
+              sub={`${fmtLimit(a.limitMin)} a day${s.premium && s.weekendLimits && a.weekendLimitMin != null ? ` · ${fmtLimit(a.weekendLimitMin)} weekends` : ''}${a.nextLimitMin != null ? ` · ${fmtLimit(a.nextLimitMin)} from tomorrow` : ''}${a.removeFrom ? ' · stops tomorrow' : ''}`}
               right={<Chevron />}
               onPress={() => router.push(`/app/${encodeURIComponent(a.packageName)}`)}
             />

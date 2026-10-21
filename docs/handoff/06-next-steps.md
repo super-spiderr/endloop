@@ -20,6 +20,7 @@ Onboarding (v2, see 09-onboarding-v2.md)
 - [ ] Reveal numbers match the phone's own Digital Wellbeing roughly; Endloop itself never listed
 - [ ] Battery card shows on the Vivo (and never names the brand)
 - [ ] Test Premium (dev): paywall button → 6 apps, weekend tabs, Unhinged gold screen; button again turns it off
+- [ ] Weekend limits (Premium): set a lower weekend limit; on Saturday the roast comes at the weekend limit and Today shows it; Monday back to the weekday one
 
 Home and watcher
 - [ ] Mood card poses: first visit, chill, close, over, Usage Access off

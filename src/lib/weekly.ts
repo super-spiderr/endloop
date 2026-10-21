@@ -1,7 +1,7 @@
 import type { HistoryDay } from '@/data/usage';
 import { fill, pickRoast } from '@/roasts';
 import type { Roaster } from '@/characters';
-import type { Intensity, RoastLang, TrackedApp } from '@/store/settings';
+import { limitOn, useSettings, type Intensity, type RoastLang, type TrackedApp } from '@/store/settings';
 
 import { fmt } from './time';
 
@@ -42,7 +42,7 @@ export function weeklyReport(
   const worstApp = tracked.map((a) => ({ label: a.label, minutes: sum(week, a.packageName) })).sort((a, b) => b.minutes - a.minutes)[0];
   const worst = worstApp && worstApp.minutes > 0 ? worstApp : null;
   const wonBack = baseline != null ? baseline * counted.length - sum(counted) : null;
-  const underDays = counted.filter((d) => tracked.every((a) => (d.apps[a.packageName] ?? 0) <= a.limitMin)).length;
+  const underDays = counted.filter((d) => tracked.every((a) => (d.apps[a.packageName] ?? 0) <= limitOn(a, useSettings.getState(), new Date(d.day)))).length;
   const wins = counted.reduce((s, d) => s + d.wins, 0);
 
   const firstWeek = Date.now() - start < 7 * DAY;

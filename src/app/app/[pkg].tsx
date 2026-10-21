@@ -26,7 +26,7 @@ import {
 import { usage, type AppDetail, type RoastEntry } from "@/data/usage";
 import { fmt, fmtLimit, suggestedLimit } from "@/lib/time";
 import { factsFor } from "@/roasts/facts";
-import { localDay, toneOf, useSettings, type RoastLang } from "@/store/settings";
+import { limitOn, localDay, toneOf, useSettings, type RoastLang } from "@/store/settings";
 import { colors, fonts, radius, stateStyle, usageState } from "@/theme/tokens";
 
 /** Screen 11 · App detail: one app up close, its limit (anti-cheat), and its Hall of shame. */
@@ -78,7 +78,9 @@ export default function AppDetailScreen() {
     );
   }
 
-  const state = usageState(today, app.limitMin);
+  // Today's limit (the Premium weekend one on Saturday and Sunday), as the watcher uses it.
+  const todayLimit = limitOn(app, useSettings.getState());
+  const state = usageState(today, todayLimit);
   const ss = stateStyle[state];
   const heaviest = detail
     ? detail.parts.indexOf(Math.max(...detail.parts))
@@ -115,7 +117,7 @@ export default function AppDetailScreen() {
       <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
         <Section title="Today">
           <View style={{ flexDirection: "row", alignItems: "center", gap: 20 }}>
-            <Ring used={today} limit={app.limitMin} color={ss.color} />
+            <Ring used={today} limit={todayLimit} color={ss.color} />
             <View style={{ gap: 12 }}>
               <Stat
                 big={String(detail?.opensToday ?? "–")}
@@ -125,20 +127,20 @@ export default function AppDetailScreen() {
                 big={detail ? `${detail.longestTodayMin} min` : "–"}
                 small="longest session"
               />
-              {today > app.limitMin ? (
+              {today > todayLimit ? (
                 <T v="bodyBold" style={{ fontSize: 13, color: colors.red }}>
-                  {fmt(today - app.limitMin)} over
+                  {fmt(today - todayLimit)} over
                 </T>
               ) : null}
             </View>
           </View>
-          {today > app.limitMin ? (
+          {today > todayLimit ? (
             <SpeechBubble
               face={pose(roaster, "confiscate")}
               text={
                 roastLang === "ta-Latn"
-                  ? `Limit-a ${fmt(today - app.limitMin)} thaandiyaachu. Phone-a kudu.`
-                  : `${fmt(today - app.limitMin)} past your limit. Hand it over.`
+                  ? `Limit-a ${fmt(today - todayLimit)} thaandiyaachu. Phone-a kudu.`
+                  : `${fmt(today - todayLimit)} past your limit. Hand it over.`
               }
             />
           ) : null}
@@ -149,7 +151,7 @@ export default function AppDetailScreen() {
             <WeekBars daily={detail.daily} limit={app.limitMin} />
             <WeekSummary daily={detail.daily} limit={app.limitMin} />
             {detail.daily.length >= 3 &&
-            detail.daily.every((d) => d.minutes <= app.limitMin) ? (
+            detail.daily.every((d) => d.minutes <= limitOn(app, useSettings.getState(), new Date(d.day))) ? (
               <SpeechBubble
                 face={pose(roaster, "highFive")}
                 text={
