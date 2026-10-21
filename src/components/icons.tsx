@@ -107,3 +107,35 @@ export const GearIcon = ({ size = 24, color = '#5F5F5F', strokeWidth = 2 }: P) =
     />
   </Svg>
 );
+
+/** Loops (the currency): a gold coin with a ring. */
+export const LoopsIcon = ({ size = 14, color = '#E8A317' }: P) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24">
+    <Circle cx={12} cy={12} r={10} fill={color} />
+    <Circle cx={12} cy={12} r={6} fill="none" stroke="#FFFFFF" strokeWidth={2.2} />
+  </Svg>
+);
+
+/** Leaves (Leave Letters): a sheet of paper. */
+export const LeafIcon = ({ size = 14, color = '#141414', strokeWidth = 2.2 }: P) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24">
+    <Path d="M6 3h9l4 4v14H6z" {...stroke(color, strokeWidth)} />
+    <Path d="M9 11h7M9 15h7" {...stroke(color, strokeWidth)} />
+  </Svg>
+);
+
+/** "Next roast in…": an eye. */
+export const EyeIcon = ({ size = 16, color = '#141414', strokeWidth = 2.2 }: P) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24">
+    <Path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12z" {...stroke(color, strokeWidth)} />
+    <Circle cx={12} cy={12} r={2.8} fill={color} />
+  </Svg>
+);
+
+/** Goal line: a target. */
+export const TargetIcon = ({ size = 15, color = '#5F5F5F', strokeWidth = 2.2 }: P) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24">
+    <Circle cx={12} cy={12} r={8} {...stroke(color, strokeWidth)} />
+    <Circle cx={12} cy={12} r={3} fill={color} />
+  </Svg>
+);

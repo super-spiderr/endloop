@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GearIcon, HomeIcon, StatsIcon } from '@/components/icons';
 import { T } from '@/components/ui';
+import { useSettings } from '@/store/settings';
 import { colors } from '@/theme/tokens';
 
 const ICONS = { today: HomeIcon, stats: StatsIcon, settings: GearIcon } as const;
@@ -36,6 +37,9 @@ type BarProps = {
 
 function Bar({ state, navigation, bottom }: BarProps) {
   const [width, setWidth] = useState(0);
+  // Premium Today is deep red: the strip matches it and the bar turns white (canvas TD2-P1).
+  const premium = useSettings((s) => s.premium);
+  const light = premium && state.routes[state.index]?.name === 'today';
   const count = state.routes.length;
   const slot = width > 0 ? (width - PAD * 2) / count : 0;
   const x = useSharedValue(0);
@@ -50,14 +54,15 @@ function Bar({ state, navigation, bottom }: BarProps) {
   const pill = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }], width: slot }));
 
   return (
-    <View style={[st.wrap, { paddingBottom: bottom }]}>
-      <View style={st.bar} onLayout={(e) => setWidth(e.nativeEvent.layout.width)} accessibilityRole="tablist">
+    <View style={[st.wrap, { paddingBottom: bottom }, light && { backgroundColor: '#26020A' }]}>
+      <View style={[st.bar, light && { backgroundColor: colors.white }]} onLayout={(e) => setWidth(e.nativeEvent.layout.width)} accessibilityRole="tablist">
         {slot > 0 ? <Animated.View pointerEvents="none" style={[st.pill, pill]} /> : null}
         {state.routes.map((route, i) => (
           <Tab
             key={route.key}
             name={route.name as keyof typeof ICONS}
             on={state.index === i}
+            light={light}
             onPress={() => {
               if (state.index === i) return;
               Haptics.selectionAsync();
@@ -70,10 +75,10 @@ function Bar({ state, navigation, bottom }: BarProps) {
   );
 }
 
-function Tab({ name, on, onPress }: { name: keyof typeof ICONS; on: boolean; onPress: () => void }) {
+function Tab({ name, on, light, onPress }: { name: keyof typeof ICONS; on: boolean; light: boolean; onPress: () => void }) {
   const Icon = ICONS[name];
   const label = LABELS[name] ?? name;
-  const col = on ? colors.white : 'rgba(255,255,255,0.55)';
+  const col = on ? colors.white : light ? colors.muted : 'rgba(255,255,255,0.55)';
   return (
     <Pressable
       accessibilityRole="tab"

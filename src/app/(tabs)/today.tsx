@@ -1,22 +1,24 @@
 import { useEffect, useState } from 'react';
 import { EndloopCore } from 'endloop-core';
 import { router } from 'expo-router';
-import { AppState, Modal, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AppState, Pressable, ScrollView, Share, StyleSheet, useWindowDimensions, View } from 'react-native';
+import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { Wordmark } from '@/brand/logo';
+import { LoopMark, Wordmark } from '@/brand/logo';
 import { pose, roasterName, type Pose } from '@/characters';
-import { CloseIcon, FlameIcon } from '@/components/icons';
+import { CloseIcon, EyeIcon, FlameIcon, LeafIcon, LoopsIcon, StarIcon, TargetIcon } from '@/components/icons';
 import { PremiumSheet } from '@/components/premium-sheet';
 import { AppTile, Avatar, Button, Character, Pill, T } from '@/components/ui';
 import { usage, type TodayUsage } from '@/data/usage';
 import { fill, pickRoast } from '@/roasts';
 import { dismissNews, useRoastNews } from '@/roasts/news';
 import { comparison, fmt } from '@/lib/time';
+import { RedStatusBar } from '@/components/onboarding-ui';
 import { batterySteps, openBatterySettings, openBrandBackgroundSettings, openUsageAccessSettings } from '@/lib/permissions';
 import { watcherLooksDead } from '@/lib/watcher';
-import { limitOn, localDay, useSettings } from '@/store/settings';
+import { limitOn, localDay, useSettings, type Goal, type TrackedApp } from '@/store/settings';
 import { colors, fonts, gradients, radius, stateStyle, usageState } from '@/theme/tokens';
 
 /** Screen 7 · Home ("Today" tab). */
@@ -24,13 +26,14 @@ import { colors, fonts, gradients, radius, stateStyle, usageState } from '@/them
 const VARS = ['app', 'time', 'limit'] as const;
 
 export default function Today() {
-  const { roaster, roastLang, intensity, name, tracked, hasUsageAccess, howItWorksDismissed, streakDays, startedAt, pausedOn, perfectSeen, premium: isPremium, weekendLimits, set } = useSettings();
+  const { roaster, roastLang, intensity, name, tracked, hasUsageAccess, howItWorksDismissed, streakDays, startedAt, pausedOn, perfectSeen, premium: isPremium, weekendLimits, welcomeBonus, goal, goalText, set } = useSettings();
   const [today, setToday] = useState<TodayUsage>({});
-  const [demo, setDemo] = useState(false);
   const [premium, setPremium] = useState(false);
   const [killed, setKilled] = useState(false);
   const [gone, setGone] = useState<string | null>(null);
   const [perfectYesterday, setPerfectYesterday] = useState(false);
+  // Per-app streak: days in a row under the limit, up to yesterday.
+  const [streaks, setStreaks] = useState<Record<string, number>>({});
   const news = useRoastNews(roastLang);
 
   // Refresh on open and every time the app comes back to the front.
@@ -54,13 +57,23 @@ export default function Today() {
           setGone(removed[0].label);
         }
       }
-      // Screen 16: yesterday under every limit → a perfect-day card, once
-      if (pkgs.length && useSettings.getState().perfectSeen !== localDay()) {
-        usage.history(2, pkgs).then((days) => {
-          const y = days[0];
-          const started = useSettings.getState().startedAt;
-          const counted = !!y && (!started || y.day >= new Date(`${started}T00:00:00`).getTime());
-          setPerfectYesterday(counted && tracked.every((a) => (y.apps[a.packageName] ?? 0) <= limitOn(a, useSettings.getState(), new Date(y.day))) && Object.values(y.apps).some((m) => m > 0));
+      // Last 30 days: per-app streaks, and (Screen 16) yesterday under every limit → a perfect-day card, once
+      if (pkgs.length) {
+        usage.history(31, pkgs).then((days) => {
+          const s = useSettings.getState();
+          const startOfToday = new Date(`${localDay()}T00:00:00`).getTime();
+          const start = s.startedAt ? new Date(`${s.startedAt}T00:00:00`).getTime() : 0;
+          const past = days.filter((d) => d.day < startOfToday && d.day >= start);
+          const under = (a: TrackedApp, d: (typeof days)[number]) => (d.apps[a.packageName] ?? 0) <= limitOn(a, s, new Date(d.day));
+          const next: Record<string, number> = {};
+          for (const a of tracked) {
+            let n = 0;
+            for (let i = past.length - 1; i >= 0 && under(a, past[i]); i--) n++;
+            next[a.packageName] = n;
+          }
+          setStreaks(next);
+          const y = past[past.length - 1];
+          if (s.perfectSeen !== localDay()) setPerfectYesterday(!!y && y.day >= startOfToday - 86_400_000 && tracked.every((a) => under(a, y)) && Object.values(y.apps).some((m) => m > 0));
         });
       }
     };
@@ -108,15 +121,64 @@ export default function Today() {
         : comparison(total);
   const showTotal = !!tracked.length && !paused && !firstVisit && !(dayOne && total === 0);
 
+  // "Next roast in…": the app closest to its limit that isn't over yet (same number as the status notification).
+  const nextUp = rows.filter((r) => r.state !== 'roasted').sort((a, b) => a.limitMin - a.used - (b.limitMin - b.used))[0];
+  const nextRoast = showTotal && nextUp ? `${nextUp.label}: ${fmt(nextUp.limitMin - nextUp.used)} till I show up` : null;
+  const goalName = goal === 'own' ? goalText : goal ? GOAL_LABEL[goal] : undefined;
+
+  // One event card at a time (decided 15 Oct), highest priority first.
+  const card: 'killed' | 'news' | 'perfect' | 'how' | 'dayOne' | null = killed
+    ? 'killed'
+    : news
+      ? 'news'
+      : perfectYesterday && perfectSeen !== localDay()
+        ? 'perfect'
+        : !tracked.length || paused
+          ? null
+          : firstVisit
+            ? 'how'
+            : dayOne && total === 0
+              ? 'dayOne'
+              : null;
+
+  // Premium: the whole screen goes deep red (canvas TD2-P1/P2). Free stays white.
+  const P = isPremium;
+  const ink = P ? colors.white : colors.ink;
+  const soft = P ? 'rgba(255,255,255,0.72)' : colors.muted;
+  const heroColors: readonly [string, string, string] = P
+    ? over.length
+      ? ['#C40F25', '#8A0A1A', '#4A0510']
+      : ['#FF3048', '#E5132B', '#9E0B1C']
+    : [mood.tint, deeper(mood.tint), deeper(mood.tint)];
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={['top']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: P ? PREMIUM_BOTTOM : colors.bg }} edges={['top']}>
+      <RedStatusBar light={P} />
+      {P ? <PremiumBackdrop /> : null}
       <View style={st.header}>
-        <Wordmark width={100} />
-        <View style={[st.streak, streakAtRisk && { backgroundColor: colors.red }]}>
-          <FlameIcon color={streakAtRisk ? colors.white : colors.red} />
-          <T v="bodyBold" style={{ fontSize: 13, color: streakAtRisk ? colors.white : colors.red }}>
-            {streakAtRisk ? 'Streak at risk' : streakDays <= 1 ? 'Day 1' : `${streakDays}-day streak`}
-          </T>
+        <View style={{ gap: 6 }}>
+          <Wordmark width={88} variant={P ? 'white' : 'ink'} />
+          {P ? (
+            <View style={st.premiumMark}>
+              <StarIcon size={10} color={colors.red} />
+              <T v="bodyBold" style={{ fontSize: 10, letterSpacing: 0.8, color: colors.red }}>PREMIUM</T>
+            </View>
+          ) : null}
+        </View>
+        {/* Streak · Loops · Leaves. They'll open the Attendance tab once it exists. */}
+        <View style={{ flexDirection: 'row', gap: 6 }}>
+          <View style={[st.chip, P && st.glassChip, { backgroundColor: streakAtRisk ? colors.red : P ? GLASS : colors.blush }]} accessibilityLabel={streakAtRisk ? 'Streak at risk' : `${streakDays}-day streak`}>
+            <FlameIcon color={streakAtRisk ? colors.white : P ? CORAL : colors.red} />
+            <T v="bodyBold" style={{ fontSize: 13, color: streakAtRisk || P ? colors.white : colors.red }}>{streakAtRisk ? `${Math.max(streakDays, 1)} · at risk` : Math.max(streakDays, 1)}</T>
+          </View>
+          <View style={[st.chip, P && st.glassChip, { backgroundColor: P ? GLASS : '#FFF6E0' }]} accessibilityLabel={`${welcomeBonus?.loops ?? 0} Loops`}>
+            <LoopsIcon color={P ? CORAL : undefined} />
+            <T v="bodyBold" style={{ fontSize: 13, color: P ? colors.white : '#8A5A00' }}>{welcomeBonus?.loops ?? 0}</T>
+          </View>
+          <View style={[st.chip, P && st.glassChip, { backgroundColor: P ? GLASS : '#F2F0F0' }]} accessibilityLabel={`${welcomeBonus?.leaves ?? 0} leaves left`}>
+            <LeafIcon color={ink} />
+            <T v="bodyBold" style={{ fontSize: 13, color: ink }}>{welcomeBonus?.leaves ?? 0}</T>
+          </View>
         </View>
       </View>
 
@@ -129,27 +191,44 @@ export default function Today() {
         </View>
       ) : null}
 
-      <ScrollView contentContainerStyle={{ padding: 24, paddingTop: 16, gap: 16 }}>
+      <ScrollView contentContainerStyle={{ padding: 24, paddingTop: 16, paddingBottom: 32, gap: 16 }}>
         {/* Hero: the roaster is the star of this screen, so they get the space. */}
-        <LinearGradient colors={[mood.tint, deeper(mood.tint)]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={st.hero}>
+        {/* Keyed on the look: switching Premium on/off remounts the hero instead of patching the native gradient. */}
+        <LinearGradient key={P ? 'premium' : 'free'} colors={heroColors} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[st.hero, P && st.heroPremium]}>
+          {P ? <HeroGlow /> : null}
           <View style={st.heroChar} pointerEvents="none">
             <Character source={pose(roaster, mood.pose)} size={250} alt={`${roasterName[roaster]}, ${mood.label.toLowerCase()}`} />
           </View>
           <View style={st.heroText}>
             <View style={[st.moodPill, { backgroundColor: colors.white }]}>
-              <View style={[st.moodDot, { backgroundColor: mood.color }]} />
-              <T v="bodyBold" style={{ fontSize: 12, color: mood.color }}>{mood.label}</T>
+              <View style={[st.moodDot, { backgroundColor: P ? colors.red : mood.color }]} />
+              <T v="bodyBold" style={{ fontSize: 12, color: P ? colors.red : mood.color }}>{mood.label}</T>
             </View>
-            <T v="bodyBold" style={{ fontSize: 20, lineHeight: 26 }}>{mood.line}</T>
+            <T v="bodyBold" style={{ fontSize: 20, lineHeight: 26, color: ink }}>{mood.line}</T>
           </View>
           {showTotal ? (
             <View style={st.heroTotal}>
-              <T v="label" style={{ fontSize: 11, color: colors.ink, opacity: 0.6 }}>Today</T>
-              <T style={{ fontFamily: fonts.display, fontSize: 40, lineHeight: 44, color: colors.ink }}>{fmt(total)}</T>
-              <T v="caption" style={{ color: colors.ink, opacity: 0.7 }} numberOfLines={2}>{totalNote}</T>
+              <T v="label" style={{ fontSize: 11, color: ink, opacity: P ? 0.75 : 0.6 }}>{P ? `Today · ${tracked.length} apps` : 'Today'}</T>
+              <T style={{ fontFamily: fonts.display, fontSize: 40, lineHeight: 44, color: ink }}>{fmt(total)}</T>
+              <T v="caption" style={{ color: ink, opacity: P ? 0.85 : 0.7 }} numberOfLines={2}>{totalNote}</T>
+              {nextRoast ? (
+                <View style={[st.nextRoast, P && { backgroundColor: 'rgba(0,0,0,0.22)' }]}>
+                  <EyeIcon color={P ? colors.white : mood.color} />
+                  <T v="bodyBold" style={{ flexShrink: 1, fontSize: 13, lineHeight: 17, color: ink }}>{nextRoast}</T>
+                </View>
+              ) : null}
             </View>
           ) : null}
         </LinearGradient>
+
+        {goalName && tracked.length ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 4 }}>
+            <TargetIcon color={over.length ? (P ? CORAL : colors.red) : soft} />
+            <T v="bodyBold" style={{ flex: 1, fontSize: 13, color: over.length ? (P ? CORAL : colors.red) : soft }} numberOfLines={1}>
+              {over.length ? `${goalName}, remember?` : `Here for: ${goalName}`}
+            </T>
+          </View>
+        ) : null}
 
         {gone ? (
           <View accessibilityRole="alert" style={st.toast}>
@@ -161,11 +240,11 @@ export default function Today() {
           </View>
         ) : null}
 
-        {news ? (
-          <View accessibilityRole="alert" style={st.news}>
-            <Avatar source={pose(roaster, 'party')} size={40} bg={colors.white} />
+        {card === 'news' ? (
+          <View accessibilityRole="alert" style={[st.news, P && st.glassCard]}>
+            <Avatar source={pose(roaster, 'party')} size={40} bg={P ? 'rgba(255,255,255,0.15)' : colors.white} />
             <View style={{ flex: 1, gap: 2 }}>
-              <T v="label" style={{ fontSize: 11, color: colors.white, opacity: 0.85 }}>Fresh roasts</T>
+              <T v="label" style={{ fontSize: 11, color: P ? CORAL : colors.white, opacity: P ? 1 : 0.85 }}>{P ? 'Early access · fresh roasts' : 'Fresh roasts'}</T>
               <T v="bodyBold" style={{ fontSize: 15, lineHeight: 20, color: colors.white }}>{news}</T>
             </View>
             <Pressable accessibilityLabel="Dismiss" onPress={dismissNews} hitSlop={8}>
@@ -174,12 +253,12 @@ export default function Today() {
           </View>
         ) : null}
 
-        {killed ? <KilledCard face={pose(roaster, 'asleep')} name={roasterName[roaster]} onClose={() => setKilled(false)} /> : null}
+        {card === 'killed' ? <KilledCard face={pose(roaster, 'asleep')} name={roasterName[roaster]} onClose={() => setKilled(false)} /> : null}
 
         {!tracked.length ? <Button label="Pick apps" onPress={() => router.push('/onboarding/pick-apps')} /> : null}
         {paused ? <Button label="Resume now" tone="outline" onPress={() => set({ pausedOn: undefined })} /> : null}
 
-        {perfectYesterday && perfectSeen !== localDay() ? (
+        {card === 'perfect' ? (
           <LinearGradient colors={gradients.proud} style={st.perfect}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <Character source={pose(roaster, 'party')} size={64} alt={`${roasterName[roaster]}, setting off a party popper`} />
@@ -201,7 +280,7 @@ export default function Today() {
           </LinearGradient>
         ) : null}
 
-        {!tracked.length || paused ? null : firstVisit ? (
+        {card === 'how' ? (
           <View style={st.how}>
             <Pressable accessibilityLabel="Dismiss" onPress={() => set({ howItWorksDismissed: true })} style={st.dismiss} hitSlop={8}>
               <CloseIcon />
@@ -219,9 +298,8 @@ export default function Today() {
                 </View>
               ))}
             </View>
-            <Button label="Test the roast" tone="outline" style={{ height: 44, borderRadius: 14 }} onPress={() => setDemo(true)} />
           </View>
-        ) : dayOne && total === 0 ? (
+        ) : card === 'dayOne' ? (
           <View style={st.dayOne}>
             <T v="label" style={{ fontSize: 11 }}>Watching</T>
             <T v="bodyBold">{tracked.map((a) => a.label).join(', ').replace(/, ([^,]*)$/, ' and $1')}</T>
@@ -230,46 +308,60 @@ export default function Today() {
         ) : null}
 
         <View style={{ gap: 10, opacity: paused ? 0.5 : 1 }}>
-          {rows.length ? <T v="label" style={{ paddingTop: 4 }}>Your apps</T> : null}
+          {rows.length ? <T v="label" style={{ paddingTop: 4, color: soft }}>{P ? `Your apps · ${rows.length} of 6` : 'Your apps'}</T> : null}
           {rows.map((r) => {
-            const ss = stateStyle[r.state];
+            const ss = P ? { ...stateStyle[r.state], ...PREMIUM_STATE[r.state] } : stateStyle[r.state];
             return (
               <Pressable
                 key={r.packageName}
                 accessibilityRole="button"
                 accessibilityLabel={`${r.label}, ${fmt(r.used)} of ${fmt(r.limitMin)}, ${ss.label}`}
                 onPress={() => router.push(`/app/${encodeURIComponent(r.packageName)}`)}
-                style={st.appCard}>
+                style={[st.appCard, P && st.glassCard]}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                   <AppTile label={r.label} color={r.color} iconUri={r.iconUri} size={44} />
                   <View style={{ flex: 1, gap: 2 }}>
-                    <T v="bodyBold" style={{ fontSize: 17 }}>{r.label}</T>
-                    <T v="caption" style={{ fontSize: 14 }}>
-                      <T v="caption" style={{ fontSize: 14, fontFamily: fonts.bold, color: colors.ink }}>{fmt(r.used)}</T> of {fmt(r.limitMin)}
+                    <T v="bodyBold" style={{ fontSize: 17, color: ink }}>{r.label}</T>
+                    <T v="caption" style={{ fontSize: 14, color: soft }}>
+                      <T v="caption" style={{ fontSize: 14, fontFamily: fonts.bold, color: ink }}>{fmt(r.used)}</T> of {fmt(r.limitMin)}
                     </T>
                   </View>
                   <Pill text={ss.label} color={ss.color} bg={ss.tint} />
                 </View>
-                <View style={st.track}>
+                <View style={[st.track, P && { backgroundColor: 'rgba(255,255,255,0.12)' }]}>
                   <View style={{ width: `${Math.max(2, Math.min(100, (r.used / r.limitMin) * 100))}%`, height: 8, borderRadius: 4, backgroundColor: ss.color }} />
+                </View>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <FlameIcon size={12} color={streaks[r.packageName] ? (P ? CORAL : colors.red) : '#8A8A8A'} />
+                    <T v="bodyBold" style={{ fontSize: 12, color: streaks[r.packageName] ? (P ? CORAL : colors.red) : P ? 'rgba(255,255,255,0.5)' : '#8A8A8A' }}>{streaks[r.packageName] ?? 0}-day streak</T>
+                  </View>
+                  {earns(r) ? (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                      <LoopsIcon size={12} color={P ? CORAL : undefined} />
+                      <T v="bodyBold" style={{ fontSize: 12, color: P ? '#FFD3D9' : '#8A5A00' }}>Earning Loops</T>
+                    </View>
+                  ) : (
+                    <T v="bodyBold" style={{ fontSize: 12, color: P ? 'rgba(255,255,255,0.5)' : '#8A8A8A' }}>Not earning</T>
+                  )}
                 </View>
               </Pressable>
             );
           })}
         </View>
 
-        {tracked.length >= 3 ? (
-          <Pressable accessibilityRole="button" onPress={() => setPremium(true)} style={st.upsell}>
-            <T v="caption" style={{ flex: 1, fontSize: 14 }}>All 3 free apps in use</T>
-            <T v="bodyBold" style={{ fontSize: 14, color: colors.red }}>Watch more →</T>
-          </Pressable>
+        {isPremium ? (
+          <T v="caption" style={{ textAlign: 'center', color: soft }}>{tracked.length < 6 ? `${6 - tracked.length} more ${6 - tracked.length === 1 ? 'slot' : 'slots'} to fill` : 'All 6 slots watched'}</T>
         ) : (
-          <T v="caption" style={{ textAlign: 'center' }}>{tracked.length} of 3 free apps in use</T>
+          <Pressable accessibilityRole="button" onPress={() => setPremium(true)} style={st.upsell}>
+            <T v="caption" style={{ flex: 1, fontSize: 14 }}>{tracked.length} of 3 free apps</T>
+            <StarIcon size={13} />
+            <T v="bodyBold" style={{ fontSize: 14, color: '#8A5A00' }}>Watch up to 6</T>
+          </Pressable>
         )}
       </ScrollView>
 
       <PremiumSheet visible={premium} onClose={() => setPremium(false)} roaster={roaster} reason="apps" />
-      <RoastDemo visible={demo} onClose={() => setDemo(false)} text={fill(pickRoast({ category: 'limit_hit', lang: roastLang, intensity, roaster, vars: ['app', 'time'], packageName: rows[0]?.packageName, appLabel: rows[0]?.label }) ?? 'Time.', { app: rows[0]?.label ?? 'Instagram', time: fmt(rows[0]?.used ?? 92) })} face={pose(roaster, 'savage')} />
     </SafeAreaView>
   );
 }
@@ -308,25 +400,64 @@ function KilledCard({ face, name, onClose }: { face: number; name: string; onClo
   );
 }
 
-/** Preview of the roast overlay (the real one is native, Screen 9). */
-function RoastDemo({ visible, onClose, text, face }: { visible: boolean; onClose: () => void; text: string; face: number }) {
-  // A Modal is its own window: pad for the status and navigation bars explicitly.
-  const insets = useSafeAreaInsets();
+const GLASS = 'rgba(255,255,255,0.1)';
+const CORAL = '#FF8C99';
+/** Bottom colour of the Premium background (the tab bar strip in (tabs)/_layout.tsx matches it). */
+const PREMIUM_BOTTOM = '#26020A';
+const PREMIUM_STATE = {
+  chill: { color: '#5BD6A0', tint: 'rgba(91,214,160,0.16)' },
+  heads: { color: '#FFB547', tint: 'rgba(255,181,71,0.16)' },
+  roasted: { color: '#FF5A6A', tint: 'rgba(255,90,106,0.18)' },
+} as const;
+
+/** Premium Today background: deep red, red light from the top, one big faint loop. */
+function PremiumBackdrop() {
+  const { width, height } = useWindowDimensions();
+  const loop = width * 2.33;
   return (
-    <Modal visible={visible} animationType="fade" onRequestClose={onClose} statusBarTranslucent>
-      <LinearGradient colors={gradients.roasted} style={{ flex: 1 }}>
-        <View style={{ flex: 1, paddingHorizontal: 24, paddingTop: 24 + insets.top, paddingBottom: 24 + insets.bottom, justifyContent: 'center', gap: 24 }}>
-          <View style={{ alignItems: 'center' }}>
-            <Character source={face} size={220} alt="Loop" fadeTo="#C20F24" />
-          </View>
-          <T style={{ fontFamily: fonts.display, fontSize: 34, lineHeight: 38, color: colors.white }}>{text}</T>
-          <Button label="Close it" tone="white" onPress={onClose} />
-          <T v="caption" style={{ color: colors.blush, textAlign: 'center' }}>This is a test. The real one shows up at 100%.</T>
-        </View>
-      </LinearGradient>
-    </Modal>
+    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+      <LinearGradient colors={['#6E0918', '#4A0510', PREMIUM_BOTTOM]} style={StyleSheet.absoluteFill} />
+      <Svg width={width} height={height} style={StyleSheet.absoluteFill}>
+        <Defs>
+          <RadialGradient id="pTop" cx="50%" cy="0%" rx="70%" ry="35%">
+            <Stop offset="0" stopColor="#E5132B" stopOpacity={0.75} />
+            <Stop offset="1" stopColor="#E5132B" stopOpacity={0} />
+          </RadialGradient>
+        </Defs>
+        <Rect width={width} height={height} fill="url(#pTop)" />
+      </Svg>
+      <View style={{ position: 'absolute', left: (width - loop) / 2, top: height * 0.62 - loop / 2, opacity: 0.05, transform: [{ rotate: '-14deg' }] }}>
+        <LoopMark size={loop} color={colors.white} strokeWidth={30} />
+      </View>
+    </View>
   );
 }
+
+/** Coral light behind the roaster in the Premium hero. */
+function HeroGlow() {
+  return (
+    <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
+      <Defs>
+        <RadialGradient id="pGlow" cx="78%" cy="88%" rx="48%" ry="48%">
+          <Stop offset="0" stopColor="#FF8C78" stopOpacity={0.85} />
+          <Stop offset="1" stopColor="#FF8C78" stopOpacity={0} />
+        </RadialGradient>
+      </Defs>
+      <Rect width="100%" height="100%" fill="url(#pGlow)" />
+    </Svg>
+  );
+}
+
+const GOAL_LABEL: Record<Exclude<Goal, 'own'>, string> = {
+  exams: 'Exams',
+  sleep: 'Better sleep',
+  focus: 'Focus at work',
+  family: 'Family time',
+  checking: 'Just checking',
+};
+
+/** Earns Loops: the limit is below the user's own normal (same rule as onboarding's Earning pill). */
+const earns = (a: TrackedApp) => a.avgDailyMin >= 5 && a.limitMin < a.avgDailyMin;
 
 /** A slightly deeper shade of the mood tint, for the hero gradient. */
 function deeper(tint: string): string {
@@ -336,7 +467,12 @@ function deeper(tint: string): string {
 
 const st = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, paddingTop: 12 },
-  streak: { flexDirection: 'row', alignItems: 'center', gap: 5, height: 30, paddingHorizontal: 12, borderRadius: 999, backgroundColor: colors.blush },
+  chip: { flexDirection: 'row', alignItems: 'center', gap: 5, height: 30, paddingHorizontal: 10, borderRadius: 999 },
+  glassChip: { borderWidth: 1, borderColor: 'rgba(255,255,255,0.16)' },
+  glassCard: { backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)' },
+  premiumMark: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 4, height: 20, paddingHorizontal: 8, borderRadius: 999, backgroundColor: colors.white },
+  heroPremium: { minHeight: 290, borderWidth: 1, borderColor: 'rgba(255,255,255,0.18)', elevation: 12, shadowColor: '#000', shadowOpacity: 0.35, shadowRadius: 20, shadowOffset: { width: 0, height: 12 } },
+  nextRoast: { flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start', marginTop: 8, paddingVertical: 7, paddingHorizontal: 10, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.72)' },
   banner: { marginHorizontal: 24, marginTop: 14, flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.red, borderRadius: 16, paddingVertical: 12, paddingLeft: 16, paddingRight: 12 },
   bannerBtn: { height: 38, paddingHorizontal: 14, borderRadius: 12, backgroundColor: colors.white, justifyContent: 'center' },
   hero: { borderRadius: 28, overflow: 'hidden', minHeight: 270, padding: 20, justifyContent: 'space-between' },
