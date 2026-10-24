@@ -13,15 +13,18 @@ type Props = {
   onSeePremium?: () => void;
   roaster: Roaster;
   /** Entry point decides the headline (paywall spec). */
-  reason: 'apps' | 'unhinged' | 'stats' | 'archive';
+  reason: 'apps' | 'unhinged' | 'stats' | 'archive' | 'strict' | 'worst-hour' | 'half-day';
 };
 
 export function PremiumSheet({ visible, onClose, onSeePremium, roaster, reason }: Props) {
   const dark = reason === 'unhinged';
   const copy: Record<Props['reason'], [string, string]> = {
-    apps: ["Watching more than 3? That's Premium.", 'Free keeps an eye on 3 apps. Premium watches all of them.'],
+    apps: ["Watching more than 3? That's Premium.", 'Free keeps an eye on 3 apps. Premium watches up to 6.'],
     unhinged: ['You want it meaner? Respect.', 'Unhinged is Premium. Absurd, chaotic, still never about your looks or your family.'],
     stats: ['The long game is Premium.', 'Month view, your full history, every past weekly roast, and up to 6 apps.'],
+    strict: ['Stricter? That’s Premium.', 'Strict mode, a 2-minute snooze, hard-mode games and your own words held up to you. Premium is never more lenient.'],
+    'worst-hour': ['Your weakest hour? Premium.', 'See the hour your thumb gives up every day, plus the 30-day trend and month view.'],
+    'half-day': ['Half a day off? That’s Premium.', 'Book half days from 6 pm for half the Loops. Same caps, more ways to spend them.'],
     archive: ['Every roast, kept forever? Premium.', 'Free shows this week and last. Premium keeps every weekly roast so you can see how far you came.'],
   };
   const [title, body] = copy[reason];

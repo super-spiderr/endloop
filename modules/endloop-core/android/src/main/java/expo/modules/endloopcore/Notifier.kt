@@ -27,6 +27,7 @@ object Notifier {
   const val ID_LATE_NIGHT = 1003
   const val ID_WEEKLY = 1004
   const val ID_BROWSER = 1005
+  const val ID_LOOPS = 1006
   private const val RED = 0xFFE5132B.toInt()
   private const val WARNING_TIMEOUT_MS = 30 * 60_000L
 

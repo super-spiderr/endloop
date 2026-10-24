@@ -5,13 +5,13 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { GearIcon, HomeIcon, StatsIcon } from '@/components/icons';
+import { AttendanceIcon, GearIcon, HomeIcon, StatsIcon } from '@/components/icons';
 import { T } from '@/components/ui';
 import { useSettings } from '@/store/settings';
 import { colors } from '@/theme/tokens';
 
-const ICONS = { today: HomeIcon, stats: StatsIcon, settings: GearIcon } as const;
-const LABELS = { today: 'Today', stats: 'Stats', settings: 'Settings' } as const;
+const ICONS = { today: HomeIcon, attendance: AttendanceIcon, stats: StatsIcon, settings: GearIcon } as const;
+const LABELS = { today: 'Today', attendance: 'Attendance', stats: 'Report Card', settings: 'Settings' } as const;
 
 const BAR_H = 68;
 const PAD = 6; // space between the bar edge and the red pill
@@ -23,6 +23,7 @@ export default function TabsLayout() {
   return (
     <Tabs screenOptions={{ headerShown: false }} tabBar={({ state, navigation }) => <Bar state={state} navigation={navigation} bottom={insets.bottom + 16} />}>
       <Tabs.Screen name="today" />
+      <Tabs.Screen name="attendance" />
       <Tabs.Screen name="stats" />
       <Tabs.Screen name="settings" />
     </Tabs>
@@ -39,7 +40,7 @@ function Bar({ state, navigation, bottom }: BarProps) {
   const [width, setWidth] = useState(0);
   // Premium Today is black and red: the strip matches its bottom and the bar turns white (canvas TD2-P1).
   const premium = useSettings((s) => s.premium && s.homeLook !== 'classic');
-  const light = premium && state.routes[state.index]?.name === 'today';
+  const light = premium && ['today', 'attendance'].includes(state.routes[state.index]?.name ?? '');
   const count = state.routes.length;
   const slot = width > 0 ? (width - PAD * 2) / count : 0;
   const x = useSharedValue(0);
@@ -88,7 +89,7 @@ function Tab({ name, on, light, onPress }: { name: keyof typeof ICONS; on: boole
       style={({ pressed }) => [st.tab, pressed && !on && { transform: [{ scale: 0.92 }] }]}>
       {Icon ? <Icon size={22} color={col} strokeWidth={on ? 2.4 : 2} /> : null}
       {/* Full tab width, centred, never animated: a label laid out narrow gets cut to "Tod…" on Android. */}
-      <T v="bodyBold" numberOfLines={1} style={{ alignSelf: 'stretch', textAlign: 'center', fontSize: 12, lineHeight: 16, color: col }}>
+      <T v="bodyBold" numberOfLines={1} style={{ alignSelf: 'stretch', textAlign: 'center', fontSize: 11, lineHeight: 15, color: col }}>
         {label}
       </T>
     </Pressable>

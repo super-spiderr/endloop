@@ -40,6 +40,8 @@ export default function AppDetailScreen() {
     changeLimit,
     scheduleRemove,
     cancelRemove,
+    premium,
+    weekendLimits,
   } = useSettings();
   const app = tracked.find((a) => a.packageName === pkg);
 
@@ -341,10 +343,22 @@ export default function AppDetailScreen() {
           label={app.label}
           current={app.limitMin}
           average={app.avgDailyMin}
+          usedToday={today}
           roasterFace={(p: Pose) => pose(roaster, p)}
-          onSave={(m) => {
-            changeLimit(app.packageName, m);
+          onSave={(m, when) => {
+            changeLimit(app.packageName, m, when);
             setEditing(false);
+          }}
+          weekend={premium ? { on: !!weekendLimits, value: app.weekendLimitMin ?? app.limitMin } : null}
+          onWeekend={(on, value) => {
+            // Per app: "Every day" drops this app's weekend limit; the switch stays on while any app has one.
+            const st = useSettings.getState();
+            const tracked: typeof st.tracked = st.tracked.map((a) => {
+              if (a.packageName !== app.packageName) return a;
+              const { weekendLimitMin: _w, ...rest } = a;
+              return on ? { ...rest, weekendLimitMin: value } : rest;
+            });
+            st.set({ tracked, weekendLimits: tracked.some((a) => a.weekendLimitMin != null) });
           }}
         />
       ) : null}
@@ -635,21 +649,57 @@ function EditLimit({
   label,
   current,
   average,
+  usedToday,
   roasterFace,
   onSave,
+  weekend,
+  onWeekend,
 }: {
   visible: boolean;
   onClose: () => void;
   label: string;
   current: number;
   average: number;
+  usedToday: number;
   roasterFace: (p: Pose) => number;
-  onSave: (min: number) => void;
+  onSave: (min: number, when?: "tomorrow") => void;
+  /** Premium: separate Saturday and Sunday limit (canvas S24-B). null = Free. */
+  weekend: { on: boolean; value: number } | null;
+  onWeekend: (on: boolean, value: number) => void;
 }) {
   // mounted fresh each time the sheet opens, so it starts from the current limit
   const [value, setValue] = useState(current);
+  const [below, setBelow] = useState(false);
+  const [split, setSplit] = useState(weekend?.on ?? false);
+  const [wk, setWk] = useState(weekend?.value ?? current);
   const lower = value <= current;
   const same = value === current;
+  const isWeekendToday = [0, 6].includes(new Date().getDay());
+  // Anti-cheat: a higher weekend limit can't start on a Saturday or Sunday.
+  const wkBlocked = !!weekend && split && isWeekendToday && wk > weekend.value;
+  const weekendChanged = !!weekend && (split !== weekend.on || (split && wk !== weekend.value));
+
+  // S24-C: lowering below what's already used today. Bold. Pick when it starts.
+  if (below) {
+    return (
+      <Sheet visible={visible} onClose={onClose}>
+        <SpeechBubble face={roasterFace("slowClap")} text="Below today? Bold. Respect." />
+        <T style={{ fontFamily: fonts.display, fontSize: 24, lineHeight: 28, color: colors.ink }}>
+          {fmtLimit(value)}? You&apos;ve already done {fmtLimit(usedToday)} today.
+        </T>
+        <T v="caption">Pick when the new limit starts.</T>
+        <Pressable accessibilityRole="button" onPress={() => onSave(value)} style={[st.choice, { backgroundColor: colors.red, borderColor: colors.red }]}>
+          <T v="bodyBold" style={{ fontSize: 15, color: colors.white }}>Roast me now</T>
+          <T style={{ fontSize: 13, color: "rgba(255,255,255,0.85)" }}>Starts now. You&apos;re over, so here comes a roast.</T>
+        </Pressable>
+        <Pressable accessibilityRole="button" onPress={() => onSave(value, "tomorrow")} style={st.choice}>
+          <T v="bodyBold" style={{ fontSize: 15 }}>Apply from tomorrow</T>
+          <T v="caption">Today stays at {fmtLimit(current)}.</T>
+        </Pressable>
+      </Sheet>
+    );
+  }
+
   return (
     <Sheet visible={visible} onClose={onClose}>
       <T v="label">{label} daily limit</T>
@@ -717,10 +767,49 @@ function EditLimit({
           />
         </>
       )}
+      {weekend ? (
+        <View style={{ gap: 8 }}>
+          <View style={{ flexDirection: "row", gap: 6 }}>
+            {([false, true] as const).map((v) => (
+              <Pressable
+                key={String(v)}
+                accessibilityRole="radio"
+                accessibilityState={{ checked: split === v }}
+                onPress={() => setSplit(v)}
+                style={[st.chip, { flex: 1, alignItems: "center" }, split === v && { backgroundColor: colors.ink, borderColor: colors.ink }]}
+              >
+                <T v="bodyBold" style={{ fontSize: 13, color: split === v ? colors.white : colors.ink }}>{v ? "Weekdays + weekends" : "Every day"}</T>
+              </Pressable>
+            ))}
+          </View>
+          {split ? (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              <View style={{ flex: 1 }}>
+                <T v="bodyBold" style={{ fontSize: 15 }}>Weekends</T>
+                <T v="caption" style={{ fontSize: 12 }}>Sat and Sun · the slider above is Mon to Fri</T>
+              </View>
+              <Pressable accessibilityRole="button" accessibilityLabel="5 minutes less on weekends" onPress={() => setWk((w) => Math.max(5, w - 5))} style={st.step}>
+                <T v="bodyBold" style={{ fontSize: 18 }}>−</T>
+              </Pressable>
+              <T style={{ fontFamily: fonts.display, fontSize: 20, minWidth: 64, textAlign: "center" }}>{fmtLimit(wk)}</T>
+              <Pressable accessibilityRole="button" accessibilityLabel="5 minutes more on weekends" onPress={() => setWk((w) => Math.min(600, w + 5))} style={st.step}>
+                <T v="bodyBold" style={{ fontSize: 18 }}>+</T>
+              </Pressable>
+            </View>
+          ) : null}
+          {wkBlocked ? <T v="caption" style={{ color: colors.red }}>It&apos;s the weekend. Raise the weekend limit on Monday.</T> : null}
+        </View>
+      ) : null}
       <Button
         label={same || lower ? "Save" : "Save for tomorrow"}
-        disabled={same}
-        onPress={() => onSave(value)}
+        disabled={(same && !weekendChanged) || wkBlocked}
+        onPress={() => {
+          if (weekend && weekendChanged && !wkBlocked) onWeekend(split, wk);
+          if (same) return onClose();
+          // Lower than what's already used today: ask when it should start (S24-C).
+          if (lower && value < usedToday) return setBelow(true);
+          onSave(value);
+        }}
       />
     </Sheet>
   );
@@ -761,6 +850,8 @@ function ShareIcon() {
 }
 
 const st = StyleSheet.create({
+  choice: { gap: 2, padding: 14, borderRadius: 16, borderWidth: 1.5, borderColor: colors.line },
+  step: { width: 40, height: 40, borderRadius: 12, borderWidth: 1, borderColor: colors.line, alignItems: "center", justifyContent: "center" },
   header: {
     flexDirection: "row",
     alignItems: "center",

@@ -139,3 +139,11 @@ export const TargetIcon = ({ size = 15, color = '#5F5F5F', strokeWidth = 2.2 }: 
     <Circle cx={12} cy={12} r={3} fill={color} />
   </Svg>
 );
+
+/** Attendance tab: a register page with a tick. */
+export const AttendanceIcon = ({ size = 24, color = '#5F5F5F', strokeWidth = 2 }: P) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24">
+    <Rect x={4} y={5} width={16} height={15} rx={2} {...stroke(color, strokeWidth)} />
+    <Path d="M8 3v4M16 3v4M8 13l3 3 5-6" {...stroke(color, strokeWidth)} />
+  </Svg>
+);

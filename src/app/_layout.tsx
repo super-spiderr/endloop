@@ -72,7 +72,10 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
           <Stack.Screen name="app/[pkg]" />
           <Stack.Screen name="privacy" />
+          <Stack.Screen name="leave-letter" options={{ presentation: 'fullScreenModal', animation: 'fade_from_bottom' }} />
+          <Stack.Screen name="snooze" options={{ presentation: 'fullScreenModal', animation: 'fade', gestureEnabled: false }} />
           <Stack.Screen name="paywall" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+          <Stack.Screen name="keep-apps" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
           <Stack.Screen name="weekly" options={{ animation: 'fade_from_bottom', presentation: 'fullScreenModal' }} />
         </Stack>
         {ready && splash ? <AnimatedSplash onShown={onSplashShown} onDone={onSplashDone} /> : null}

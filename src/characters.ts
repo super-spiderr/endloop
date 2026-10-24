@@ -60,7 +60,35 @@ export type Pose =
   | 'frame' // S17 app-icon ask
   | 'envelope' // S08 weekly notification; also the Stats weekly-roast card
   | 'choose'
-  | 'fingerWag'; // onboarding v2 6a: Unhinged locked for school students // onboarding v2 roaster chooser: animated WebP loop (Loop rubs his chin, Lupe inspects you through a magnifying glass)
+  | 'fingerWag'
+  | 'slowClap' // Attendance: Leave Letter approved
+  | 'drumroll' // onboarding v2 3: the 7-day reveal
+  | 'chinOnHand' // onboarding v2 1 and 6: Which one are you? / Why are you here?
+  | 'giftBox' // onboarding v2 8: welcome bonus
+  | 'happyChill' // Today: under every limit
+  | 'strikeX' // Today: Strike / Pay it back card
+  | 'rareSmile' // Attendance: 7-day milestone
+  | 'readingLetter' // Leave Letter being read
+  | 'stampApproved' // Leave Letter approved
+  | 'lifebuoy' // Streak saver used
+  | 'gameFace' // snooze game starts
+  | 'smug' // roaster wins a round
+  | 'soreLoser' // you win the game
+  | 'running' // Catch the roaster game target
+  | 'buzzer' // Reaction test
+  | 'door' // Bunk today
+  | 'footTap' // 1-min timeout / cool-off
+  | 'scissorsClock' // Pay it back (−15 min tomorrow)
+  | 'padlock' // Strict mode (Premium)
+  | 'note' // Your own words (Premium)
+  | 'meltdown' // 3rd+ roast of the day
+  | 'popcorn' // Report Card / weekly: time won back
+  | 'airQuotes' // top excuse
+  | 'magnifier' // worst-hour strip (Premium)
+  | 'crown' // paywall: founding lifetime
+  | 'key' // paywall: 7-day free trial
+  | 'controller'; // paywall: from a Premium game
+// (choose = onboarding v2 roaster chooser; fingerWag = 6a, Unhinged locked for school students)
 
 const loop = {
   idle: require('../assets/characters/loop/idle.webp'),
@@ -120,6 +148,33 @@ const loop = {
   envelope: require('../assets/characters/loop/envelope.webp'),
   choose: require('../assets/characters/loop/choose.webp'),
   fingerWag: require('../assets/characters/loop/finger-wag.webp'),
+  slowClap: require('../assets/characters/loop/slow-clap.webp'),
+  drumroll: require('../assets/characters/loop/drumroll.webp'),
+  chinOnHand: require('../assets/characters/loop/chin-on-hand.webp'),
+  giftBox: require('../assets/characters/loop/gift-box.webp'),
+  happyChill: require('../assets/characters/loop/happy-chill.webp'),
+  strikeX: require('../assets/characters/loop/strike-x.webp'),
+  rareSmile: require('../assets/characters/loop/rare-smile.webp'),
+  readingLetter: require('../assets/characters/loop/reading-letter.webp'),
+  stampApproved: require('../assets/characters/loop/stamp-approved.webp'),
+  lifebuoy: require('../assets/characters/loop/lifebuoy.webp'),
+  gameFace: require('../assets/characters/loop/game-face.webp'),
+  smug: require('../assets/characters/loop/smug.webp'),
+  soreLoser: require('../assets/characters/loop/sore-loser.webp'),
+  running: require('../assets/characters/loop/running.webp'),
+  buzzer: require('../assets/characters/loop/buzzer.webp'),
+  door: require('../assets/characters/loop/door.webp'),
+  footTap: require('../assets/characters/loop/foot-tap.webp'),
+  scissorsClock: require('../assets/characters/loop/scissors-clock.webp'),
+  padlock: require('../assets/characters/loop/padlock.webp'),
+  note: require('../assets/characters/loop/note.webp'),
+  meltdown: require('../assets/characters/loop/meltdown.webp'),
+  popcorn: require('../assets/characters/loop/popcorn.webp'),
+  airQuotes: require('../assets/characters/loop/air-quotes.webp'),
+  magnifier: require('../assets/characters/loop/magnifier.webp'),
+  crown: require('../assets/characters/loop/crown.webp'),
+  key: require('../assets/characters/loop/key.webp'),
+  controller: require('../assets/characters/loop/controller.webp'),
 } satisfies Record<Pose, number>;
 
 // Lupe has every pose too (Screen 3 runs before the roaster is picked, so present is rarely shown).
@@ -181,6 +236,33 @@ const lupe = {
   envelope: require('../assets/characters/lupe/envelope.webp'),
   choose: require('../assets/characters/lupe/choose.webp'),
   fingerWag: require('../assets/characters/lupe/finger-wag.webp'),
+  slowClap: require('../assets/characters/lupe/slow-clap.webp'),
+  drumroll: require('../assets/characters/lupe/drumroll.webp'),
+  chinOnHand: require('../assets/characters/lupe/chin-on-hand.webp'),
+  giftBox: require('../assets/characters/lupe/gift-box.webp'),
+  happyChill: require('../assets/characters/lupe/happy-chill.webp'),
+  strikeX: require('../assets/characters/lupe/strike-x.webp'),
+  rareSmile: require('../assets/characters/lupe/rare-smile.webp'),
+  readingLetter: require('../assets/characters/lupe/reading-letter.webp'),
+  stampApproved: require('../assets/characters/lupe/stamp-approved.webp'),
+  lifebuoy: require('../assets/characters/lupe/lifebuoy.webp'),
+  gameFace: require('../assets/characters/lupe/game-face.webp'),
+  smug: require('../assets/characters/lupe/smug.webp'),
+  soreLoser: require('../assets/characters/lupe/sore-loser.webp'),
+  running: require('../assets/characters/lupe/running.webp'),
+  buzzer: require('../assets/characters/lupe/buzzer.webp'),
+  door: require('../assets/characters/lupe/door.webp'),
+  footTap: require('../assets/characters/lupe/foot-tap.webp'),
+  scissorsClock: require('../assets/characters/lupe/scissors-clock.webp'),
+  padlock: require('../assets/characters/lupe/padlock.webp'),
+  note: require('../assets/characters/lupe/note.webp'),
+  meltdown: require('../assets/characters/lupe/meltdown.webp'),
+  popcorn: require('../assets/characters/lupe/popcorn.webp'),
+  airQuotes: require('../assets/characters/lupe/air-quotes.webp'),
+  magnifier: require('../assets/characters/lupe/magnifier.webp'),
+  crown: require('../assets/characters/lupe/crown.webp'),
+  key: require('../assets/characters/lupe/key.webp'),
+  controller: require('../assets/characters/lupe/controller.webp'),
 } satisfies Record<Pose, number>;
 
 export const characters: Record<Roaster, Record<Pose, number>> = { loop, lupe };

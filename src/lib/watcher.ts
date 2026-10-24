@@ -1,8 +1,9 @@
 import { EndloopCore, type WatcherConfig } from 'endloop-core';
 
+import { LETTER_COST } from '@/lib/attendance';
 import { linesFor } from '@/roasts';
 import { FACT_LABEL, factsFor } from '@/roasts/facts';
-import { localDay, toneOf, useSettings } from '@/store/settings';
+import { localDay, strictActive, toneOf, useSettings, watchedApps } from '@/store/settings';
 
 function endOfToday(): number {
   const d = new Date();
@@ -95,6 +96,14 @@ const NOTIF: Record<S['roastLang'], NonNullable<WatcherConfig['notif']>> = {
     minimalText: 'Endloop is on.',
     browserTitle: 'Switched to the browser? Cute.',
     browserText: "{app} in a browser is still {app}. Add your browser to Endloop and I'll watch that too.",
+    weeklyIn: 'Your week is in.',
+    weeklyLoopsTail: 'And {n} Loops expire at midnight 👀',
+    loopsTitleEnough: "You've got {n} Loops. Write a Leave Letter!",
+    loopsTitleShort: '{n} Loops. {short} more by Sunday night for a leave.',
+    loopsText: 'Loops clear Sunday at midnight. Plan your weekend.',
+    loopsLabel: 'LOOPS',
+    loopsOpen: 'Write a letter',
+    loopsOpenShort: 'See Attendance',
   },
   'ta-Latn': {
     headsUpTitle: '{app}: innum {left} dhaan',
@@ -117,6 +126,14 @@ const NOTIF: Record<S['roastLang'], NonNullable<WatcherConfig['notif']>> = {
     minimalText: 'Endloop on-la irukku.',
     browserTitle: 'Browser-ku poitiya? Cute.',
     browserText: 'Browser-la {app} paathaalum adhu {app} dhaan. Browser-ayum Endloop-la add pannu, adhayum paapen.',
+    weeklyIn: 'Indha vaaram ready.',
+    weeklyLoopsTail: 'Innum {n} Loops midnight-la poidum 👀',
+    loopsTitleEnough: '{n} Loops irukku. Leave Letter ezhudhu!',
+    loopsTitleShort: '{n} Loops. Leave-ku innum {short} venum, Sunday night-kulla.',
+    loopsText: 'Sunday midnight-la Loops clear aagidum. Weekend plan pannu.',
+    loopsLabel: 'LOOPS',
+    loopsOpen: 'Letter ezhudhu',
+    loopsOpenShort: 'Attendance paaru',
   },
 };
 
@@ -135,6 +152,11 @@ const ROAST: Record<S['roastLang'], NonNullable<WatcherConfig['roast']>> = {
     shareLabel: 'Share this roast',
     clockEyebrow: 'CLOCK CHANGED?',
     clockLine: "Moved your clock? Time doesn't work like that. Neither do limits.",
+    secondEyebrow: 'ROAST 2 OF TODAY · YOU CAME BACK',
+    thirdEyebrow: '{n} ROAST OF TODAY · SERIOUSLY?',
+    strictEyebrow: 'STRICT MODE',
+    strictLine: "Strict mode's on. No snoozes today. Past you was right.",
+    strictNote: 'Strict mode can only go off from tomorrow.',
   },
   'ta-Latn': {
     eyebrow: "TIME'S UP",
@@ -150,7 +172,18 @@ const ROAST: Record<S['roastLang'], NonNullable<WatcherConfig['roast']>> = {
     shareLabel: 'Indha roast-a share pannu',
     clockEyebrow: 'CLOCK-A MAATHINIYA?',
     clockLine: 'Clock-a maathina time maaridumaa? Limit-um maaradhu.',
+    secondEyebrow: 'INNAIKU 2-AVADHU ROAST · THIRUMBI VANTHACHA',
+    thirdEyebrow: 'INNAIKU {n} ROAST · SERIOUSLY?',
+    strictEyebrow: 'STRICT MODE',
+    strictLine: 'Strict mode on-la irukku. Innaiku snooze illa. Nethu neenga sonnadhu correct.',
+    strictNote: 'Strict mode naalaiku dhaan off aagum.',
   },
+};
+
+/** The snooze button per ladder step (1st, 2nd, 3rd, 4th+). {n} = snooze length. */
+const LADDER_LABELS: Record<S['roastLang'], string[]> = {
+  en: ['I need {n} more minutes', '{n} more minutes · costs you a game', '{n} more minutes · a harder game', '{n} more minutes · a cool-off'],
+  'ta-Latn': ['Innum {n} minutes venum', 'Innum {n} minutes · oru game aadanum', 'Innum {n} minutes · kashtamaana game', 'Innum {n} minutes · wait pannanum'],
 };
 
 /** Late-night nudges start at 11:30 pm unless changed in Settings. */
@@ -163,7 +196,12 @@ export function buildConfig(s: S): WatcherConfig {
     enabled: s.onboarded && s.tracked.length > 0,
     closeLabel: s.roastLang === 'ta-Latn' ? 'Sari, close pannu' : 'Fine. Close it.',
     snoozeLabel: s.roastLang === 'ta-Latn' ? 'Innum 5 minutes venum' : 'I need 5 more minutes',
-    maxSnoozesPerDay: 2,
+    // The ladder (src/app/snooze.tsx) never runs out in Free: every snooze just costs more.
+    maxSnoozesPerDay: 99,
+    ladder: true,
+    ladderLabels: LADDER_LABELS[s.roastLang].map((l) => l.replace('{n}', String(snoozeMin(s)))),
+    strict: strictActive(s),
+    snoozeMin: snoozeMin(s),
     friction: {
       ...FRICTION[s.roastLang],
       secondSentences: linesFor('snooze_sentence_2', { ...who, packageName: '' }),
@@ -177,14 +215,18 @@ export function buildConfig(s: S): WatcherConfig {
     notify: s.notify,
     statusMode: s.statusMode ?? 'live',
     pausedUntil: s.pausedOn === localDay() ? endOfToday() : 0,
+    offDays: (s.leaves ?? []).filter((l) => !l.half).map((l) => l.day),
+    halfDays: (s.leaves ?? []).filter((l) => l.half).map((l) => l.day),
+    ...(s.loopsNow ? { loops: { ...s.loopsNow, cost: LETTER_COST } } : {}),
     roaster: s.roaster,
     // The roast image exists for three tones only; Unhinged uses Savage's.
     intensity: toneOf(s.intensity),
-    apps: s.tracked.map((a) => ({
+    apps: watchedApps(s).map((a) => ({
       packageName: a.packageName,
       label: a.label,
       limitMin: a.limitMin,
       ...(s.premium && s.weekendLimits && a.weekendLimitMin != null ? { weekendLimitMin: a.weekendLimitMin } : {}),
+      ...(a.payBackOn && a.payBackOn >= localDay() ? { payBackOn: a.payBackOn } : {}),
       lines: {
         heads_up: linesFor('heads_up', { ...who, packageName: a.packageName, appLabel: a.label }),
         last_call: linesFor('last_call', { ...who, packageName: a.packageName, appLabel: a.label }),
@@ -195,6 +237,9 @@ export function buildConfig(s: S): WatcherConfig {
     })),
   };
 }
+
+/** Snooze length: 5 minutes, or 2 if a Premium user picked the shorter one. */
+export const snoozeMin = (s: { premium: boolean; snoozeMin?: 2 | 5 }) => (s.premium && s.snoozeMin === 2 ? 2 : 5);
 
 let last = '';
 

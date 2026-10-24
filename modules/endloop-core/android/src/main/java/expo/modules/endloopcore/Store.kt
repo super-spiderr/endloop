@@ -20,10 +20,15 @@ data class TrackedApp(
   val limitHit: List<String>,
   val lateNight: List<String>,
   val snoozesUsedUp: List<String>,
+  /** "Pay it back" after a bunk (YYYY-MM-DD): on that day the limit is PAY_BACK_MIN shorter. */
+  val payBackOn: String? = null,
 ) {
   /** Today's limit, read fresh on every check so it switches at midnight on Friday and Sunday. */
   val limitMin: Int
-    get() = weekendLimitMin?.takeIf { isWeekend() } ?: baseLimitMin
+    get() {
+      val base = weekendLimitMin?.takeIf { isWeekend() } ?: baseLimitMin
+      return if (payBackOn != null && payBackOn == dayKey(System.currentTimeMillis())) (base - PAY_BACK_MIN).coerceAtLeast(1) else base
+    }
 
   private fun isWeekend(): Boolean {
     val day = java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_WEEK)
@@ -169,6 +174,16 @@ data class NotifCopy(
   val minimalText: String, // Settings → Status notification: Minimal
   val browserTitle: String, // H2: went to the browser right after a roast
   val browserText: String,
+  // Sunday 7 pm, merged with the Loops last call (Product Book A7): "Your week is in. Instagram ↓ 32%. And 240 Loops expire at midnight 👀"
+  val weeklyIn: String = "Your week is in.",
+  val weeklyLoopsTail: String = "And {n} Loops expire at midnight 👀",
+  // Saturday 10 am Loops reminder
+  val loopsTitleEnough: String = "You've got {n} Loops. Write a Leave Letter!",
+  val loopsTitleShort: String = "{n} Loops. {short} more by Sunday night for a leave.",
+  val loopsText: String = "Loops clear Sunday at midnight. Plan your weekend.",
+  val loopsLabel: String = "LOOPS",
+  val loopsOpen: String = "Write a letter",
+  val loopsOpenShort: String = "See Attendance",
 ) {
   companion object {
     val DEFAULT = NotifCopy(
@@ -219,6 +234,14 @@ data class NotifCopy(
         minimalText = s("minimalText", d.minimalText),
         browserTitle = s("browserTitle", d.browserTitle),
         browserText = s("browserText", d.browserText),
+        weeklyIn = s("weeklyIn", d.weeklyIn),
+        weeklyLoopsTail = s("weeklyLoopsTail", d.weeklyLoopsTail),
+        loopsTitleEnough = s("loopsTitleEnough", d.loopsTitleEnough),
+        loopsTitleShort = s("loopsTitleShort", d.loopsTitleShort),
+        loopsText = s("loopsText", d.loopsText),
+        loopsLabel = s("loopsLabel", d.loopsLabel),
+        loopsOpen = s("loopsOpen", d.loopsOpen),
+        loopsOpenShort = s("loopsOpenShort", d.loopsOpenShort),
       )
     }
   }
@@ -239,6 +262,11 @@ data class RoastText(
   val shareLabel: String,
   val clockEyebrow: String, // H6
   val clockLine: String,
+  val secondEyebrow: String = "BACK AGAIN · 2ND ROAST TODAY", // the day's 2nd roast for this app
+  val thirdEyebrow: String = "{n} ROAST TODAY. REALLY?", // 3rd and later ({n} = 3RD, 4TH...)
+  val strictEyebrow: String = "STRICT MODE", // Premium Strict mode wall
+  val strictLine: String = "Strict mode's on. No snoozes today. Past you was right.",
+  val strictNote: String = "Strict mode can only go off from tomorrow.",
 ) {
   companion object {
     val DEFAULT = RoastText(
@@ -268,6 +296,11 @@ data class RoastText(
         reopenEyebrow = s("reopenEyebrow", d.reopenEyebrow),
         reopenStat = s("reopenStat", d.reopenStat),
         reopenLines = lines ?: d.reopenLines,
+        secondEyebrow = s("secondEyebrow", d.secondEyebrow),
+        thirdEyebrow = s("thirdEyebrow", d.thirdEyebrow),
+        strictEyebrow = s("strictEyebrow", d.strictEyebrow),
+        strictLine = s("strictLine", d.strictLine),
+        strictNote = s("strictNote", d.strictNote),
         usedUpEyebrow = s("usedUpEyebrow", d.usedUpEyebrow),
         usedUpNote = s("usedUpNote", d.usedUpNote),
         shareEyebrow = s("shareEyebrow", d.shareEyebrow),
@@ -297,10 +330,32 @@ data class EnforcerConfig(
   val roastText: RoastText,
   val bedtimeMin: Int, // minutes after midnight; late-night nudges run from here until 5 am. -1 = off
   val notify: Notify, // Settings: which notification types are on
+  /** Booked leave days (YYYY-MM-DD, local): no warnings or roasts all day, like Pause for today. */
+  val offDays: Set<String> = emptySet(),
+  /** Half-day leaves (Premium): no warnings or roasts from HALF_DAY_FROM_HOUR (18:00) to midnight on these days. */
+  val halfDays: Set<String> = emptySet(),
   val pausedUntil: Long, // Settings → Pause for today: no warnings or roasts before this (ms)
   val statusMinimal: Boolean, // Settings → Status notification: Minimal (no live counter)
+  /** Premium Strict mode: after the 3rd snooze of the day (all apps), only "Fine. Close it." */
+  val strict: Boolean = false,
+  /** Snooze length in minutes (5, or 2 for Premium). */
+  val snoozeMin: Int = 5,
+  /** The snooze ladder (games, cool-off, Bunk) runs in the app: "5 more minutes" opens it there. */
+  val ladder: Boolean = false,
+  /** The snooze button per ladder step (1st, 2nd, 3rd, 4th+), e.g. "5 more minutes · costs you a game". */
+  val ladderLabels: List<String> = emptyList(),
+  /** Loops in the jar as JS last worked them out, for the week starting `loopsWeek` (Monday, yyyy-MM-dd). -1 = unknown. */
+  val loops: Int = -1,
+  val loopsWeek: String = "",
+  /** Week one: Loops carry over instead of clearing on Sunday. */
+  val loopsCarry: Boolean = false,
+  /** Loops for one leave. */
+  val letterCost: Int = 200,
 ) {
   fun app(pkg: String) = apps.firstOrNull { it.packageName == pkg }
+
+  /** Loops, only if JS reported them for the week `monday` is in. */
+  fun loopsFor(monday: String): Int? = if (loops >= 0 && loopsWeek == monday) loops else null
 
   companion object {
     fun parse(json: String?): EnforcerConfig? {
@@ -322,6 +377,7 @@ data class EnforcerConfig(
             limitHit = list("limit_hit"),
             lateNight = list("late_night"),
             snoozesUsedUp = list("snoozes_used_up"),
+            payBackOn = a.optString("payBackOn", "").ifBlank { null },
           )
         }
         EnforcerConfig(
@@ -345,7 +401,17 @@ data class EnforcerConfig(
             )
           },
           pausedUntil = o.optLong("pausedUntil", 0L),
+          offDays = o.optJSONArray("offDays")?.let { a -> (0 until a.length()).map { a.getString(it) }.toSet() } ?: emptySet(),
+          halfDays = o.optJSONArray("halfDays")?.let { a -> (0 until a.length()).map { a.getString(it) }.toSet() } ?: emptySet(),
           statusMinimal = o.optString("statusMode", "live") == "minimal",
+          strict = o.optBoolean("strict", false),
+          snoozeMin = o.optInt("snoozeMin", 5).coerceIn(1, 15),
+          ladder = o.optBoolean("ladder", false),
+          ladderLabels = o.optJSONArray("ladderLabels")?.let { a -> (0 until a.length()).map { a.getString(it) } } ?: emptyList(),
+          loops = o.optJSONObject("loops")?.optInt("count", -1) ?: -1,
+          loopsWeek = o.optJSONObject("loops")?.optString("week", "") ?: "",
+          loopsCarry = o.optJSONObject("loops")?.optBoolean("carry", false) ?: false,
+          letterCost = o.optJSONObject("loops")?.optInt("cost", 200) ?: 200,
         )
       } catch (e: Exception) {
         null
@@ -425,6 +491,29 @@ class Store(context: Context) {
   }
   fun snoozedUntil(pkg: String) = prefs.getLong("snoozeUntil:$pkg", 0L)
 
+  /** Snoozes today across every app: the ladder step (it resets at midnight). */
+  fun snoozesToday(): Int {
+    val prefix = "snooze:${today()}:"
+    return prefs.all.entries.sumOf { (k, v) -> if (k.startsWith(prefix)) (v as? Int ?: 0) else 0 }
+  }
+
+  /** Bunk today: no more roasts for this app until midnight. Counts as a snooze on the ladder. */
+  fun bunk(pkg: String) {
+    val end = java.util.Calendar.getInstance().apply {
+      add(java.util.Calendar.DAY_OF_YEAR, 1)
+      set(java.util.Calendar.HOUR_OF_DAY, 0)
+      set(java.util.Calendar.MINUTE, 0)
+      set(java.util.Calendar.SECOND, 0)
+      set(java.util.Calendar.MILLISECOND, 0)
+    }.timeInMillis
+    prefs.edit()
+      .putInt("snooze:${today()}:$pkg", snoozesUsed(pkg) + 1)
+      .putLong("snoozeUntil:$pkg", end)
+      .putBoolean("bunk:${today()}:$pkg", true)
+      .apply()
+  }
+  fun bunkedToday(pkg: String) = prefs.getBoolean("bunk:${today()}:$pkg", false)
+
   /** Every "Convince me" answer (newest last, capped), for the stats screen and AI roasts later. */
   fun logSnoozeReason(pkg: String, reason: String) {
     val arr = runCatching { org.json.JSONArray(snoozeLogJson) }.getOrDefault(org.json.JSONArray())
@@ -453,6 +542,8 @@ class Store(context: Context) {
   /** The Sunday weekly roast: once per week, keyed by that Sunday's date. */
   fun weeklySent(sunday: String) = prefs.getBoolean("weekly:$sunday", false)
   fun markWeekly(sunday: String) = prefs.edit().putBoolean("weekly:$sunday", true).apply()
+  fun loopsSent(saturday: String) = prefs.getBoolean("loopsnote:$saturday", false)
+  fun markLoops(saturday: String) = prefs.edit().putBoolean("loopsnote:$saturday", true).apply()
 
   /** "Closed it" on a roast without snoozing (or backed out of a snooze): a win for the day. */
   fun addWin() = prefs.edit().putInt("wins:${today()}", wins(today()) + 1).apply()
@@ -468,10 +559,36 @@ class Store(context: Context) {
     prefs.edit().putString("roastLog", arr.toString()).apply()
   }
   val roastLogJson: String get() = prefs.getString("roastLog", "[]") ?: "[]"
+
+  /** How many roasts this app got today (the roast escalates: 1st light, 2nd sharper, 3rd+ savage). */
+  fun roastsToday(pkg: String): Int {
+    val arr = runCatching { org.json.JSONArray(roastLogJson) }.getOrDefault(org.json.JSONArray())
+    val day = today()
+    var n = 0
+    for (i in 0 until arr.length()) {
+      val o = arr.optJSONObject(i) ?: continue
+      if (o.optString("packageName") == pkg && dayKey(o.optLong("at")) == day) n++
+    }
+    return n
+  }
 }
+
+/** Half-day leave starts at 18:00 local time (keep in sync with HALF_DAY_FROM in src/lib/attendance.ts). */
+const val HALF_DAY_FROM_HOUR = 18
+
+/** "Pay it back" (after a bunk with no leave left): that app's limit is this much shorter the next day. */
+const val PAY_BACK_MIN = 15
 
 /** Local date key, e.g. "2026-09-25". */
 fun dayKey(ms: Long): String = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date(ms))
+
+/** The Monday (yyyy-MM-dd) of the week `ms` is in; weeks run Monday to Sunday. */
+fun mondayKey(ms: Long): String {
+  val c = java.util.Calendar.getInstance().apply { timeInMillis = ms }
+  val back = (c.get(java.util.Calendar.DAY_OF_WEEK) + 5) % 7 // Mon 0 … Sun 6
+  c.add(java.util.Calendar.DAY_OF_YEAR, -back)
+  return dayKey(c.timeInMillis)
+}
 
 /** Fill {app}, {time}, {limit}, {left}, {over}, {clock} in a roast line (keep in sync with NATIVE_VARS in JS). */
 fun fillRoast(template: String, app: TrackedApp, usedMin: Int, opens: Int = -1): String {

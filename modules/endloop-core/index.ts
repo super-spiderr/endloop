@@ -56,15 +56,25 @@ type EndloopCoreModule = {
   roastLog(): string;
   /** Oldest first, today last. */
   history(days: number, packages: string[]): Promise<NativeHistoryDay[]>;
-  /** Screen 13: render the weekly card natively; share = true opens the share sheet, false saves to Pictures/Endloop. */
-  weeklyCard(json: string, share: boolean): Promise<boolean>;
+  /** Screen 21: render a square share card natively (see src/lib/share-cards.ts); share = true opens the share sheet, false saves to Pictures/Endloop. */
+  shareCard(json: string, share: boolean): Promise<boolean>;
   /** Which of these packages are still installed. */
   installed(packages: string[]): string[];
   /** Stop watching and wipe everything the native side stored. */
   clearData(): Promise<void>;
   shareRoast(text: string, stat: string): Promise<boolean>;
   /** Testing: send one notification now (ignores the Settings toggles). False if nothing is tracked yet. */
-  testNotification?(kind: 'heads_up' | 'last_call' | 'late_night' | 'weekly' | 'explain'): Promise<boolean>;
+  testNotification?(kind: 'heads_up' | 'last_call' | 'late_night' | 'weekly' | 'loops' | 'explain'): Promise<boolean>;
+  /** Snooze ladder: snoozes today across all apps (the next step is this + 1). */
+  snoozesToday?(): number;
+  /** Snooze ladder: snooze this app for `minutes` and log the reason. */
+  grantSnooze?(packageName: string, minutes: number, reason: string): void;
+  /** Snooze ladder: no roasts for this app until midnight. */
+  bunk?(packageName: string, how: 'leave' | 'timeout' | 'payback'): void;
+  /** Snooze ladder: "Never mind, close it" counts as a win. */
+  addWin?(): void;
+  /** Open an app (back to it after a snooze). */
+  openApp?(packageName: string): boolean;
   /** Screen 17: false until a build made with `prebuild --clean` includes the icon aliases. */
   appIconSupported?(): boolean;
   /** 'default' | 'loop' | 'lupe' — what the user picked (may still be waiting to apply). */
@@ -110,6 +120,14 @@ export type WatcherConfig = {
     minimalText?: string;
     browserTitle?: string;
     browserText?: string;
+    weeklyIn?: string;
+    weeklyLoopsTail?: string;
+    loopsTitleEnough?: string;
+    loopsTitleShort?: string;
+    loopsText?: string;
+    loopsLabel?: string;
+    loopsOpen?: string;
+    loopsOpenShort?: string;
   };
   /** Roast screen copy (Screen 9). */
   roast?: {
@@ -126,13 +144,34 @@ export type WatcherConfig = {
     shareLabel: string;
     clockEyebrow?: string;
     clockLine?: string;
+    /** The day's 2nd roast for an app, and the 3rd+ ({n} = 3RD, 4TH…). */
+    secondEyebrow?: string;
+    thirdEyebrow?: string;
+    /** Premium Strict mode wall. */
+    strictEyebrow?: string;
+    strictLine?: string;
+    strictNote?: string;
   };
+  /** The snooze ladder runs in the app (src/app/snooze.tsx): "5 more minutes" opens it there. */
+  ladder?: boolean;
+  /** Snooze button per ladder step: 1st, 2nd, 3rd, 4th and later. */
+  ladderLabels?: string[];
+  /** Premium Strict mode: after the 3rd snooze of the day, no more snoozes. */
+  strict?: boolean;
+  /** Snooze length in minutes (Premium can pick 2). */
+  snoozeMin?: number;
   /** Minutes after midnight when late-night nudges start (until 5 am); -1 turns them off. */
   bedtimeMin?: number;
   /** Notification types left on in Settings. */
   notify?: { headsUp: boolean; lastCall: boolean; lateNight: boolean; weekly: boolean };
   /** Pause for today: no warnings or roasts before this time (ms). */
   pausedUntil?: number;
+  /** Booked leave days (YYYY-MM-DD, local): no warnings or roasts on these days. */
+  offDays?: string[];
+  /** Half-day leaves (Premium, YYYY-MM-DD): no warnings or roasts from 18:00 on these days. */
+  halfDays?: string[];
+  /** This week's Loops for the Saturday reminder and Sunday last call; `week` = Monday (YYYY-MM-DD). */
+  loops?: { count: number; week: string; carry: boolean; cost: number };
   /** Settings → Status notification: "live" counter (default) or "minimal". */
   statusMode?: 'live' | 'minimal';
   /** Copy for the "Convince me" step behind the snooze button. {app} and {n} are filled natively. */
@@ -171,6 +210,8 @@ export type WatcherConfig = {
     limitMin: number;
     /** Premium: Saturday and Sunday limit; the watcher uses it on those days. Left out = same as limitMin. */
     weekendLimitMin?: number;
+    /** "Pay it back" day (YYYY-MM-DD): the limit is 15 min shorter that day. */
+    payBackOn?: string;
     lines: { heads_up: string[]; last_call: string[]; limit_hit: string[]; late_night: string[]; snoozes_used_up: string[] };
   }[];
 };

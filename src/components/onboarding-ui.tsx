@@ -15,12 +15,13 @@ export const OB_STEPS = 8;
 export const btn = { height: 54, borderRadius: 16 } as const;
 
 /**
- * Light status bar icons for red screens. Stack screens stay mounted under the next one, so this
- * turns dark when the screen loses focus; otherwise white screens pushed on top inherit white icons.
+ * Status bar icons for a screen with its own background (light on red or black). Screens stay mounted
+ * under the next one (stack) or beside it (tabs), so it only applies while focused; otherwise the
+ * root's "auto" style takes over again.
  */
 export function RedStatusBar({ light = true }: { light?: boolean }) {
   const focused = useIsFocused();
-  return <StatusBar style={focused && light ? 'light' : 'dark'} />;
+  return focused ? <StatusBar style={light ? 'light' : 'dark'} /> : null;
 }
 
 /**

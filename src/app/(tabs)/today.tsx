@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { EndloopCore } from 'endloop-core';
 import { router } from 'expo-router';
-import { AppState, Pressable, ScrollView, Share, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { AppState, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { LoopMark, Wordmark } from '@/brand/logo';
+import { Wordmark } from '@/brand/logo';
 import { pose, roasterName, type Pose } from '@/characters';
 import { CloseIcon, EyeIcon, FlameIcon, LeafIcon, LoopsIcon, StarIcon, TargetIcon } from '@/components/icons';
 import { PremiumSheet } from '@/components/premium-sheet';
@@ -16,9 +16,11 @@ import { fill, pickRoast } from '@/roasts';
 import { dismissNews, useRoastNews } from '@/roasts/news';
 import { comparison, fmt } from '@/lib/time';
 import { RedStatusBar } from '@/components/onboarding-ui';
+import { PREMIUM_BOTTOM, PremiumBackdrop } from '@/components/premium-ui';
 import { batterySteps, openBatterySettings, openBrandBackgroundSettings, openUsageAccessSettings } from '@/lib/permissions';
+import { LETTER_COST, useAttendance } from '@/lib/attendance';
 import { watcherLooksDead } from '@/lib/watcher';
-import { limitOn, localDay, useSettings, type Goal, type TrackedApp } from '@/store/settings';
+import { limitOn, localDay, useSettings, watchedApps, type Goal, type TrackedApp } from '@/store/settings';
 import { colors, fonts, gradients, radius, stateStyle, usageState } from '@/theme/tokens';
 
 /** Screen 7 · Home ("Today" tab). */
@@ -26,15 +28,14 @@ import { colors, fonts, gradients, radius, stateStyle, usageState } from '@/them
 const VARS = ['app', 'time', 'limit'] as const;
 
 export default function Today() {
-  const { roaster, roastLang, intensity, name, tracked, hasUsageAccess, howItWorksDismissed, streakDays, startedAt, pausedOn, perfectSeen, premium: isPremium, homeLook, weekendLimits, welcomeBonus, goal, goalText, set } = useSettings();
+  const { roaster, roastLang, intensity, name, tracked, hasUsageAccess, howItWorksDismissed, streakDays, startedAt, pausedOn, perfectSeen, strictNudgeSeen, premium: isPremium, homeLook, weekendLimits, goal, goalText, set } = useSettings();
   const [today, setToday] = useState<TodayUsage>({});
   const [premium, setPremium] = useState(false);
   const [killed, setKilled] = useState(false);
   const [gone, setGone] = useState<string | null>(null);
   const [perfectYesterday, setPerfectYesterday] = useState(false);
-  // Per-app streak: days in a row under the limit, up to yesterday.
-  const [streaks, setStreaks] = useState<Record<string, number>>({});
   const news = useRoastNews(roastLang);
+  const att = useAttendance();
 
   // Refresh on open and every time the app comes back to the front.
   useEffect(() => {
@@ -57,21 +58,14 @@ export default function Today() {
           setGone(removed[0].label);
         }
       }
-      // Last 30 days: per-app streaks, and (Screen 16) yesterday under every limit → a perfect-day card, once
+      // Screen 16: yesterday under every limit → a perfect-day card, once
       if (pkgs.length) {
-        usage.history(31, pkgs).then((days) => {
+        usage.history(2, pkgs).then((days) => {
           const s = useSettings.getState();
           const startOfToday = new Date(`${localDay()}T00:00:00`).getTime();
           const start = s.startedAt ? new Date(`${s.startedAt}T00:00:00`).getTime() : 0;
           const past = days.filter((d) => d.day < startOfToday && d.day >= start);
           const under = (a: TrackedApp, d: (typeof days)[number]) => (d.apps[a.packageName] ?? 0) <= limitOn(a, s, new Date(d.day));
-          const next: Record<string, number> = {};
-          for (const a of tracked) {
-            let n = 0;
-            for (let i = past.length - 1; i >= 0 && under(a, past[i]); i--) n++;
-            next[a.packageName] = n;
-          }
-          setStreaks(next);
           const y = past[past.length - 1];
           if (s.perfectSeen !== localDay()) setPerfectYesterday(!!y && y.day >= startOfToday - 86_400_000 && tracked.every((a) => under(a, y)) && Object.values(y.apps).some((m) => m > 0));
         });
@@ -86,7 +80,10 @@ export default function Today() {
   const paused = pausedOn === localDay();
   const dayOne = !firstVisit && (!startedAt || startedAt === localDay());
   // Today's limit (the Premium weekend one on Saturday and Sunday), same as the watcher uses.
-  const rows = tracked.map((a) => ({ ...a, limitMin: limitOn(a, { premium: isPremium, weekendLimits }), used: today[a.packageName] ?? 0 })).map((a) => ({ ...a, state: usageState(a.used, a.limitMin) }));
+  // Premium ended with more than 3 apps: only the watched 3 get a row (S16-H).
+  const watched = watchedApps({ premium: isPremium, tracked });
+  const overFree = watched.length < tracked.length;
+  const rows = watched.map((a) => ({ ...a, limitMin: limitOn(a, { premium: isPremium, weekendLimits }), used: today[a.packageName] ?? 0 })).map((a) => ({ ...a, state: usageState(a.used, a.limitMin) }));
   const total = rows.reduce((s, r) => s + r.used, 0);
   const over = rows.filter((r) => r.state === 'roasted');
   const close = rows.filter((r) => r.state === 'heads');
@@ -96,10 +93,17 @@ export default function Today() {
     const vars = (r?: (typeof rows)[number]) => ({ app: r?.label ?? '', time: fmt(r?.used ?? 0), limit: fmt(r?.limitMin ?? 0), streak: streakDays });
     if (!hasUsageAccess) return { label: 'Blind', pose: 'unplugged' as Pose, tint: colors.blush, color: colors.red, line: "Usage Access is off. I'm guessing now." };
     if (!tracked.length) return { label: 'Bored', pose: 'bored' as Pose, tint: colors.blush, color: colors.red, line: 'Nothing to watch. Suspicious.' };
+    if (att.onLeaveToday) return { label: 'On leave', pose: 'couch' as Pose, tint: '#E4EEFB', color: '#2D5FA8', line: "On leave today. Enjoy it. I'm still counting." };
     if (paused) return { label: 'Day off', pose: 'stretching' as Pose, tint: '#EDEDED', color: colors.muted, line: "I'm judging silently." };
     if (firstVisit) return { label: 'Setup done', pose: 'binoculars' as Pose, tint: colors.blush, color: colors.red, line: "Go live your life. I'll be watching." };
     if (over.length && over.length === rows.length)
-      return { label: 'Fuming', pose: 'fuming' as Pose, tint: colors.blush, color: colors.red, line: 'Roasted on every app. Go outside. Seriously.' };
+      return {
+        label: 'Done',
+        pose: 'meltdown' as Pose,
+        tint: colors.blush,
+        color: colors.red,
+        line: rows.length === 1 ? `${rows[0].label}'s limit, gone by ${clockNow()}. Go outside.` : `All ${rows.length === 3 ? 'three' : rows.length} limits gone by ${clockNow()}. New record.`,
+      };
     if (over.length)
       return { label: 'Disgusted', pose: 'disgusted' as Pose, tint: colors.blush, color: colors.red, line: fill(pickRoast({ category: 'home_over', lang: roastLang, intensity, roaster, name, seed, vars: VARS, packageName: over[0].packageName, appLabel: over[0].label }) ?? "I'm not angry. I'm disappointed.", vars(over[0])) };
     if (close.length) {
@@ -107,13 +111,19 @@ export default function Today() {
       return { label: 'Suspicious', pose: 'eyesOnYou' as Pose, tint: colors.headsTint, color: colors.heads, line: fill(pickRoast({ category: 'home_close', lang: roastLang, intensity, roaster, name, seed, vars: VARS, packageName: close[0].packageName, appLabel: close[0].label }) ?? `${close[0].label}'s at ${pct}%. I see you.`, vars(close[0])) };
     }
     if (dayOne && total === 0) return { label: 'Day one', pose: 'notes' as Pose, tint: colors.headsTint, color: colors.heads, line: "I'm taking notes. Check back tonight." };
-    return { label: 'Chill', pose: 'chill' as Pose, tint: colors.chillTint, color: colors.chill, line: fill(pickRoast({ category: 'home_under', lang: roastLang, intensity, roaster, name, seed, vars: VARS }) ?? 'Under every limit. Who are you?', vars(rows[0])) };
+    return { label: 'Chill', pose: 'happyChill' as Pose, tint: colors.chillTint, color: colors.chill, line: fill(pickRoast({ category: 'home_under', lang: roastLang, intensity, roaster, name, seed, vars: VARS }) ?? 'Under every limit. Who are you?', vars(rows[0])) };
   })();
 
-  const streakAtRisk = over.length > 0;
+  const streakAtRisk = over.length > 0 && !att.onLeaveToday;
+  const streak = att.ready ? att.streak : streakDays;
   // Under the total: say what matters. Never praise the total while an app is over its limit.
+  const allOver = !!over.length && over.length === rows.length;
   const totalNote = killed
     ? 'Last known. I missed a few hours.'
+    : att.onLeaveToday
+      ? 'No roasts today. Leave Letter approved.'
+    : allOver && rows.length > 1
+      ? `${fmt(over.reduce((n, r) => n + r.used - r.limitMin, 0))} past every limit`
     : over.length === 1
       ? `${fmt(over[0].used - over[0].limitMin)} over on ${over[0].label}.`
       : over.length > 1
@@ -123,23 +133,30 @@ export default function Today() {
 
   // "Next roast in…": the app closest to its limit that isn't over yet (same number as the status notification).
   const nextUp = rows.filter((r) => r.state !== 'roasted').sort((a, b) => a.limitMin - a.used - (b.limitMin - b.used))[0];
-  const nextRoast = showTotal && nextUp ? `${nextUp.label}: ${fmt(nextUp.limitMin - nextUp.used)} till I show up` : null;
+  const nextRoast = showTotal && nextUp && !att.onLeaveToday ? `${nextUp.label}: ${fmt(nextUp.limitMin - nextUp.used)} till I show up` : null;
   const goalName = goal === 'own' ? goalText : goal ? GOAL_LABEL[goal] : undefined;
 
   // One event card at a time (decided 15 Oct), highest priority first.
-  const card: 'killed' | 'news' | 'perfect' | 'how' | 'dayOne' | null = killed
+  // Product Book: killed → Premium ended (pick 3) → Strike → leave → fresh roasts → perfect day → first-week tips.
+  const card: 'killed' | 'ended' | 'leave' | 'news' | 'perfect' | 'strict' | 'how' | 'dayOne' | null = killed
     ? 'killed'
-    : news
-      ? 'news'
-      : perfectYesterday && perfectSeen !== localDay()
-        ? 'perfect'
-        : !tracked.length || paused
-          ? null
-          : firstVisit
-            ? 'how'
-            : dayOne && total === 0
-              ? 'dayOne'
-              : null;
+    : overFree
+      ? 'ended'
+      : att.onLeaveToday && tracked.length
+      ? 'leave'
+      : news
+        ? 'news'
+        : perfectYesterday && perfectSeen !== localDay()
+          ? 'perfect'
+          : !tracked.length || paused
+            ? null
+            : allOver && strictNudgeSeen !== localDay()
+              ? 'strict'
+              : firstVisit
+                ? 'how'
+                : dayOne && total === 0
+                  ? 'dayOne'
+                  : null;
 
   // Premium: the whole screen goes black with red light (canvas TD2-P1/P2), unless they picked Classic in Settings.
   const P = isPremium && homeLook !== 'classic';
@@ -165,21 +182,21 @@ export default function Today() {
             </View>
           ) : null}
         </View>
-        {/* Streak · Loops · Leaves. They'll open the Attendance tab once it exists. */}
-        <View style={{ flexDirection: 'row', gap: 6 }}>
-          <View style={[st.chip, P && st.glassChip, { backgroundColor: streakAtRisk ? colors.red : P ? GLASS : colors.blush }]} accessibilityLabel={streakAtRisk ? 'Streak at risk' : `${streakDays}-day streak`}>
+        {/* Streak · Loops · Leaves: tap to open Attendance. */}
+        <Pressable accessibilityRole="button" accessibilityLabel="Open Attendance" onPress={() => router.push('/attendance')} style={{ flexDirection: 'row', gap: 6 }}>
+          <View style={[st.chip, P && st.glassChip, { backgroundColor: streakAtRisk ? colors.red : P ? GLASS : colors.blush }]} accessibilityLabel={streakAtRisk ? 'Streak at risk' : `${streak}-day streak`}>
             <FlameIcon color={streakAtRisk ? colors.white : P ? CORAL : colors.red} />
-            <T v="bodyBold" style={{ fontSize: 13, color: streakAtRisk || P ? colors.white : colors.red }}>{streakAtRisk ? `${Math.max(streakDays, 1)} · at risk` : Math.max(streakDays, 1)}</T>
+            <T v="bodyBold" style={{ fontSize: 13, color: streakAtRisk || P ? colors.white : colors.red }}>{streakAtRisk ? `${streak} · at risk` : streak}</T>
           </View>
-          <View style={[st.chip, P && st.glassChip, { backgroundColor: P ? GLASS : '#FFF6E0' }]} accessibilityLabel={`${welcomeBonus?.loops ?? 0} Loops`}>
+          <View style={[st.chip, P && st.glassChip, { backgroundColor: P ? GLASS : '#FFF6E0' }]} accessibilityLabel={`${att.loops} Loops`}>
             <LoopsIcon color={P ? CORAL : undefined} />
-            <T v="bodyBold" style={{ fontSize: 13, color: P ? colors.white : '#8A5A00' }}>{welcomeBonus?.loops ?? 0}</T>
+            <T v="bodyBold" style={{ fontSize: 13, color: P ? colors.white : '#8A5A00' }}>{att.loops}</T>
           </View>
-          <View style={[st.chip, P && st.glassChip, { backgroundColor: P ? GLASS : '#F2F0F0' }]} accessibilityLabel={`${welcomeBonus?.leaves ?? 0} leaves left`}>
+          <View style={[st.chip, P && st.glassChip, { backgroundColor: P ? GLASS : '#F2F0F0' }]} accessibilityLabel={`${att.freeLeavesLeft} leaves left`}>
             <LeafIcon color={ink} />
-            <T v="bodyBold" style={{ fontSize: 13, color: ink }}>{welcomeBonus?.leaves ?? 0}</T>
+            <T v="bodyBold" style={{ fontSize: 13, color: ink }}>{att.freeLeavesLeft}</T>
           </View>
-        </View>
+        </Pressable>
       </View>
 
       {!hasUsageAccess ? (
@@ -193,8 +210,9 @@ export default function Today() {
 
       <ScrollView contentContainerStyle={{ padding: 24, paddingTop: 16, paddingBottom: 32, gap: 16 }}>
         {/* Hero: the roaster is the star of this screen, so they get the space. */}
-        {/* Keyed on the look: switching Premium on/off remounts the hero instead of patching the native gradient. */}
-        <LinearGradient key={P ? 'premium' : 'free'} colors={heroColors} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[st.hero, P && st.heroPremium]}>
+        {/* The gradient is a background layer, not a wrapper: wrapped content sometimes doesn't paint on Android. */}
+        <View style={[st.hero, P && st.heroPremium]}>
+          <LinearGradient colors={heroColors} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
           {P ? <HeroGlow /> : null}
           <View style={st.heroChar} pointerEvents="none">
             <Character source={pose(roaster, mood.pose)} size={250} alt={`${roasterName[roaster]}, ${mood.label.toLowerCase()}`} />
@@ -219,7 +237,7 @@ export default function Today() {
               ) : null}
             </View>
           ) : null}
-        </LinearGradient>
+        </View>
 
         {goalName && tracked.length ? (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 4 }}>
@@ -267,7 +285,10 @@ export default function Today() {
                 <CloseIcon color="#8A4A20" />
               </Pressable>
             </View>
-            <T style={{ fontFamily: fonts.display, fontSize: 22, lineHeight: 27, color: colors.ink }}>All under limits. I&apos;m… proud? Weird feeling.</T>
+            <T style={{ fontFamily: fonts.display, fontSize: 22, lineHeight: 27, color: colors.ink }}>{att.yesterdayLoops ? `Perfect day: +${att.yesterdayLoops} Loops` : 'All under limits. I’m… proud? Weird feeling.'}</T>
+            <T style={{ fontSize: 14, lineHeight: 20, color: '#5F3A2E' }}>
+              {`${tracked.length === 1 ? 'Your app' : `All ${tracked.length} apps`} stayed under. ${att.streak >= 1 ? `That's ${att.streak} ${att.streak === 1 ? 'day' : 'days'} present. ` : ''}${att.loops >= LETTER_COST ? 'Enough Loops for a Leave Letter.' : `${LETTER_COST - att.loops} more Loops to a leave.`}`}
+            </T>
             <Pressable
               accessibilityRole="button"
               onPress={() => {
@@ -278,6 +299,55 @@ export default function Today() {
               <T v="bodyBold" style={{ fontSize: 14, color: colors.white }}>Share it</T>
             </Pressable>
           </LinearGradient>
+        ) : null}
+
+        {card === 'ended' ? (
+          <View style={[st.strict, P && st.glassCard]}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <Avatar source={pose(roaster, 'goodbye')} size={40} bg={P ? 'rgba(255,255,255,0.12)' : colors.blush} />
+              <T v="bodyBold" style={{ flex: 1, fontSize: 16, color: ink }}>Premium ended. Pick 3 apps to keep.</T>
+            </View>
+            <T style={{ fontSize: 14, lineHeight: 20, color: soft }}>
+              Till you do, I&apos;m watching your 3 most used: {watched.map((a) => a.label).join(', ').replace(/, ([^,]*)$/, ' and $1')}.
+            </T>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+              <Pressable accessibilityRole="button" onPress={() => router.push('/keep-apps')} style={[st.shareBtn, { backgroundColor: colors.red }]}>
+                <T v="bodyBold" style={{ fontSize: 14, color: colors.white }}>Pick 3</T>
+              </Pressable>
+              <Pressable accessibilityRole="button" hitSlop={8} onPress={() => router.push({ pathname: '/paywall', params: { reason: 'ended' } })}>
+                <T v="bodyBold" style={{ fontSize: 14, color: soft, textDecorationLine: 'underline' }}>Get Premium back</T>
+              </Pressable>
+            </View>
+          </View>
+        ) : null}
+
+        {card === 'leave' ? (
+          <View style={[st.leave, P && st.glassCard]}>
+            <T v="bodyBold" style={{ fontSize: 16, color: P ? colors.white : '#1F4A85' }}>Streak paused, not broken</T>
+            <T style={{ fontSize: 14, lineHeight: 20, color: P ? 'rgba(255,255,255,0.8)' : '#3A5A86' }}>No roasts today. I&apos;m still counting, though. Back tomorrow, same limits.</T>
+          </View>
+        ) : null}
+
+        {card === 'strict' ? (
+          <View style={[st.strict, P && st.glassCard]}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <Avatar source={pose(roaster, 'padlock')} size={40} bg={P ? 'rgba(255,255,255,0.12)' : colors.blush} />
+              <T v="bodyBold" style={{ flex: 1, fontSize: 16, color: ink }}>Want me to be stricter tomorrow?</T>
+            </View>
+            <T style={{ fontSize: 14, lineHeight: 20, color: soft }}>Strict mode takes away every snooze. You can only switch it off from the next day.</T>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => (isPremium ? router.push('/prefs/snooze') : router.push({ pathname: '/paywall', params: { reason: 'strict' } }))}
+                style={[st.shareBtn, { backgroundColor: colors.red, flexDirection: 'row', gap: 6, alignItems: 'center' }]}>
+                {isPremium ? null : <StarIcon size={12} color="#FFD27A" />}
+                <T v="bodyBold" style={{ fontSize: 14, color: colors.white }}>Try Strict mode</T>
+              </Pressable>
+              <Pressable accessibilityRole="button" hitSlop={8} onPress={() => set({ strictNudgeSeen: localDay() })}>
+                <T v="bodyBold" style={{ fontSize: 14, color: soft, textDecorationLine: 'underline' }}>Not now</T>
+              </Pressable>
+            </View>
+          </View>
         ) : null}
 
         {card === 'how' ? (
@@ -310,7 +380,8 @@ export default function Today() {
         <View style={{ gap: 10, opacity: paused ? 0.5 : 1 }}>
           {rows.length ? <T v="label" style={{ paddingTop: 4, color: soft }}>{P ? `Your apps · ${rows.length} of 6` : 'Your apps'}</T> : null}
           {rows.map((r) => {
-            const ss = P ? { ...stateStyle[r.state], ...PREMIUM_STATE[r.state] } : stateStyle[r.state];
+            const base = P ? { ...stateStyle[r.state], ...PREMIUM_STATE[r.state] } : stateStyle[r.state];
+            const ss = att.onLeaveToday ? { ...base, label: 'No roasts', color: P ? '#9CC0FF' : '#2D5FA8', tint: P ? 'rgba(156,192,255,0.16)' : '#E4EEFB' } : base;
             return (
               <Pressable
                 key={r.packageName}
@@ -333,8 +404,8 @@ export default function Today() {
                 </View>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                    <FlameIcon size={12} color={streaks[r.packageName] ? (P ? CORAL : colors.red) : '#8A8A8A'} />
-                    <T v="bodyBold" style={{ fontSize: 12, color: streaks[r.packageName] ? (P ? CORAL : colors.red) : P ? 'rgba(255,255,255,0.5)' : '#8A8A8A' }}>{streaks[r.packageName] ?? 0}-day streak</T>
+                    <FlameIcon size={12} color={(att.perApp[r.packageName]?.streak ?? 0) ? (P ? CORAL : colors.red) : '#8A8A8A'} />
+                    <T v="bodyBold" style={{ fontSize: 12, color: (att.perApp[r.packageName]?.streak ?? 0) ? (P ? CORAL : colors.red) : P ? 'rgba(255,255,255,0.5)' : '#8A8A8A' }}>{att.perApp[r.packageName]?.streak ?? 0}-day streak</T>
                   </View>
                   {earns(r) ? (
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
@@ -354,7 +425,7 @@ export default function Today() {
           <T v="caption" style={{ textAlign: 'center', color: soft }}>{tracked.length < 6 ? `${6 - tracked.length} more ${6 - tracked.length === 1 ? 'slot' : 'slots'} to fill` : 'All 6 slots watched'}</T>
         ) : (
           <Pressable accessibilityRole="button" onPress={() => setPremium(true)} style={st.upsell}>
-            <T v="caption" style={{ flex: 1, fontSize: 14 }}>{tracked.length} of 3 free apps</T>
+            <T v="caption" style={{ flex: 1, fontSize: 14 }}>{watched.length} of 3 free apps</T>
             <StarIcon size={13} />
             <T v="bodyBold" style={{ fontSize: 14, color: '#8A5A00' }}>Watch up to 6</T>
           </Pressable>
@@ -402,36 +473,11 @@ function KilledCard({ face, name, onClose }: { face: number; name: string; onClo
 
 const GLASS = 'rgba(255,255,255,0.1)';
 const CORAL = '#FF8C99';
-/** Bottom colour of the Premium background (the tab bar strip in (tabs)/_layout.tsx matches it). */
-const PREMIUM_BOTTOM = '#060203';
 const PREMIUM_STATE = {
   chill: { color: '#5BD6A0', tint: 'rgba(91,214,160,0.16)' },
   heads: { color: '#FFB547', tint: 'rgba(255,181,71,0.16)' },
   roasted: { color: '#FF5A6A', tint: 'rgba(255,90,106,0.18)' },
 } as const;
-
-/** Premium Today background: black, red light from the top fading down, one big faint loop. */
-function PremiumBackdrop() {
-  const { width, height } = useWindowDimensions();
-  const loop = width * 2.33;
-  return (
-    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-      <LinearGradient colors={['#4A0610', '#1A0306', '#0B0405', PREMIUM_BOTTOM]} locations={[0, 0.35, 0.7, 1]} style={StyleSheet.absoluteFill} />
-      <Svg width={width} height={height} style={StyleSheet.absoluteFill}>
-        <Defs>
-          <RadialGradient id="pTop" cx="50%" cy="0%" rx="70%" ry="35%">
-            <Stop offset="0" stopColor="#E5132B" stopOpacity={0.6} />
-            <Stop offset="1" stopColor="#E5132B" stopOpacity={0} />
-          </RadialGradient>
-        </Defs>
-        <Rect width={width} height={height} fill="url(#pTop)" />
-      </Svg>
-      <View style={{ position: 'absolute', left: (width - loop) / 2, top: height * 0.62 - loop / 2, opacity: 0.05, transform: [{ rotate: '-14deg' }] }}>
-        <LoopMark size={loop} color={colors.white} strokeWidth={30} />
-      </View>
-    </View>
-  );
-}
 
 /** Coral light behind the roaster in the Premium hero. */
 function HeroGlow() {
@@ -458,6 +504,14 @@ const GOAL_LABEL: Record<Exclude<Goal, 'own'>, string> = {
 
 /** Earns Loops: the limit is below the user's own normal (same rule as onboarding's Earning pill). */
 const earns = (a: TrackedApp) => a.avgDailyMin >= 5 && a.limitMin < a.avgDailyMin;
+
+/** "9 pm" / "9:30 pm" for the every-limit-gone line. */
+function clockNow(): string {
+  const d = new Date();
+  const h = d.getHours() % 12 || 12;
+  const m = d.getMinutes();
+  return `${h}${m >= 10 ? `:${String(m).padStart(2, '0')}` : ''} ${d.getHours() < 12 ? 'am' : 'pm'}`;
+}
 
 /** A slightly deeper shade of the mood tint, for the hero gradient. */
 function deeper(tint: string): string {
@@ -494,4 +548,6 @@ const st = StyleSheet.create({
   perfect: { gap: 12, padding: 18, borderRadius: 22 },
   shareBtn: { alignSelf: 'flex-start', height: 40, paddingHorizontal: 16, borderRadius: 12, backgroundColor: colors.ink, justifyContent: 'center' },
   dayOne: { gap: 6, padding: 16, borderRadius: 20, backgroundColor: colors.surface },
+  leave: { gap: 6, padding: 16, borderRadius: 20, backgroundColor: '#E4EEFB' },
+  strict: { gap: 10, padding: 16, borderRadius: 20, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.white },
 });

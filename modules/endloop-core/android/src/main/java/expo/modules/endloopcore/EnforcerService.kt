@@ -151,10 +151,14 @@ class EnforcerService : Service() {
       statusAt = now
       refreshStatus(config, now)
       maybeWeekly(config, now)
+      maybeLoops(config, now)
     }
 
-    // Paused for today (Settings): keep counting for Stats, but no warnings or roasts until midnight.
-    if (now < config.pausedUntil) {
+    // Paused for today (Settings), a booked leave day, or the evening of a half-day leave (Premium, from 18:00):
+    // keep counting for Stats, but no warnings or roasts until midnight.
+    val today = dayKey(now)
+    val halfDayOff = today in config.halfDays && java.util.Calendar.getInstance().apply { timeInMillis = now }.get(java.util.Calendar.HOUR_OF_DAY) >= HALF_DAY_FROM_HOUR
+    if (now < config.pausedUntil || today in config.offDays || halfDayOff) {
       if (overlay.isShowing) overlay.hide()
       eventsUpTo = 0L
       foreground = null
@@ -227,7 +231,18 @@ class EnforcerService : Service() {
     val sunday = dayKey(now)
     if (store.weeklySent(sunday)) return
     store.markWeekly(sunday)
-    Alerts.weekly(this, config, Alerts.weekTotal(this, config, now))
+    Alerts.weekly(this, config, Alerts.weekTotal(this, config, now), now)
+  }
+
+  /** Saturday from 10 am: the Loops reminder, once (shares the Weekly roast switch in Settings). */
+  private fun maybeLoops(config: EnforcerConfig, now: Long) {
+    if (!config.notify.weekly) return
+    val c = java.util.Calendar.getInstance()
+    if (c.get(java.util.Calendar.DAY_OF_WEEK) != java.util.Calendar.SATURDAY || c.get(java.util.Calendar.HOUR_OF_DAY) < 10) return
+    val saturday = dayKey(now)
+    if (store.loopsSent(saturday)) return
+    store.markLoops(saturday)
+    Alerts.loopsReminder(this, config, now)
   }
 
   /** From bedtime until 5 am. */
@@ -413,7 +428,11 @@ class EnforcerService : Service() {
     sentHome = false
     val t = config.roastText
     val used = store.snoozesUsed(pkg)
-    val canSnooze = used < config.maxSnoozesPerDay
+    // Premium Strict mode: after the day's 3rd snooze (any app), only "Fine. Close it."
+    val strictWall = config.strict && store.snoozesToday() >= STRICT_AFTER
+    val canSnooze = used < config.maxSnoozesPerDay && !strictWall
+    // Today's roast number for this app: 1st light, 2nd sharper, 3rd+ savage (the look deepens too).
+    val level = store.roastsToday(pkg) + 1
     val opens = runCatching { UsageReader.opens(this, UsageReader.startOfToday(now), now, pkg) }.getOrDefault(-1)
 
     // Back within 10 minutes of closing it: the roast escalates.
@@ -440,6 +459,12 @@ class EnforcerService : Service() {
         stat = t.reopenStat.replace("{app}", app.label).replace("{n}", n.toString())
         image = drawable("endloop_${config.roaster}_hands_on_hips")
       }
+      strictWall -> {
+        eyebrow = t.strictEyebrow
+        line = t.strictLine
+        stat = statLine(t.stat, app, usedMin, opens)
+        image = drawable("endloop_${config.roaster}_padlock").takeIf { it != 0 } ?: drawable("endloop_${config.roaster}_finger_wag")
+      }
       !canSnooze -> {
         eyebrow = t.usedUpEyebrow
         line = Alerts.pickLine(app.snoozesUsedUp, app, usedMin, "No more snoozes today. This one's final.", opens)
@@ -447,13 +472,21 @@ class EnforcerService : Service() {
         image = drawable("endloop_${config.roaster}_finger_wag")
       }
       else -> {
-        eyebrow = t.eyebrow
+        eyebrow = when {
+          level >= 3 -> t.thirdEyebrow.replace("{n}", ordinal(level))
+          level == 2 -> t.secondEyebrow
+          else -> t.eyebrow
+        }
         line = Alerts.pickLine(app.limitHit, app, usedMin, "That's your ${app.label} time for today.", opens)
         stat = statLine(t.stat, app, usedMin, opens)
-        image = drawable("endloop_${config.roaster}_${config.intensity}")
+        image = when {
+          level >= 3 -> drawable("endloop_${config.roaster}_meltdown")
+          level == 2 -> drawable("endloop_${config.roaster}_disgusted")
+          else -> 0
+        }.takeIf { it != 0 } ?: drawable("endloop_${config.roaster}_${config.intensity}")
       }
     }
-    Log.i(TAG, "roast up: $pkg at $usedMin/${app.limitMin} min, opens=$opens, reopened=$reopened")
+    Log.i(TAG, "roast up: $pkg at $usedMin/${app.limitMin} min, opens=$opens, reopened=$reopened, level=$level, strict=$strictWall")
     store.logRoast(pkg, line)
 
     overlay.show(
@@ -463,8 +496,10 @@ class EnforcerService : Service() {
         roast = line,
         stat = stat,
         close = config.closeLabel,
-        snooze = if (canSnooze) config.snoozeLabel else null,
-        note = if (canSnooze) null else t.usedUpNote,
+        snooze = if (!canSnooze) null else if (config.ladder && config.ladderLabels.isNotEmpty()) {
+          config.ladderLabels[(store.snoozesToday()).coerceIn(0, config.ladderLabels.size - 1)]
+        } else config.snoozeLabel,
+        note = if (canSnooze) null else if (strictWall) t.strictNote else t.usedUpNote,
         shareLabel = t.shareLabel,
         // facts can mention today's time: fill them now
         friction = config.friction.copy(facts = config.friction.facts.map { fillFact(it, app, usedMin) }),
@@ -476,6 +511,8 @@ class EnforcerService : Service() {
         stareImage = drawable("endloop_${config.roaster}_stopwatch"),
         readyImage = drawable("endloop_${config.roaster}_fine_go"),
         proudImage = drawable("endloop_${config.roaster}_slow_clap"),
+        level = level,
+        ladder = config.ladder,
       ),
       onClose = {
         overlayFor = null
@@ -492,7 +529,7 @@ class EnforcerService : Service() {
         if (sentHome) overlay.open(pkg)
         sentHome = false
         closedAt.remove(pkg)
-        store.addSnooze(pkg, SNOOZE_MIN)
+        store.addSnooze(pkg, config.snoozeMin)
         store.logSnoozeReason(pkg, reason)
         Log.i(TAG, "snoozed $pkg: $reason")
       },
@@ -502,12 +539,47 @@ class EnforcerService : Service() {
         overlay.hide()
         overlayFor = null
         shareGraceUntil = System.currentTimeMillis() + SHARE_GRACE_MS
-        val card = ShareCard.Card(t.shareEyebrow, line, statLine(t.shareStat, app, usedMin, opens), t.shareTagline, image)
+        // "I GOT ROASTED · 3RD TIME TODAY" from the 2nd roast of the day (S21-A).
+        val shareEyebrow = if (level >= 2) "${t.shareEyebrow} · ${ordinal(level)} TIME TODAY" else t.shareEyebrow
+        val card = ShareCard.Card(shareEyebrow, line, statLine(t.shareStat, app, usedMin, opens), t.shareTagline, image)
         if (!ShareCard.share(this, card, t.shareLabel)) shareGraceUntil = 0L
         Log.i(TAG, "shared roast for $pkg")
       },
       onVisible = { handler.post { leaveUnderRoast(pkg, pip) } },
+      onLadder = { handler.post { openLadder(app, usedMin) } },
     )
+  }
+
+  /**
+   * "5 more minutes" with the ladder on: the snooze screen opens in the app (convince, games, cool-off,
+   * Bunk). The roast steps aside once it's up. Endloop is a protected app, so nothing roasts it meanwhile;
+   * if they leave it without finishing, the next open of the app is roasted as usual.
+   */
+  private fun openLadder(app: TrackedApp, usedMin: Int) {
+    val pkg = app.packageName
+    overlayFor = null
+    sentHome = false
+    val uri = android.net.Uri.Builder()
+      .scheme("endloop")
+      .authority("snooze")
+      .appendQueryParameter("pkg", pkg)
+      .appendQueryParameter("app", app.label)
+      .appendQueryParameter("step", (store.snoozesToday() + 1).toString())
+      .appendQueryParameter("used", usedMin.toString())
+      .appendQueryParameter("limit", app.limitMin.toString())
+      .build()
+    val intent = Intent(Intent.ACTION_VIEW, uri)
+      .setPackage(packageName)
+      .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+    runCatching { startActivity(intent) }.onFailure { Log.e(TAG, "snooze screen failed to open", it) }
+    handler.postDelayed({ overlay.hide() }, LADDER_HANDOFF_MS)
+    Log.i(TAG, "snooze ladder opened for $pkg")
+  }
+
+  /** 3 → "3RD", 4 → "4TH", 22 → "22ND". */
+  private fun ordinal(n: Int): String {
+    val suffix = if (n % 100 in 11..13) "TH" else when (n % 10) { 1 -> "ST"; 2 -> "ND"; 3 -> "RD"; else -> "TH" }
+    return "$n$suffix"
   }
 
   /** {app} {time} {weekHours} {yearDays} in a fact card, from today's usage. */
@@ -627,7 +699,8 @@ class EnforcerService : Service() {
     private const val STATUS_MS = 60_000L
     private const val REOPEN_WINDOW_MS = 10 * 60_000L
     private const val SHARE_GRACE_MS = 90_000L
-    private const val SNOOZE_MIN = 5
+    private const val STRICT_AFTER = 3
+    private const val LADDER_HANDOFF_MS = 250L
     // Time for a picture-in-picture window to grow back to full screen before we leave it.
     private const val PIP_EXPAND_MS = 1_200L
     private const val CLOCK_JUMP_MS = 30 * 60_000L

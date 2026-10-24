@@ -48,6 +48,10 @@ data class RoastCopy(
   val stareImage: Int, // the face in the countdown ring
   val readyImage: Int, // the ring face once the wait is over ("fine, go")
   val proudImage: Int, // "Never mind, close it"
+  /** Today's roast number for this app: 1 light, 2 sharper (darker red), 3+ savage (deepest red, a shake). */
+  val level: Int = 1,
+  /** "5 more minutes" opens the snooze ladder in the app instead of the convince steps here. */
+  val ladder: Boolean = false,
 )
 
 /**
@@ -117,9 +121,9 @@ class RoastOverlay(private val context: Context) {
   @Volatile var onHiddenBySystem: (() -> Unit)? = null
 
   /** [onVisible] runs once, when the roast is really on screen (activity starts from the background need that on Android 15). */
-  fun show(copy: RoastCopy, onClose: () -> Unit, onSnooze: (reason: String) -> Unit, onShare: () -> Unit, onVisible: () -> Unit = {}) = main.post {
+  fun show(copy: RoastCopy, onClose: () -> Unit, onSnooze: (reason: String) -> Unit, onShare: () -> Unit, onVisible: () -> Unit = {}, onLadder: () -> Unit = {}) = main.post {
     try {
-      build(copy, onClose, onSnooze, onShare, onVisible)
+      build(copy, onClose, onSnooze, onShare, onVisible, onLadder)
     } catch (e: Exception) {
       // never crash the app (and the watcher with it) over the overlay
       Log.e(TAG, "roast overlay failed", e)
@@ -227,7 +231,7 @@ class RoastOverlay(private val context: Context) {
 
   // ---------------------------------------------------------------------------
 
-  private fun build(copy: RoastCopy, onClose: () -> Unit, onSnooze: (String) -> Unit, onShare: () -> Unit, onVisible: () -> Unit) {
+  private fun build(copy: RoastCopy, onClose: () -> Unit, onSnooze: (String) -> Unit, onShare: () -> Unit, onVisible: () -> Unit, onLadder: () -> Unit) {
     if (view != null) return
     if (!Settings.canDrawOverlays(context)) {
       Log.w(TAG, "no overlay permission, roast skipped")
@@ -268,9 +272,14 @@ class RoastOverlay(private val context: Context) {
         }
       }
     }.apply {
+      // The red deepens with each roast of the day for this app.
       background = GradientDrawable(
         GradientDrawable.Orientation.TOP_BOTTOM,
-        intArrayOf(0xFFF0263D.toInt(), 0xFFC20F24.toInt(), 0xFF7A0714.toInt()),
+        when {
+          copy.level >= 3 -> intArrayOf(0xFF8E0A1B.toInt(), 0xFF4A0510.toInt(), 0xFF1A0206.toInt())
+          copy.level == 2 -> intArrayOf(0xFFC20F24.toInt(), 0xFF8E0A1B.toInt(), 0xFF4F0510.toInt())
+          else -> intArrayOf(0xFFF0263D.toInt(), 0xFFC20F24.toInt(), 0xFF7A0714.toInt())
+        },
       )
       isClickable = true // swallow touches meant for the app underneath
       isFocusableInTouchMode = true
@@ -369,7 +378,12 @@ class RoastOverlay(private val context: Context) {
       column.addView(View(context), LinearLayout.LayoutParams(1, 0, 1f)) // push buttons down
       column.addView(primaryButton(copy.close) { close() }, fullWidth(60))
       copy.snooze?.let { s ->
-        column.addView(quietButton(s, underline = true) { convinceStep(column, copy, ::close, onSnooze) { share.visibility = View.GONE; onBack = { roastStep() } } })
+        column.addView(
+          quietButton(s, underline = true) {
+            if (copy.ladder) onLadder() // the ladder (games, cool-off, Bunk) runs in the app
+            else convinceStep(column, copy, ::close, onSnooze) { share.visibility = View.GONE; onBack = { roastStep() } }
+          },
+        )
       }
       copy.note?.let { n -> column.addView(quietButton(n) {}.apply { isClickable = false }) }
       typeOut(roast, copy.roast)
@@ -396,7 +410,18 @@ class RoastOverlay(private val context: Context) {
     takeAudio()
     root.requestFocus()
     enter(root)
-    runCatching { buzz() }
+    runCatching { buzz(copy.level >= 3) }
+    if (copy.level >= 3) shake(root)
+  }
+
+  /** 3rd roast and later: a short side-to-side shake once it has slid in. */
+  private fun shake(root: View) {
+    val d = dp(10).toFloat()
+    ValueAnimator.ofFloat(0f, -d, d, -d * 0.7f, d * 0.7f, -d * 0.35f, 0f).apply {
+      startDelay = 360
+      duration = 420
+      addUpdateListener { a -> root.translationX = a.animatedValue as Float }
+    }.start()
   }
 
   /** Slides up from the bottom with a quick deceleration. */
@@ -837,14 +862,15 @@ class RoastOverlay(private val context: Context) {
     return if (id > 0) context.resources.getDimensionPixelSize(id) else dp(24)
   }
 
-  private fun buzz() {
+  private fun buzz(heavy: Boolean = false) {
     @Suppress("DEPRECATION")
     val v = context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator ?: return
+    val pattern = if (heavy) longArrayOf(0, 90, 70, 90, 70, 220) else longArrayOf(0, 60, 80, 120)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      v.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 60, 80, 120), -1))
+      v.vibrate(VibrationEffect.createWaveform(pattern, -1))
     } else {
       @Suppress("DEPRECATION")
-      v.vibrate(longArrayOf(0, 60, 80, 120), -1)
+      v.vibrate(pattern, -1)
     }
   }
 

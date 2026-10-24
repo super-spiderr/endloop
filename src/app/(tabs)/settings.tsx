@@ -13,8 +13,10 @@ import { Avatar, Button, Character, LinkButton, Sheet, T } from '@/components/ui
 import { APP_ICON_LABEL, AppIconImage, appIconSupported, getAppIcon, setAppIcon, type AppIconName } from '@/lib/app-icon';
 import { useOnReturn } from '@/lib/hooks';
 import { batteryNeededUpfront, checkPermissions, requestNotifications } from '@/lib/permissions';
-import { localDay, useSettings } from '@/store/settings';
+import { TEST_BUILD } from '@/lib/plans';
+import { localDay, strictActive, useSettings } from '@/store/settings';
 import { colors } from '@/theme/tokens';
+
 
 const LEVEL: Record<string, string> = { polite: 'Polite', honest: 'Honest', savage: 'Savage', unhinged: 'Unhinged' };
 const LANG: Record<string, string> = { en: 'English', 'ta-Latn': 'Tanglish' };
@@ -87,6 +89,7 @@ export default function Settings() {
         <Group>
           <NavRow first label="Roasting" value={`${LEVEL[s.intensity] ?? s.intensity} · ${LANG[s.roastLang] ?? s.roastLang}`} href="/prefs/roasting" />
           <NavRow label="Apps and limits" value={`${s.tracked.length} ${s.tracked.length === 1 ? 'app' : 'apps'}`} href="/prefs/limits" />
+          <NavRow label="Snooze and Strict mode" value={strictActive(s) ? 'Strict on' : s.premium ? `${s.snoozeMin === 2 ? 2 : 5} min snooze` : 'Premium'} href="/prefs/snooze" />
           <NavRow label="Notifications" value={notifOn === NOTIFY_ROWS.length ? 'All on' : notifOn === 0 ? 'Off' : `${notifOn} of ${NOTIFY_ROWS.length} on`} href="/prefs/notifications" />
           <NavRow label="Permissions" value={toFix ? `${toFix} to fix` : 'All good'} valueColor={toFix ? colors.red : colors.chill} href="/prefs/permissions" />
           {iconOk ? <NavRow label="App icon" value={APP_ICON_LABEL[icon]} onPress={() => openIcon(icon, null)} /> : null}
@@ -132,6 +135,21 @@ export default function Settings() {
           <Chevron color="#FFB38A" />
         </Pressable>
         )}
+
+        {TEST_BUILD ? (
+          <Group title="Testing" note="Testers only. This section isn't in the Play Store build.">
+            <View style={{ paddingTop: 12 }}>
+              <Segment<'free' | 'premium'>
+                options={[
+                  ['free', 'Free'],
+                  ['premium', 'Premium'],
+                ]}
+                value={s.premium ? 'premium' : 'free'}
+                onChange={(v) => s.set({ premium: v === 'premium' })}
+              />
+            </View>
+          </Group>
+        ) : null}
 
         {__DEV__ ? (
           <View style={{ paddingHorizontal: 24, paddingTop: 20, gap: 12 }}>
@@ -207,7 +225,8 @@ export default function Settings() {
             ['heads_up', 'Heads up · 75%'],
             ['last_call', 'Last call · 90%'],
             ['late_night', 'Late night'],
-            ['weekly', 'Weekly roast'],
+            ['weekly', 'Weekly roast · Sunday'],
+            ['loops', 'Loops reminder · Saturday'],
             ['explain', 'Watcher explainer'],
           ] as const
         ).map(([kind, label]) => (
@@ -219,7 +238,7 @@ export default function Settings() {
               if (!EndloopCore?.testNotification) return setTestMsg('Needs a native build (not Expo Go).');
               if (!(await requestNotifications())) return setTestMsg('Notifications are off for Endloop. Turn them on first.');
               const ok = await EndloopCore.testNotification(kind);
-              setTestMsg(ok ? `Sent: ${label}. Pull down the shade.` : 'Nothing to test yet. Pick at least one app first.');
+              setTestMsg(ok ? `Sent: ${label}. Pull down the shade.` : kind === 'loops' ? 'No Loops this week yet. Open Attendance first.' : 'Nothing to test yet. Pick at least one app first.');
             }}
           />
         ))}

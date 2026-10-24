@@ -222,22 +222,14 @@ class EndloopCoreModule : Module() {
       ShareCard.share(context, ShareCard.Card(t.shareEyebrow, text, stat, t.shareTagline, res), t.shareLabel)
     }
 
-    /** Screen 13: the weekly card. `share` true = share sheet, false = save to Pictures/Endloop. */
-    AsyncFunction("weeklyCard") { json: String, share: Boolean ->
+    /**
+     * Screen 21 share cards (roast, milestone, leave, weekly), square 1080×1080, from a JSON description (see ShareCard.render).
+     * `share` true = share sheet, false = save to Pictures/Endloop.
+     */
+    AsyncFunction("shareCard") { json: String, share: Boolean ->
       val o = org.json.JSONObject(json)
-      val cfg = Store(context).config
-      val res = context.resources.getIdentifier(o.optString("character", "endloop_${cfg?.roaster ?: "loop"}_savage"), "drawable", context.packageName)
-      val card = ShareCard.Weekly(
-        dates = o.optString("dates"),
-        total = o.optString("total"),
-        worst = o.optString("worst"),
-        win = o.optString("win"),
-        roast = o.optString("roast"),
-        tagline = o.optString("tagline", "Get roasted too → endloop app"),
-        character = res,
-      )
-      val bmp = ShareCard.renderWeekly(context, card)
-      if (share) ShareCard.shareBitmap(context, bmp, o.optString("shareTitle", "Share your roast")) else ShareCard.save(context, bmp)
+      val bmp = ShareCard.render(context, o)
+      if (share) ShareCard.shareBitmap(context, bmp, o.optString("shareTitle", "Share")) else ShareCard.save(context, bmp)
     }
 
     /** Settings → Delete all my data: stop watching, wipe our storage and cached cards/icons. */
@@ -286,6 +278,30 @@ class EndloopCoreModule : Module() {
     Function<Double>("lastHeartbeat") { Store(context).heartbeat.toDouble() }
     /** H7: JSON array of { from, to } when Endloop was off while the phone was on. */
     Function<String>("offGaps") { Store(context).offGapsJson }
+
+    // ---- the snooze ladder (src/app/snooze.tsx) ----
+    /** Snoozes today across all apps: which ladder step comes next (it resets at midnight). */
+    Function<Int>("snoozesToday") { Store(context).snoozesToday() }
+    /** Won the step (or waited it out): snooze this app for [minutes] and log the reason. */
+    Function("grantSnooze") { pkg: String, minutes: Int, reason: String ->
+      val store = Store(context)
+      store.addSnooze(pkg, minutes.coerceIn(1, 15))
+      store.logSnoozeReason(pkg, reason)
+    }
+    /** Bunk today: no roasts for this app until midnight. [how] = "leave" | "timeout" | "payback" (logged). */
+    Function("bunk") { pkg: String, how: String ->
+      val store = Store(context)
+      store.bunk(pkg)
+      store.logSnoozeReason(pkg, "bunk:$how")
+    }
+    /** "Never mind, close it" in the snooze screen: a win for the day, like closing the roast. */
+    Function<Unit>("addWin") { Store(context).addWin() }
+    /** Back to the app the snooze was for. False if it can't be opened. */
+    Function("openApp") { pkg: String ->
+      val launch = context.packageManager.getLaunchIntentForPackage(pkg) ?: return@Function false
+      launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
+      runCatching { context.startActivity(launch) }.isSuccess
+    }
   }
 
   /**

@@ -1,220 +1,200 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { AppState, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Path, Rect } from 'react-native-svg';
+import Svg, { Circle, Line, Path, Polyline, Rect } from 'react-native-svg';
 
 import { Wordmark } from '@/brand/logo';
-import { pose, roasterName, type Pose, type Roaster } from '@/characters';
-import { AppTile, Character, T } from '@/components/ui';
+import { pose, roasterName, type Roaster } from '@/characters';
+import { StarIcon } from '@/components/icons';
 import { PremiumSheet } from '@/components/premium-sheet';
+import { AppTile, Avatar, Character, T } from '@/components/ui';
 import { usage, type HistoryDay } from '@/data/usage';
+import { dayTotal, mondayOf, monthReport, normalDay, PARTS, topExcuse, WEAK_LINE, weakestPart } from '@/lib/report';
 import { fmt } from '@/lib/time';
+import { weeklyReport } from '@/lib/weekly';
 import { limitOn, localDay, useSettings, type TrackedApp } from '@/store/settings';
-import { colors, fonts, gradients, radius } from '@/theme/tokens';
+import { colors, fonts } from '@/theme/tokens';
 
 const DAY = 86_400_000;
-const HISTORY_DAYS = 21; // this week, last week, and the 21-day challenge
+const HISTORY_DAYS = 62; // this month, last month, and four past weeks
 
-/** Screen 12 · Stats: is Endloop actually helping? */
-export default function Stats() {
-  const { tracked, roaster, startedAt, baselineDailyMin, set } = useSettings();
+/** Report Card (canvas Screen 19; formerly Stats): time only. Streaks and Loops live in Attendance. */
+export default function ReportCard() {
+  const s = useSettings();
+  const { tracked, roaster, startedAt, baselineDailyMin, premium, set } = s;
   const [days, setDays] = useState<HistoryDay[] | null>(null);
-  const [premium, setPremium] = useState<null | 'stats' | 'archive'>(null);
+  const [parts, setParts] = useState<[number, number, number, number][]>([]);
+  const [view, setView] = useState<'week' | 'month'>('week');
+  const [now, setNow] = useState(() => Date.now());
+  const [sheet, setSheet] = useState<null | 'stats' | 'worst-hour'>(null);
 
   useEffect(() => {
     if (!startedAt) set({ startedAt: localDay() }); // installs from before this screen
-    const load = () => usage.history(HISTORY_DAYS, tracked.map((a) => a.packageName)).then(setDays).catch(() => setDays([]));
+    const pkgs = tracked.map((a) => a.packageName);
+    const load = () => {
+      setNow(Date.now());
+      usage.history(HISTORY_DAYS, pkgs).then(setDays).catch(() => setDays([]));
+      if (premium) Promise.all(pkgs.map((p) => usage.detail(p).then((d) => d.parts).catch(() => [0, 0, 0, 0] as [number, number, number, number]))).then(setParts);
+    };
     load();
-    const sub = AppState.addEventListener('change', (s) => s === 'active' && load());
+    const sub = AppState.addEventListener('change', (st) => st === 'active' && load());
     return () => sub.remove();
-  }, [tracked, startedAt, set]);
+  }, [tracked, startedAt, premium, set]);
 
-  // Installs from before the baseline was saved: the averages picked in onboarding are the same thing.
-  const pickedAvg = tracked.reduce((s, a) => s + a.avgDailyMin, 0);
-  const baseline = baselineDailyMin ?? (pickedAvg > 0 ? pickedAvg : undefined);
-  const m = days ? metrics(days, tracked, startedAt ?? localDay(), baseline) : null;
+  const normal = normalDay(tracked, baselineDailyMin);
+  const start = new Date(`${startedAt ?? localDay()}T00:00:00`).getTime();
+  const sinceStart = Math.max(0, Math.floor((now - start) / DAY));
 
-  // No baseline from onboarding (Usage Access was skipped): the first full week becomes it.
-  const sinceStart = m?.sinceStart ?? 0;
-  const firstWeekAvg = m?.firstWeekAvg ?? 0;
+  // No baseline at all (Usage Access was skipped in onboarding): the first full week becomes it.
+  const firstWeek = days ? days.filter((d) => d.day >= start && d.day < start + 7 * DAY) : [];
+  const firstWeekAvg = firstWeek.length >= 7 ? Math.round(firstWeek.reduce((n, d) => n + dayTotal(d, tracked), 0) / 7) : 0;
   useEffect(() => {
-    if (baseline == null && sinceStart >= 7 && firstWeekAvg > 0) set({ baselineDailyMin: firstWeekAvg });
-  }, [sinceStart, firstWeekAvg, baseline, set]);
+    if (normal == null && firstWeekAvg > 0) set({ baselineDailyMin: firstWeekAvg });
+  }, [normal, firstWeekAvg, set]);
 
+  const month = view === 'month' && premium;
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={['top']}>
       <View style={st.header}>
-        <Wordmark width={100} />
+        <Wordmark width={96} />
         <View accessibilityRole="radiogroup" style={st.segment}>
-          <View accessibilityRole="radio" accessibilityState={{ checked: true }} style={[st.segBtn, st.segOn]}>
-            <T v="bodyBold" style={{ fontSize: 14 }}>Week</T>
-          </View>
-          <Pressable accessibilityRole="radio" accessibilityState={{ checked: false }} accessibilityHint="Premium" onPress={() => setPremium('stats')} style={st.segBtn}>
-            <T v="bodyBold" style={{ fontSize: 14, color: colors.muted }}>Month</T>
-            <LockIcon />
-          </Pressable>
+          {(['week', 'month'] as const).map((v) => {
+            const on = v === 'week' ? !month : month;
+            return (
+              <Pressable
+                key={v}
+                accessibilityRole="radio"
+                accessibilityState={{ checked: on }}
+                accessibilityHint={v === 'month' && !premium ? 'Premium' : undefined}
+                onPress={() => (v === 'month' && !premium ? setSheet('stats') : setView(v))}
+                style={[st.segBtn, on && st.segOn]}>
+                <T v="bodyBold" style={{ fontSize: 14, color: on ? colors.ink : colors.muted }}>{v === 'week' ? 'Week' : 'Month'}</T>
+                {v === 'month' && !premium ? <Lock /> : null}
+              </Pressable>
+            );
+          })}
         </View>
       </View>
 
-      {!m ? null : (
-        <ScrollView contentContainerStyle={{ padding: 24, paddingTop: 12, paddingBottom: 36, gap: 20 }}>
-          <T v="display" accessibilityRole="header">Your week</T>
-          <Hero m={m} roaster={roaster} />
-          <DailyChart m={m} />
-          <View style={st.tiles}>
-            <Tile value={`${m.underDays}/${m.weekDays}`} label="days under all limits" color={m.underDays >= m.weekDays / 2 ? colors.chill : colors.red} />
-            <Tile value={String(m.wins)} label="closed on the first roast" color={colors.chill} />
-            <Tile value={String(m.snoozes)} label="snoozes used" color={colors.heads} />
-            <Tile value={String(m.roasts)} label="roasts received" color={colors.red} />
-          </View>
-          <PerApp m={m} tracked={tracked} />
-          <Challenge day={m.challengeDay} under={m.challengeUnder} roaster={roaster} />
-          <WeeklyCta roaster={roaster} onPress={() => router.push('/weekly')} />
-          <Pressable accessibilityRole="button" onPress={() => setPremium('archive')} style={st.archive}>
-            <T v="bodyBold">Past weekly roasts</T>
-            <View style={st.premiumTag}>
-              <LockIcon color={colors.red} />
-              <T v="bodyBold" style={{ fontSize: 12, color: colors.red }}>Premium</T>
-            </View>
-          </Pressable>
-        </ScrollView>
+      {!days ? null : normal == null ? (
+        <FirstWeek days={days} tracked={tracked} start={start} sinceStart={sinceStart} roaster={roaster} />
+      ) : month ? (
+        <Month days={days} tracked={tracked} start={start} normal={normal} parts={parts} roaster={roaster} />
+      ) : (
+        <Week days={days} tracked={tracked} start={start} normal={normal} parts={parts} premium={premium} now={now} onLocked={() => setSheet('worst-hour')} />
       )}
 
-      <PremiumSheet visible={premium !== null} onClose={() => setPremium(null)} roaster={roaster} reason={premium ?? 'stats'} />
+      <PremiumSheet visible={sheet !== null} onClose={() => setSheet(null)} roaster={roaster} reason={sheet ?? 'stats'} />
     </SafeAreaView>
   );
 }
 
-// ---------------------------------------------------------------------------
+/* ---------------------------------------------------------------- week */
 
-type Metrics = ReturnType<typeof metrics>;
-
-function metrics(days: HistoryDay[], tracked: TrackedApp[], startedAt: string, baseline: number | undefined) {
-  const start = new Date(`${startedAt}T00:00:00`).getTime();
-  const sinceStart = Math.max(0, Math.floor((Date.now() - start) / DAY)); // 0 on day 1
-  const total = (d: HistoryDay) => tracked.reduce((s, a) => s + (d.apps[a.packageName] ?? 0), 0);
-  const underAll = (d: HistoryDay) => tracked.every((a) => (d.apps[a.packageName] ?? 0) <= limitOn(a, useSettings.getState(), new Date(d.day)));
-
+function Week({ days, tracked, start, normal, parts, premium, now, onLocked }: { days: HistoryDay[]; tracked: TrackedApp[]; start: number; normal: number; parts: [number, number, number, number][]; premium: boolean; now: number; onLocked: () => void }) {
+  const s = useSettings();
   const week = days.slice(-7);
-  const lastWeek = days.slice(-14, -7);
-  const counted = week.filter((d) => d.day >= start); // only days with Endloop running
-  const weekTotal = counted.reduce((s, d) => s + total(d), 0);
-  const firstWeek = days.filter((d) => d.day >= start && d.day < start + 7 * DAY);
-  const firstWeekAvg = firstWeek.length >= 7 ? Math.round(firstWeek.reduce((s, d) => s + total(d), 0) / 7) : 0;
-  const base = baseline ?? null;
-
+  const counted = week.filter((d) => d.day >= start);
+  const total = counted.reduce((n, d) => n + dayTotal(d, tracked), 0);
+  const wonBack = Math.round(normal * counted.length - total);
+  const report = weeklyReport(days.slice(-14), tracked, s.startedAt ?? localDay(), normal, { lang: s.roastLang, intensity: s.intensity, roaster: s.roaster });
   const perApp = tracked.map((a) => {
-    const now = week.reduce((s, d) => s + (d.apps[a.packageName] ?? 0), 0);
-    const before = lastWeek.reduce((s, d) => s + (d.apps[a.packageName] ?? 0), 0);
-    return { app: a, now, change: before > 0 ? Math.round(((now - before) / before) * 100) : null };
+    const now = counted.reduce((n, d) => n + (d.apps[a.packageName] ?? 0), 0);
+    const usual = a.avgDailyMin * counted.length;
+    return { app: a, now, change: usual > 0 ? Math.round(((now - usual) / usual) * 100) : null };
   });
+  const switched = perApp.some((p) => (p.change ?? 0) <= -10) && perApp.some((p) => (p.change ?? 0) >= 5);
+  const excuse = topExcuse(mondayOf(now));
+  const wins = counted.reduce((n, d) => n + d.wins, 0);
+  const snoozes = counted.reduce((n, d) => n + d.snoozes, 0);
+  const good = wonBack >= 0;
+  const movies = Math.floor(Math.max(0, wonBack) / 120);
 
-  const sinceStartDays = days.filter((d) => d.day >= start);
-  return {
-    week: week.map((d) => ({ day: d.day, minutes: total(d), counted: d.day >= start })),
-    base,
-    sinceStart,
-    firstWeekAvg,
-    wonBack: base != null ? base * counted.length - weekTotal : null,
-    countedDays: counted.length,
-    weekDays: counted.length,
-    underDays: counted.filter(underAll).length,
-    wins: counted.reduce((s, d) => s + d.wins, 0),
-    snoozes: counted.reduce((s, d) => s + d.snoozes, 0),
-    roasts: counted.reduce((s, d) => s + d.roasts, 0),
-    perApp,
-    challengeDay: Math.min(21, sinceStart + 1),
-    challengeUnder: sinceStartDays.filter(underAll).length,
-  };
-}
-
-function Hero({ m, roaster }: { m: Metrics; roaster: 'loop' | 'lupe' }) {
-  let label: string, value: string, sub: string, color: string, tint: string, face: Pose, line: string;
-  if (m.base == null) {
-    label = 'Building your baseline';
-    value = `Day ${Math.min(7, m.sinceStart + 1)} of 7`;
-    sub = 'Then I can tell you how much time you won back.';
-    color = colors.heads;
-    tint = colors.headsTint;
-    face = 'notes';
-    line = 'Taking notes. So many notes.';
-  } else if ((m.wonBack ?? 0) >= 0) {
-    const won = m.wonBack ?? 0;
-    label = 'Time won back';
-    value = fmt(won);
-    sub = `vs your ${fmt(m.base)} a day before Endloop`;
-    color = colors.chill;
-    tint = colors.chillTint;
-    face = 'flex';
-    line = won >= 150 ? 'Look at that. Almost an entire movie, back.' : won >= 30 ? 'Real hours, back in your life. Keep going.' : 'Small win. Still a win.';
-  } else {
-    label = 'Time lost';
-    value = fmt(-(m.wonBack ?? 0));
-    sub = 'more than before Endloop. Impressive, in the wrong way.';
-    color = colors.red;
-    tint = colors.blush;
-    face = 'headInHands';
-    line = `I roasted you ${m.roasts} times. You roasted me back by ignoring it.`;
-  }
   return (
-    <LinearGradient colors={[tint, deeper(tint)]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={st.hero}>
-      <View style={st.heroChar} pointerEvents="none">
-        <Character source={pose(roaster, face)} size={240} alt={`${roasterName[roaster]}: ${line}`} />
-      </View>
-      <View style={{ width: '54%', gap: 10 }}>
-        <View style={st.pill}>
-          <View style={[st.dot, { backgroundColor: color }]} />
-          <T v="bodyBold" style={{ fontSize: 12, color }} numberOfLines={1}>{label}</T>
+    <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 14, paddingBottom: 120, gap: 16 }}>
+      <View style={[st.hero, { backgroundColor: good ? '#E3F3EC' : colors.blush }]}>
+        <T v="label" style={{ fontSize: 11, color: good ? colors.chill : colors.red }}>{good ? 'Time won back this week' : 'Time lost this week'}</T>
+        <T style={{ fontFamily: fonts.display, fontSize: 46, lineHeight: 50, color: colors.ink }}>{fmt(Math.abs(wonBack))}</T>
+        <T v="caption" style={{ fontSize: 13 }}>
+          vs your normal week{good && movies > 0 ? ` · that's ${movies} ${movies === 1 ? 'movie' : 'movies'}` : good ? '' : ' · more than before Endloop'}
+        </T>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 8 }}>
+          <Avatar source={pose(s.roaster, good ? 'popcorn' : 'headShake')} size={38} bg={colors.white} />
+          <T v="bodyBold" style={{ flex: 1, fontSize: 14, lineHeight: 19, color: colors.ink }}>{report.roast}</T>
         </View>
-        <T numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7} style={{ fontFamily: fonts.display, fontSize: 38, lineHeight: 42, color: colors.ink }}>{value}</T>
-        <T v="caption" style={{ fontSize: 13, color: colors.ink, opacity: 0.7 }}>{sub}</T>
       </View>
-      <T v="bodyBold" style={{ width: '54%', fontSize: 17, lineHeight: 23, paddingTop: 14 }}>{line}</T>
-    </LinearGradient>
+
+      <Bars week={week} start={start} tracked={tracked} normal={normal} />
+
+      <View style={{ gap: 8 }}>
+        <T v="label" style={{ fontSize: 11 }}>Per app · vs your normal</T>
+        {perApp.map(({ app, now, change }) => (
+          <View key={app.packageName} style={st.appRow}>
+            <AppTile label={app.label} color={app.color} iconUri={app.iconUri} size={34} />
+            <T v="bodyBold" style={{ flex: 1, fontSize: 15 }}>{app.label}</T>
+            <T v="bodyBold" style={{ fontSize: 15 }}>{fmt(now)}</T>
+            <T v="bodyBold" style={{ width: 56, textAlign: 'right', fontSize: 13, color: change == null ? colors.muted : change <= 0 ? colors.chill : colors.red }}>
+              {change == null ? 'New' : `${change <= 0 ? '↓' : '↑'} ${Math.abs(change)}%`}
+            </T>
+          </View>
+        ))}
+        {switched ? <T v="caption" style={{ fontSize: 13 }}>You didn&apos;t quit scrolling. You changed apps.</T> : null}
+      </View>
+
+      {excuse ? (
+        <View style={st.excuse}>
+          <Character source={pose(s.roaster, 'airQuotes')} size={110} alt={`${roasterName[s.roaster]}, doing air quotes`} />
+          <View style={{ flex: 1, gap: 4 }}>
+            <T v="label" style={{ fontSize: 11, color: colors.red }}>Most used excuse</T>
+            <T style={{ fontFamily: fonts.display, fontSize: 18, lineHeight: 22, color: colors.ink }}>
+              “{excuse.reason}” {excuse.count} {excuse.count === 1 ? 'time' : 'times'}.{excuse.count > 2 ? ' That’s a pattern.' : ''}
+            </T>
+          </View>
+        </View>
+      ) : null}
+
+      <View style={{ flexDirection: 'row', gap: 10 }}>
+        <Tile value={wins} label="closed on the first roast" color={colors.chill} />
+        <Tile value={snoozes} label="snoozes used" color={colors.heads} />
+      </View>
+
+      <WeakestHour parts={parts} premium={premium} onLocked={onLocked} roaster={s.roaster} />
+
+      <Pressable accessibilityRole="button" onPress={() => router.push('/weekly')} style={st.weeklyCta}>
+        <Avatar source={pose(s.roaster, 'envelope')} size={44} bg="#3A1C20" />
+        <View style={{ flex: 1 }}>
+          <T v="label" style={{ fontSize: 11, color: '#FFD3D8' }}>Weekly roast</T>
+          <T v="bodyBold" style={{ fontSize: 15, color: colors.white }}>This week, in one roast →</T>
+        </View>
+      </Pressable>
+    </ScrollView>
   );
 }
 
-/** A slightly deeper shade of the tint, for the hero gradient. */
-function deeper(tint: string): string {
-  const map: Record<string, string> = { [colors.blush]: '#FFC9D0', [colors.headsTint]: '#FFDDA8', [colors.chillTint]: '#C4E8D7' };
-  return map[tint] ?? tint;
-}
-
-const BAR_H = 150;
-
-function DailyChart({ m }: { m: Metrics }) {
-  const ref = m.base ?? 0;
-  const top = Math.max(ref, ...m.week.map((d) => d.minutes), 1) * 1.12;
-  const lineY = BAR_H - (ref / top) * BAR_H;
+const BAR_H = 120;
+function Bars({ week, start, tracked, normal }: { week: HistoryDay[]; start: number; tracked: TrackedApp[]; normal: number }) {
+  const s = useSettings();
+  const totals = week.map((d) => ({ day: d.day, m: dayTotal(d, tracked), counted: d.day >= start, under: tracked.every((a) => (d.apps[a.packageName] ?? 0) <= limitOn(a, s, new Date(d.day))) }));
+  const top = Math.max(normal, ...totals.map((t) => t.m), 1) * 1.1;
+  const worst = totals.filter((t) => t.counted).reduce((m, t) => (t.m > (m?.m ?? -1) ? t : m), null as (typeof totals)[number] | null);
   return (
-    <View style={st.card}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-        <T v="bodyBold" style={{ fontSize: 17 }}>Per day</T>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          <Legend color={colors.chill} text="Under" />
-          <Legend color={colors.red} text="Over" />
-        </View>
-      </View>
-      {ref > 0 ? (
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <View style={st.dash} />
-          <T v="caption" style={{ fontSize: 12 }}>Before Endloop · {fmt(ref)} a day</T>
-        </View>
-      ) : null}
-      <View style={{ flexDirection: 'row', gap: 4, paddingTop: 18 }}>
-        {ref > 0 ? <View pointerEvents="none" style={[st.baseLine, { top: 18 + lineY }]} /> : null}
-        {m.week.map((d, i) => {
-          const isToday = i === m.week.length - 1;
-          const col = !d.counted ? colors.line : ref > 0 && d.minutes > ref ? colors.red : colors.chill;
-          const label = isToday ? 'Today' : new Date(d.day).toLocaleDateString('en-IN', { weekday: 'short' });
+    <View style={{ gap: 6 }}>
+      <T v="label" style={{ fontSize: 11 }}>Tracked apps per day</T>
+      <T v="caption" style={{ fontSize: 12 }}>Your normal · {fmt(normal)}</T>
+      <View style={{ height: BAR_H + 22, flexDirection: 'row', gap: 8, paddingTop: 6 }}>
+        <View pointerEvents="none" style={[st.normalLine, { top: 6 + BAR_H - (normal / top) * BAR_H }]} />
+        {totals.map((t, i) => {
+          const today = i === totals.length - 1;
+          const isWorst = worst?.day === t.day && t.m > normal;
+          const col = !t.counted ? colors.line : t.m > normal ? colors.red : colors.chill;
+          const label = today ? 'Today' : new Date(t.day).toLocaleDateString('en-GB', { weekday: 'short' });
           return (
-            <View key={d.day} style={{ flex: 1, alignItems: 'center', gap: 6 }} accessible accessibilityLabel={`${label}: ${fmt(d.minutes)}`}>
+            <View key={t.day} style={{ flex: 1, alignItems: 'center', gap: 4 }} accessible accessibilityLabel={`${label}: ${fmt(t.m)}`}>
               <View style={{ height: BAR_H, width: '100%', justifyContent: 'flex-end', alignItems: 'center' }}>
-                <View style={{ width: 26, height: Math.max(4, (d.minutes / top) * BAR_H), borderRadius: 8, backgroundColor: col, opacity: isToday || !d.counted ? 1 : 0.85 }} />
+                <View style={{ width: 22, height: Math.max(4, (t.m / top) * BAR_H), borderRadius: 6, backgroundColor: col }} />
               </View>
-              <T v="caption" style={{ fontSize: 12, color: isToday ? colors.ink : colors.muted, fontFamily: isToday ? fonts.bold : fonts.medium }}>{label}</T>
+              <T v="caption" style={{ fontSize: 11, color: isWorst ? colors.red : today ? colors.ink : colors.muted, fontFamily: isWorst || today ? fonts.bold : fonts.medium }}>{label}</T>
             </View>
           );
         })}
@@ -223,100 +203,180 @@ function DailyChart({ m }: { m: Metrics }) {
   );
 }
 
-function Tile({ value, label, color }: { value: string; label: string; color: string }) {
+function WeakestHour({ parts, premium, onLocked, roaster }: { parts: [number, number, number, number][]; premium: boolean; onLocked: () => void; roaster: Roaster }) {
+  const w = weakestPart(parts);
+  if (!premium) {
+    return (
+      <Pressable accessibilityRole="button" accessibilityLabel="Your weakest hour, Premium" onPress={onLocked} style={st.weak}>
+        <View style={{ flex: 1, gap: 6 }}>
+          <T v="label" style={{ fontSize: 11, color: '#FFB38A' }}>Your weakest hour</T>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <T v="bodyBold" style={{ fontSize: 15, color: colors.white }}>You crack every night at</T>
+            <View style={{ width: 56, height: 12, borderRadius: 6, backgroundColor: 'rgba(255,255,255,0.35)' }} />
+          </View>
+        </View>
+        <View style={st.premiumPill}>
+          <StarIcon size={11} />
+          <T v="bodyBold" style={{ fontSize: 12, color: colors.red }}>Premium</T>
+        </View>
+      </Pressable>
+    );
+  }
+  return (
+    <View style={[st.weak, { flexDirection: 'column', alignItems: 'stretch', gap: 12 }]}>
+      <T v="label" style={{ fontSize: 11, color: '#FFB38A' }}>Your weakest hour</T>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <Avatar source={pose(roaster, 'magnifier')} size={48} bg="#3A1C20" />
+        <T style={{ flex: 1, fontFamily: fonts.display, fontSize: 18, lineHeight: 23, color: colors.white }}>{w.worst ? WEAK_LINE[w.worst.key] : 'Not enough data yet. Give me a few days.'}</T>
+      </View>
+      <View style={{ flexDirection: 'row', gap: 3, height: 22 }}>
+        {PARTS.map((p, i) => (
+          <View key={p.key} style={{ flex: p.hours, borderRadius: 6, backgroundColor: w.max > 0 ? `rgba(229,19,43,${0.2 + 0.8 * (w.perHour[i] / w.max)})` : 'rgba(255,255,255,0.12)' }} />
+        ))}
+      </View>
+      <View style={{ flexDirection: 'row' }}>
+        {PARTS.map((p) => (
+          <T key={p.key} v="caption" style={{ flex: p.hours, fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>{p.label}</T>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+/* ---------------------------------------------------------------- month (Premium) */
+
+function Month({ days, tracked, start, normal, parts, roaster }: { days: HistoryDay[]; tracked: TrackedApp[]; start: number; normal: number; parts: [number, number, number, number][]; roaster: Roaster }) {
+  const m = monthReport(days, tracked, start, normal);
+  const won = m.wonBack ?? 0;
+  return (
+    <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 14, paddingBottom: 120, gap: 16 }}>
+      <View style={{ flexDirection: 'row', gap: 10 }}>
+        <View style={[st.monthTile, { backgroundColor: won >= 0 ? '#E3F3EC' : colors.blush, flex: 1.3 }]}>
+          <T style={{ fontFamily: fonts.display, fontSize: 26, lineHeight: 30, color: colors.ink }}>{fmt(Math.abs(won))}</T>
+          <T v="bodyBold" style={{ fontSize: 12, color: won >= 0 ? colors.chill : colors.red }}>{won >= 0 ? `won back in ${m.monthName}` : `lost in ${m.monthName}`}</T>
+        </View>
+        <View style={[st.monthTile, { borderWidth: 1, borderColor: colors.line }]}>
+          <T style={{ fontFamily: fonts.display, fontSize: 26, lineHeight: 30, color: m.change == null ? colors.muted : m.change <= 0 ? colors.chill : colors.red }}>
+            {m.change == null ? '—' : `${m.change <= 0 ? '↓' : '↑'} ${Math.abs(m.change)}%`}
+          </T>
+          <T v="caption" style={{ fontSize: 12 }}>vs {m.lastMonthName}</T>
+        </View>
+      </View>
+
+      <Trend trend={m.trend} normal={normal} />
+      <WeakestHour parts={parts} premium onLocked={() => {}} roaster={roaster} />
+
+      {m.worstDow && m.bestDow ? (
+        <View style={{ flexDirection: 'row', gap: 10 }}>
+          <View style={[st.monthTile, { borderWidth: 1, borderColor: colors.line }]}>
+            <T style={{ fontFamily: fonts.display, fontSize: 20, color: colors.red }}>{m.worstDow}</T>
+            <T v="caption" style={{ fontSize: 12 }}>your worst day</T>
+          </View>
+          <View style={[st.monthTile, { borderWidth: 1, borderColor: colors.line }]}>
+            <T style={{ fontFamily: fonts.display, fontSize: 20, color: colors.chill }}>{m.bestDow}</T>
+            <T v="caption" style={{ fontSize: 12 }}>your best. Touch grass more.</T>
+          </View>
+        </View>
+      ) : null}
+
+      {m.weeks.length ? (
+        <View style={{ gap: 4 }}>
+          <T v="label" style={{ fontSize: 11 }}>Past weeks</T>
+          {m.weeks.map((w) => {
+            const end = new Date(w.from + 6 * DAY);
+            const from = new Date(w.from);
+            const label = `${from.getDate()}–${end.getDate()} ${end.toLocaleDateString('en-GB', { month: 'short' })}`;
+            const v = w.wonBack ?? 0;
+            return (
+              <View key={w.from} style={st.weekRow}>
+                <T v="bodyBold" style={{ flex: 1, fontSize: 15 }}>{label}</T>
+                <T v="bodyBold" style={{ fontSize: 14, color: v >= 0 ? colors.chill : colors.red }}>{v >= 0 ? `+${fmt(v)} back` : `−${fmt(-v)} lost`}</T>
+              </View>
+            );
+          })}
+        </View>
+      ) : null}
+    </ScrollView>
+  );
+}
+
+function Trend({ trend, normal }: { trend: { day: number; minutes: number | null }[]; normal: number }) {
+  const W = 340;
+  const H = 110;
+  const pts = trend.map((t, i) => ({ x: (i / Math.max(1, trend.length - 1)) * W, m: t.minutes })).filter((p) => p.m != null) as { x: number; m: number }[];
+  const top = Math.max(normal, ...pts.map((p) => p.m), 1) * 1.15;
+  const y = (m: number) => H - (m / top) * H;
+  const last = pts[pts.length - 1];
+  return (
+    <View style={{ gap: 6 }}>
+      <T v="label" style={{ fontSize: 11 }}>30-day trend</T>
+      <Svg width="100%" height={H + 8} viewBox={`0 -4 ${W} ${H + 8}`} preserveAspectRatio="none">
+        <Line x1={0} x2={W} y1={y(normal)} y2={y(normal)} stroke={colors.ink} strokeOpacity={0.35} strokeWidth={1.5} strokeDasharray="6 5" />
+        {pts.length > 1 ? <Polyline points={pts.map((p) => `${p.x},${y(p.m)}`).join(' ')} fill="none" stroke={colors.chill} strokeWidth={2.5} strokeLinejoin="round" /> : null}
+        {last ? <Circle cx={last.x} cy={y(last.m)} r={5} fill={colors.chill} /> : null}
+      </Svg>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <T v="caption" style={{ fontSize: 11 }}>{trend[0] ? new Date(trend[0].day).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : ''}</T>
+        <T v="caption" style={{ fontSize: 11 }}>Your normal · {fmt(normal)}</T>
+        <T v="caption" style={{ fontSize: 11 }}>Today</T>
+      </View>
+    </View>
+  );
+}
+
+/* ---------------------------------------------------------------- first week, no baseline yet (S19-D) */
+
+function FirstWeek({ days, tracked, start, sinceStart, roaster }: { days: HistoryDay[]; tracked: TrackedApp[]; start: number; sinceStart: number; roaster: Roaster }) {
+  const left = Math.max(1, 7 - sinceStart);
+  const soFar = days.filter((d) => d.day >= start).slice(-7).reduce((n, d) => n + dayTotal(d, tracked), 0);
+  const labels = Array.from({ length: 7 }, (_, i) => new Date(start + i * DAY).toLocaleDateString('en-GB', { weekday: 'short' }));
+  return (
+    <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 8, paddingBottom: 120, gap: 14, alignItems: 'center' }}>
+      <T style={{ alignSelf: 'flex-start', fontFamily: fonts.display, fontSize: 28, color: colors.ink }}>Report Card</T>
+      <Character source={pose(roaster, 'drumroll')} size={210} alt={`${roasterName[roaster]} with a drumroll`} />
+      <T style={{ fontFamily: fonts.display, fontSize: 24, lineHeight: 28, color: colors.ink, textAlign: 'center' }}>
+        Your first report card drops in {left} {left === 1 ? 'day' : 'days'}.
+      </T>
+      <T style={{ fontSize: 15, lineHeight: 21, color: colors.muted, textAlign: 'center' }}>I need one full week to learn your normal. Then every week gets compared to it. Brace yourself.</T>
+      <View style={[st.card, { flexDirection: 'row', justifyContent: 'space-between', alignSelf: 'stretch' }]}>
+        {labels.map((l, i) => {
+          const done = i < sinceStart;
+          return (
+            <View key={i} style={{ alignItems: 'center', gap: 6 }}>
+              <View style={[st.dayDot, done ? { backgroundColor: colors.red } : { borderWidth: 1.5, borderStyle: 'dashed', borderColor: '#D9CFD0' }]}>
+                {done ? (
+                  <Svg width={14} height={14} viewBox="0 0 24 24">
+                    <Path d="M5 12l5 5 9-10" fill="none" stroke="#FFFFFF" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+                  </Svg>
+                ) : (
+                  <T v="bodyBold" style={{ fontSize: 12, color: colors.muted }}>{i + 1}</T>
+                )}
+              </View>
+              <T v="caption" style={{ fontSize: 11 }}>{l}</T>
+            </View>
+          );
+        })}
+      </View>
+      <View style={[st.card, { flexDirection: 'row', alignItems: 'center', alignSelf: 'stretch', backgroundColor: colors.surface, borderWidth: 0 }]}>
+        <T v="bodyBold" style={{ flex: 1, fontSize: 14 }}>So far this week</T>
+        <T style={{ fontFamily: fonts.display, fontSize: 22, color: colors.ink }}>{fmt(soFar)}</T>
+      </View>
+    </ScrollView>
+  );
+}
+
+/* ---------------------------------------------------------------- bits */
+
+function Tile({ value, label, color }: { value: number; label: string; color: string }) {
   return (
     <View style={st.tile}>
-      <View style={[st.tileBar, { backgroundColor: color }]} />
-      <T style={{ fontFamily: fonts.display, fontSize: 30, lineHeight: 34, color: colors.ink }}>{value}</T>
+      <T style={{ fontFamily: fonts.display, fontSize: 28, lineHeight: 32, color }}>{value}</T>
       <T v="caption" style={{ fontSize: 13 }}>{label}</T>
     </View>
   );
 }
 
-function Legend({ color, text }: { color: string; text: string }) {
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-      <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: color }} />
-      <T v="caption" style={{ fontSize: 12 }}>{text}</T>
-    </View>
-  );
-}
-
-function PerApp({ m, tracked }: { m: Metrics; tracked: TrackedApp[] }) {
-  if (!tracked.length) return null;
-  return (
-    <View style={st.card}>
-      <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' }}>
-        <T v="bodyBold" style={{ fontSize: 17 }}>Per app</T>
-        <T v="caption" style={{ fontSize: 12 }}>vs last week</T>
-      </View>
-      {m.perApp.map(({ app, now, change }, i) => {
-        const down = change != null && change < 0;
-        const up = change != null && change > 5;
-        const badge = change == null ? { bg: colors.surface, fg: colors.muted, text: 'New' } : down ? { bg: colors.chillTint, fg: colors.chill, text: `↓ ${Math.abs(change)}%` } : { bg: colors.blush, fg: colors.red, text: `↑ ${Math.abs(change)}%` };
-        return (
-          <View key={app.packageName} style={[st.appRow, i === 0 && { borderTopWidth: 0, paddingTop: 4 }]}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-              <AppTile label={app.label} color={app.color} iconUri={app.iconUri} size={40} />
-              <View style={{ flex: 1, gap: 2 }}>
-                <T v="bodyBold">{app.label}</T>
-                <T v="caption">{fmt(now)} this week</T>
-              </View>
-              <View style={[st.badge, { backgroundColor: badge.bg }]}>
-                <T v="bodyBold" style={{ fontSize: 13, color: badge.fg }}>{badge.text}</T>
-              </View>
-            </View>
-            {up ? <T v="caption" style={{ paddingLeft: 52 }}>{app.label} went up. I noticed. Everyone noticed.</T> : null}
-          </View>
-        );
-      })}
-    </View>
-  );
-}
-
-/** Describes the studies; never promises a result. */
-function Challenge({ day, under, roaster }: { day: number; under: number; roaster: Roaster }) {
-  return (
-    <View style={st.challenge}>
-      <View style={st.challengeChar} pointerEvents="none">
-        <Character source={pose(roaster, 'knuckles')} size={150} alt="" />
-      </View>
-      <View style={{ width: '62%', gap: 8 }}>
-        <T v="label" style={{ fontSize: 11, color: '#FFB38A' }}>21-day challenge</T>
-        <T style={{ fontFamily: fonts.display, fontSize: 30, lineHeight: 33, color: colors.white }}>Day {day}</T>
-        <T v="bodyBold" style={{ fontSize: 15, lineHeight: 20, color: colors.white }}>
-          {day >= 21 ? 'Three weeks. The same length as the studies.' : 'The studies ran for 3 weeks. Keep going.'}
-        </T>
-      </View>
-      <View accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: 21, now: day }} style={st.progress}>
-        <View style={{ width: `${(day / 21) * 100}%`, height: 10, borderRadius: 5, backgroundColor: '#FFB38A' }} />
-      </View>
-      <T v="caption" style={{ color: 'rgba(255,255,255,0.75)' }}>
-        {under} of {day} days under every limit so far. In one study, people who kept limits for 3 weeks felt less lonely and less low.
-      </T>
-    </View>
-  );
-}
-
-/** This week's roast: a red card, not a plain link. */
-function WeeklyCta({ roaster, onPress }: { roaster: Roaster; onPress: () => void }) {
-  return (
-    <Pressable accessibilityRole="button" accessibilityLabel="Open this week's roast" onPress={onPress} style={({ pressed }) => [{ borderRadius: 24, overflow: 'hidden' }, pressed && { opacity: 0.9 }]}>
-      <LinearGradient colors={gradients.roasted} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={st.weekly}>
-        <View style={{ flex: 1, gap: 6, paddingVertical: 20, paddingLeft: 20 }}>
-          <T v="label" style={{ fontSize: 11, color: '#FFD3D8' }}>Weekly roast</T>
-          <T style={{ fontFamily: fonts.display, fontSize: 24, lineHeight: 27, color: colors.white }}>This week, in one roast</T>
-          <View style={st.weeklyBtn}>
-            <T v="bodyBold" style={{ fontSize: 14, color: colors.red }}>Open it →</T>
-          </View>
-        </View>
-        <Character source={pose(roaster, 'envelope')} size={150} alt="" />
-      </LinearGradient>
-    </Pressable>
-  );
-}
-
-function LockIcon({ color = colors.muted }: { color?: string }) {
+function Lock({ color = colors.muted }: { color?: string }) {
   return (
     <Svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
       <Rect x={5} y={11} width={14} height={10} rx={2} />
@@ -326,27 +386,20 @@ function LockIcon({ color = colors.muted }: { color?: string }) {
 }
 
 const st = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, paddingTop: 12 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 12 },
   segment: { width: 170, flexDirection: 'row', gap: 2, padding: 3, borderRadius: 12, backgroundColor: colors.surface },
   segBtn: { flex: 1, height: 34, borderRadius: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5 },
   segOn: { backgroundColor: colors.white, elevation: 1 },
-  hero: { minHeight: 280, padding: 20, borderRadius: 28, overflow: 'hidden', justifyContent: 'space-between' },
-  heroChar: { position: 'absolute', right: -54, bottom: 0 },
-  pill: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 5, paddingHorizontal: 12, borderRadius: 14, backgroundColor: colors.white, maxWidth: '100%' },
-  dot: { width: 8, height: 8, borderRadius: 4 },
-  card: { gap: 12, padding: 18, borderRadius: 24, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.white },
-  baseLine: { position: 'absolute', left: 0, right: 0, borderTopWidth: 2, borderStyle: 'dashed', borderColor: colors.ink, opacity: 0.35, zIndex: 1 },
-  dash: { width: 18, borderTopWidth: 2, borderStyle: 'dashed', borderColor: colors.ink, opacity: 0.4 },
-  tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  tile: { width: '48.4%', gap: 4, padding: 16, borderRadius: radius.lg, backgroundColor: colors.surface },
-  tileBar: { width: 24, height: 4, borderRadius: 2, marginBottom: 6 },
-  appRow: { gap: 4, paddingTop: 12, borderTopWidth: 1, borderTopColor: colors.line },
-  badge: { minWidth: 58, alignItems: 'center', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999 },
-  challenge: { gap: 12, padding: 20, borderRadius: 24, backgroundColor: colors.ink, overflow: 'hidden' },
-  challengeChar: { position: 'absolute', right: -30, top: 0 },
-  weekly: { flexDirection: 'row', alignItems: 'flex-end' },
-  weeklyBtn: { alignSelf: 'flex-start', marginTop: 8, height: 38, paddingHorizontal: 14, borderRadius: 12, backgroundColor: colors.white, justifyContent: 'center' },
-  progress: { height: 10, borderRadius: 5, backgroundColor: 'rgba(255,255,255,0.2)', marginTop: 4 },
-  archive: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderRadius: radius.md, borderWidth: 1, borderColor: colors.line },
-  premiumTag: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 999, backgroundColor: colors.blush },
+  hero: { gap: 2, padding: 18, borderRadius: 24 },
+  normalLine: { position: 'absolute', left: 0, right: 0, borderTopWidth: 1.5, borderStyle: 'dashed', borderColor: colors.ink, opacity: 0.35, zIndex: 1 },
+  appRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, borderTopWidth: 1, borderTopColor: colors.line },
+  excuse: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingRight: 16, borderRadius: 22, backgroundColor: colors.blush, overflow: 'hidden' },
+  tile: { flex: 1, gap: 2, padding: 14, borderRadius: 18, borderWidth: 1, borderColor: colors.line },
+  weak: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 16, borderRadius: 22, backgroundColor: colors.ink },
+  premiumPill: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 26, paddingHorizontal: 10, borderRadius: 999, backgroundColor: colors.blush },
+  weeklyCta: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 20, backgroundColor: '#C20F24' },
+  monthTile: { flex: 1, gap: 2, padding: 14, borderRadius: 18 },
+  weekRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderTopWidth: 1, borderTopColor: colors.line },
+  card: { padding: 14, borderRadius: 18, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.white },
+  dayDot: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
 });

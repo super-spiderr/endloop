@@ -13,6 +13,7 @@ const ROWS: [string, string][] = [
   ['When you open them', 'To warn you at 75% and 90%, and to count opens.'],
   ['Your snooze reasons and roasts', 'Stored on your phone for Stats and your weekly roast.'],
   ['Your name or nickname', 'The one you typed or the title I gave you. Only so I can call you by it in roasts. Stays on your phone.'],
+  ['Your Attendance', 'Loops you spend, the days you book off with a Leave Letter (and the excuse you picked) and Streak savers you use. Streaks and Loops are worked out from your usage. Stays on your phone.'],
   ['Which one you are and why you’re here', 'School, college, working or other, and your goal (in your own words if you typed them). Both optional, only to pick the right roasts. Stays on your phone.'],
   ['Nothing inside your apps', 'No messages, no photos, no what-you-watched. I only see the clock.'],
   ['No account, no ads', 'Nothing about you leaves your phone unless you share a card.'],
