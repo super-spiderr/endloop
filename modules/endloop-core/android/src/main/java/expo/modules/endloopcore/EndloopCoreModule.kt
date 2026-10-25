@@ -296,6 +296,12 @@ class EndloopCoreModule : Module() {
     }
     /** "Never mind, close it" in the snooze screen: a win for the day, like closing the roast. */
     Function<Unit>("addWin") { Store(context).addWin() }
+    /** "Never mind, close it" in the snooze screen: straight to the home screen, not back to the app being snoozed. */
+    Function<Boolean>("goHome") {
+      runCatching {
+        context.startActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+      }.isSuccess
+    }
     /** Back to the app the snooze was for. False if it can't be opened. */
     Function("openApp") { pkg: String ->
       val launch = context.packageManager.getLaunchIntentForPackage(pkg) ?: return@Function false

@@ -72,6 +72,8 @@ type EndloopCoreModule = {
   /** Snooze ladder: no roasts for this app until midnight. */
   bunk?(packageName: string, how: 'leave' | 'timeout' | 'payback'): void;
   /** Snooze ladder: "Never mind, close it" counts as a win. */
+  /** Go to the launcher (the snooze screen's "Never mind, close it"). */
+  goHome?(): boolean;
   addWin?(): void;
   /** Open an app (back to it after a snooze). */
   openApp?(packageName: string): boolean;

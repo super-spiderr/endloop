@@ -11,7 +11,8 @@ import { colors } from '@/theme/tokens';
 const ROWS: [string, string][] = [
   ['Which apps you open and for how long', "From Android's Usage Access. Stays on your phone."],
   ['When you open them', 'To warn you at 75% and 90%, and to count opens.'],
-  ['Your snooze reasons and roasts', 'Stored on your phone for Stats and your weekly roast.'],
+  ['Your snooze reasons and roasts', 'The reasons you pick, games played and days you bunked an app. Stored on your phone for the Report Card and your weekly roast.'],
+  ['Your snooze settings', 'Strict mode, snooze length, Hard mode and your own words, if you write them. Stays on your phone.'],
   ['Your name or nickname', 'The one you typed or the title I gave you. Only so I can call you by it in roasts. Stays on your phone.'],
   ['Your Attendance', 'Loops you spend, the days you book off with a Leave Letter (and the excuse you picked) and Streak savers you use. Streaks and Loops are worked out from your usage. Stays on your phone.'],
   ['Which one you are and why you’re here', 'School, college, working or other, and your goal (in your own words if you typed them). Both optional, only to pick the right roasts. Stays on your phone.'],

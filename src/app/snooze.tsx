@@ -114,7 +114,8 @@ export default function Snooze() {
   function giveUp() {
     EndloopCore?.addWin?.();
     home();
-    setTimeout(() => BackHandler.exitApp(), 60);
+    // Going home, not just closing Endloop: closing would drop them back into the app they were snoozing, and the roast again.
+    setTimeout(() => (EndloopCore?.goHome?.() ? undefined : BackHandler.exitApp()), 60);
   }
 
   function doBunk(how: Bunk['how']) {
